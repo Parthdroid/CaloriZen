@@ -48,7 +48,38 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
+## Project: AI Calorie Tracker
+
+A mobile calorie and macro tracking app with:
+- **AI photo analysis**: Take a photo of a meal; GPT-4 vision estimates calories and macros
+- **Barcode scanner**: Look up packaged food nutrition by barcode (Open Food Facts + AI fallback)
+- **Clarification Q&A**: If AI is unsure, it asks follow-up questions to improve accuracy
+- **Food log with history**: View meals by date with 7-day scrollable date picker
+- **Nutrition goals**: Set and edit daily calorie/macro targets
+- **Calorie ring**: Animated SVG ring showing remaining calories for the day
+
+### Design System
+- Orange accent: `#FF6B35`, dark/light theme via `useTheme()` hook
+- Font: Inter (400/500/600/700)
+- Color tokens for protein (blue), carbs (yellow), fat (red), calories (orange)
+
 ## Packages
+
+### `artifacts/mobile` (`@workspace/mobile`)
+
+Expo React Native app (iOS/Android/Web). Key files:
+- `app/_layout.tsx` — root stack with providers (QueryClient, AppProvider)
+- `app/(tabs)/_layout.tsx` — 4-tab layout (Home/Log/Scan/Goals)
+- `app/(tabs)/index.tsx` — home screen: calorie ring, macro bars, quick actions
+- `app/(tabs)/log.tsx` — food log with date picker
+- `app/(tabs)/scan.tsx` — scan tab with camera/gallery options
+- `app/(tabs)/goals.tsx` — goals CRUD with edit mode
+- `app/barcode.tsx` — barcode lookup modal
+- `app/review.tsx` — AI analysis review with clarification Q&A, editable items
+- `context/AppContext.tsx` — shared state (pendingAnalysis, selectedDate)
+- `constants/colors.ts` — theme tokens for light/dark mode
+- `components/MacroRing.tsx` — SVG ring for macros
+- `components/MealCard.tsx` — meal list item with long-press delete
 
 ### `artifacts/api-server` (`@workspace/api-server`)
 
