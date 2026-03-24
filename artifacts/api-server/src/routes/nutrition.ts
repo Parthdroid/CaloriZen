@@ -93,14 +93,51 @@ Return ONLY valid JSON with the same structure as before, but with updated value
 Set needsClarification to false and clarificationQuestions to [].`;
 
 function normalizeItem(item: Record<string, unknown>) {
+  const nutrition = (item.nutrition ?? {}) as Record<string, unknown>;
+  const macros = (nutrition.macros ?? item.macros ?? {}) as Record<string, unknown>;
+  const estimatedServing = (item.estimatedServing ?? item.estimatedPortion ?? item.estimated_serving ?? {}) as Record<string, unknown>;
+
+  const servingDesc =
+    item.servingDescription ??
+    item.serving_description ??
+    item.serving ??
+    estimatedServing.description ??
+    (estimatedServing.amount ? `${estimatedServing.amount}${estimatedServing.unit ? " " + estimatedServing.unit : ""}` : null) ??
+    "1 serving";
+
+  const cal =
+    item.calories ?? item.kcal ?? item.cal ??
+    nutrition.calories ?? nutrition.kcal ??
+    macros.calories ?? macros.kcal ??
+    0;
+
+  const prot =
+    item.protein ?? item.proteins ??
+    nutrition.protein ?? nutrition.proteins ??
+    macros.protein ?? macros.proteins ??
+    macros.protein_g ??
+    0;
+
+  const carb =
+    item.carbs ?? item.carbohydrates ?? item.carb ??
+    nutrition.carbs ?? nutrition.carbohydrates ??
+    macros.carbs ?? macros.carbohydrates ?? macros.carbs_g ??
+    0;
+
+  const fatVal =
+    item.fat ?? item.fats ?? item.totalFat ??
+    nutrition.fat ?? nutrition.fats ??
+    macros.fat ?? macros.fats ?? macros.fat_g ??
+    0;
+
   return {
     name: String(item.name ?? "Unknown food"),
-    servingDescription: String(item.servingDescription ?? item.serving_description ?? item.serving ?? "1 serving"),
-    calories: Number(item.calories ?? item.kcal ?? item.cal ?? 0),
-    protein: Number(item.protein ?? item.proteins ?? 0),
-    carbs: Number(item.carbs ?? item.carbohydrates ?? item.carb ?? 0),
-    fat: Number(item.fat ?? item.fats ?? item.totalFat ?? 0),
-    confidence: Number(item.confidence ?? 0.8),
+    servingDescription: String(servingDesc),
+    calories: Number(cal),
+    protein: Number(prot),
+    carbs: Number(carb),
+    fat: Number(fatVal),
+    confidence: Number(item.confidence ?? nutrition.confidence ?? 0.8),
   };
 }
 
