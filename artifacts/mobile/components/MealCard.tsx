@@ -25,11 +25,11 @@ const MEAL_ICONS: Record<string, string> = {
   snack: "cafe-outline",
 };
 
-const MEAL_LABELS: Record<string, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  snack: "Snack",
+const MEAL_COLORS: Record<string, string> = {
+  breakfast: "#F59E0B",
+  lunch: "#22C55E",
+  dinner: "#8B5CF6",
+  snack: "#3B82F6",
 };
 
 export function MealCard({ meal, onPress }: Props) {
@@ -41,6 +41,9 @@ export function MealCard({ meal, onPress }: Props) {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const mealColor = MEAL_COLORS[meal.mealType] ?? colors.tint;
+  const itemNames = (meal.items as Array<{ name: string }>).map((i) => i.name).join(", ");
 
   const handleDelete = () => {
     Alert.alert("Delete Meal", "Are you sure you want to delete this meal?", [
@@ -72,45 +75,31 @@ export function MealCard({ meal, onPress }: Props) {
         styles.card,
         {
           backgroundColor: colors.card,
-          borderColor: colors.border,
-          opacity: pressed ? 0.85 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
+          opacity: pressed ? 0.7 : 1,
         },
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: colors.tint + "18" }]}>
+      <View style={[styles.iconWrap, { backgroundColor: mealColor + "14" }]}>
         <Ionicons
           name={MEAL_ICONS[meal.mealType] as keyof typeof Ionicons.glyphMap ?? "restaurant-outline"}
-          size={20}
-          color={colors.tint}
+          size={18}
+          color={mealColor}
         />
       </View>
+
       <View style={styles.info}>
-        <View style={styles.topRow}>
-          <Text style={[styles.mealType, { color: colors.text }]}>
-            {MEAL_LABELS[meal.mealType] ?? meal.mealType}
-          </Text>
-          <Text style={[styles.time, { color: colors.textTertiary }]}>{time}</Text>
-        </View>
-        <Text style={[styles.items, { color: colors.textSecondary }]} numberOfLines={1}>
-          {(meal.items as Array<{ name: string }>).map((i) => i.name).join(", ")}
+        <Text style={[styles.itemNames, { color: colors.text }]} numberOfLines={1}>
+          {itemNames}
         </Text>
-        <View style={styles.macros}>
-          <Text style={[styles.calories, { color: colors.tint }]}>
-            {Math.round(meal.totalCalories)} kcal
-          </Text>
-          <Text style={[styles.macroText, { color: colors.protein }]}>
-            P {Math.round(meal.totalProtein)}g
-          </Text>
-          <Text style={[styles.macroText, { color: colors.carbs }]}>
-            C {Math.round(meal.totalCarbs)}g
-          </Text>
-          <Text style={[styles.macroText, { color: colors.fat }]}>
-            F {Math.round(meal.totalFat)}g
-          </Text>
-        </View>
+        <Text style={[styles.time, { color: colors.textTertiary }]}>{time}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+
+      <View style={styles.calCol}>
+        <Text style={[styles.calValue, { color: colors.text }]}>
+          {Math.round(meal.totalCalories)}
+        </Text>
+        <Text style={[styles.calUnit, { color: colors.textTertiary }]}>cal</Text>
+      </View>
     </Pressable>
   );
 }
@@ -119,16 +108,13 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     gap: 12,
-    marginHorizontal: 16,
-    marginVertical: 4,
   },
-  iconContainer: {
-    width: 42,
-    height: 42,
+  iconWrap: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -137,34 +123,23 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  mealType: {
+  itemNames: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_500Medium",
   },
   time: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
   },
-  items: {
-    fontSize: 12,
+  calCol: {
+    alignItems: "flex-end",
+  },
+  calValue: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+  },
+  calUnit: {
+    fontSize: 11,
     fontFamily: "Inter_400Regular",
-  },
-  macros: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 4,
-  },
-  calories: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-  },
-  macroText: {
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
   },
 });

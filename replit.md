@@ -58,10 +58,17 @@ A mobile calorie and macro tracking app with:
 - **Nutrition goals**: Set and edit daily calorie/macro targets
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
-### Design System
+### Design System (Cal AI / HealthifyMe Snap style)
+- Clean, borderless card design with subtle backgrounds instead of heavy borders
 - Orange accent: `#FF6B35`, dark/light theme via `useTheme()` hook
 - Font: Inter (400/500/600/700)
-- Color tokens for protein (blue), carbs (yellow), fat (red), calories (orange)
+- Color tokens: protein (blue #3B82F6), carbs (amber #F59E0B), fat (red #EF4444), calories (orange)
+- Home: calorie ring with macro progress rings (not bars)
+- Meal cards: compact rows with food name, time, and calorie count — no heavy borders
+- Tab bar: clean with outline/filled icon toggle on focus
+- Date picker: vertical day-number style (not pill labels)
+- Scan: prominent camera card, list-style gallery/barcode rows
+- Goals: list-style goal rows with colored icons
 
 ## Packages
 

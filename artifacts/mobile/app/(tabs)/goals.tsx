@@ -24,7 +24,7 @@ type GoalInput = {
 };
 
 export default function GoalsScreen() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
@@ -94,10 +94,10 @@ export default function GoalsScreen() {
     color: string;
     icon: string;
   }> = [
-    { key: "dailyCalories", label: "Daily Calories", unit: "kcal", color: colors.tint, icon: "flame-outline" },
-    { key: "dailyProtein", label: "Daily Protein", unit: "g", color: colors.protein, icon: "barbell-outline" },
-    { key: "dailyCarbs", label: "Daily Carbs", unit: "g", color: colors.carbs, icon: "leaf-outline" },
-    { key: "dailyFat", label: "Daily Fat", unit: "g", color: colors.fat, icon: "water-outline" },
+    { key: "dailyCalories", label: "Calories", unit: "kcal", color: colors.tint, icon: "flame-outline" },
+    { key: "dailyProtein", label: "Protein", unit: "g", color: colors.protein, icon: "barbell-outline" },
+    { key: "dailyCarbs", label: "Carbs", unit: "g", color: colors.carbs, icon: "leaf-outline" },
+    { key: "dailyFat", label: "Fat", unit: "g", color: colors.fat, icon: "water-outline" },
   ];
 
   return (
@@ -110,13 +110,16 @@ export default function GoalsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Nutrition Goals</Text>
+        <View>
+          <Text style={[styles.title, { color: colors.text }]}>Goals</Text>
+          <Text style={[styles.subtitle, { color: colors.textTertiary }]}>Daily nutrition targets</Text>
+        </View>
         {!editing ? (
           <Pressable
             onPress={() => setEditing(true)}
-            style={[styles.editBtn, { backgroundColor: colors.tint + "18" }]}
+            style={[styles.editBtn, { backgroundColor: colors.tint + "12" }]}
           >
-            <Ionicons name="pencil" size={16} color={colors.tint} />
+            <Ionicons name="pencil-outline" size={14} color={colors.tint} />
             <Text style={[styles.editBtnText, { color: colors.tint }]}>Edit</Text>
           </Pressable>
         ) : (
@@ -124,52 +127,48 @@ export default function GoalsScreen() {
             onPress={() => setEditing(false)}
             style={[styles.editBtn, { backgroundColor: colors.backgroundTertiary }]}
           >
-            <Ionicons name="close" size={16} color={colors.textSecondary} />
-            <Text style={[styles.editBtnText, { color: colors.textSecondary }]}>Cancel</Text>
+            <Ionicons name="close" size={14} color={colors.textSecondary} />
           </Pressable>
         )}
       </View>
 
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        Set your daily nutrition targets to track your progress
-      </Text>
-
-      <View style={styles.goalsGrid}>
+      <View style={styles.goalsList}>
         {goalFields.map(({ key, label, unit, color, icon }) => (
           <View
             key={key}
-            style={[styles.goalCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.goalRow, { backgroundColor: colors.card }]}
           >
-            <View style={[styles.goalIcon, { backgroundColor: color + "18" }]}>
-              <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={22} color={color} />
+            <View style={[styles.goalIconWrap, { backgroundColor: color + "12" }]}>
+              <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color={color} />
             </View>
-            <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>{label}</Text>
-            {editing ? (
-              <View style={styles.inputRow}>
-                <TextInput
-                  value={inputs[key]}
-                  onChangeText={(v) => setInputs((p) => ({ ...p, [key]: v }))}
-                  keyboardType="numeric"
-                  style={[
-                    styles.input,
-                    {
-                      color: colors.text,
-                      backgroundColor: colors.backgroundTertiary,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  selectTextOnFocus
-                />
-                <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
-              </View>
-            ) : (
-              <View style={styles.valueRow}>
-                <Text style={[styles.goalValue, { color: color }]}>
-                  {isLoading ? "..." : inputs[key]}
-                </Text>
-                <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
-              </View>
-            )}
+            <View style={styles.goalInfo}>
+              <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>{label}</Text>
+              {editing ? (
+                <View style={styles.inputRow}>
+                  <TextInput
+                    value={inputs[key]}
+                    onChangeText={(v) => setInputs((p) => ({ ...p, [key]: v }))}
+                    keyboardType="numeric"
+                    style={[
+                      styles.input,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.backgroundTertiary,
+                      },
+                    ]}
+                    selectTextOnFocus
+                  />
+                  <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
+                </View>
+              ) : (
+                <View style={styles.valueRow}>
+                  <Text style={[styles.goalValue, { color }]}>
+                    {isLoading ? "..." : inputs[key]}
+                  </Text>
+                  <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
+                </View>
+              )}
+            </View>
           </View>
         ))}
       </View>
@@ -182,7 +181,8 @@ export default function GoalsScreen() {
             styles.saveBtn,
             {
               backgroundColor: colors.tint,
-              opacity: pressed || isPending ? 0.8 : 1,
+              opacity: pressed || isPending ? 0.85 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             },
           ]}
         >
@@ -197,15 +197,10 @@ export default function GoalsScreen() {
         </Pressable>
       )}
 
-      <View
-        style={[
-          styles.disclaimer,
-          { backgroundColor: colors.backgroundTertiary, borderColor: colors.border },
-        ]}
-      >
-        <Ionicons name="information-circle-outline" size={18} color={colors.textTertiary} />
-        <Text style={[styles.disclaimerText, { color: colors.textTertiary }]}>
-          These targets are estimates. Consult a healthcare professional for personalized nutrition advice.
+      <View style={[styles.infoCard, { backgroundColor: colors.backgroundTertiary }]}>
+        <Ionicons name="information-circle-outline" size={16} color={colors.textTertiary} />
+        <Text style={[styles.infoText, { color: colors.textTertiary }]}>
+          Consult a healthcare professional for personalized nutrition advice.
         </Text>
       </View>
     </ScrollView>
@@ -217,18 +212,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 20,
-    marginBottom: 8,
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
     fontFamily: "Inter_700Bold",
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    marginTop: 2,
   },
   editBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
@@ -237,36 +238,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
   },
-  subtitle: {
+  goalsList: {
     paddingHorizontal: 20,
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  goalsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 12,
-    gap: 10,
+    gap: 8,
     marginBottom: 20,
   },
-  goalCard: {
-    width: "47%",
-    borderRadius: 20,
-    borderWidth: 1,
+  goalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 16,
     padding: 16,
-    gap: 8,
+    gap: 14,
   },
-  goalIcon: {
+  goalIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
+  goalInfo: {
+    flex: 1,
+    gap: 4,
+  },
   goalLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
   },
   valueRow: {
@@ -275,7 +271,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   goalValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: "Inter_700Bold",
   },
   inputRow: {
@@ -286,14 +282,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderRadius: 10,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 18,
     fontFamily: "Inter_600SemiBold",
   },
   unit: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: "Inter_400Regular",
   },
   saveBtn: {
@@ -303,7 +298,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginHorizontal: 20,
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     marginBottom: 20,
   },
   saveBtnText: {
@@ -311,19 +306,18 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: "#fff",
   },
-  disclaimer: {
+  infoCard: {
     flexDirection: "row",
     gap: 10,
     marginHorizontal: 20,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
+    padding: 14,
+    borderRadius: 14,
     alignItems: "flex-start",
   },
-  disclaimerText: {
+  infoText: {
     flex: 1,
     fontSize: 12,
     fontFamily: "Inter_400Regular",
-    lineHeight: 18,
+    lineHeight: 17,
   },
 });

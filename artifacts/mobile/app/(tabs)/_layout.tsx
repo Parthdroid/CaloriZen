@@ -19,11 +19,14 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.tabIconDefault,
+        tabBarLabelStyle: {
+          fontFamily: "Inter_500Medium",
+          fontSize: 11,
+        },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.backgroundSecondary,
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: colors.border,
+          backgroundColor: isIOS ? "transparent" : colors.background,
+          borderTopWidth: 0,
           elevation: 0,
           ...(isWeb ? { height: 64, paddingBottom: 8 } : {}),
         },
@@ -38,7 +41,7 @@ export default function TabLayout() {
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: colors.backgroundSecondary },
+                { backgroundColor: colors.background, borderTopWidth: 0.5, borderTopColor: colors.border },
               ]}
             />
           ) : null,
@@ -48,11 +51,11 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) =>
+          tabBarIcon: ({ color, focused }) =>
             isIOS ? (
-              <SymbolView name="house.fill" tintColor={color} size={24} />
+              <SymbolView name="house.fill" tintColor={color} size={22} />
             ) : (
-              <Ionicons name="home" size={22} color={color} />
+              <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
             ),
         }}
       />
@@ -60,11 +63,11 @@ export default function TabLayout() {
         name="log"
         options={{
           title: "Log",
-          tabBarIcon: ({ color }) =>
+          tabBarIcon: ({ color, focused }) =>
             isIOS ? (
-              <SymbolView name="list.bullet.circle.fill" tintColor={color} size={24} />
+              <SymbolView name="list.bullet.circle.fill" tintColor={color} size={22} />
             ) : (
-              <Ionicons name="list" size={22} color={color} />
+              <Ionicons name={focused ? "list" : "list-outline"} size={22} color={color} />
             ),
         }}
       />
@@ -72,11 +75,11 @@ export default function TabLayout() {
         name="scan"
         options={{
           title: "Scan",
-          tabBarIcon: ({ color }) =>
+          tabBarIcon: ({ color, focused }) =>
             isIOS ? (
-              <SymbolView name="camera.viewfinder" tintColor={color} size={24} />
+              <SymbolView name="camera.viewfinder" tintColor={color} size={22} />
             ) : (
-              <Ionicons name="scan" size={22} color={color} />
+              <Ionicons name={focused ? "scan" : "scan-outline"} size={22} color={color} />
             ),
         }}
       />
@@ -84,11 +87,11 @@ export default function TabLayout() {
         name="goals"
         options={{
           title: "Goals",
-          tabBarIcon: ({ color }) =>
+          tabBarIcon: ({ color, focused }) =>
             isIOS ? (
-              <SymbolView name="target" tintColor={color} size={24} />
+              <SymbolView name="target" tintColor={color} size={22} />
             ) : (
-              <Ionicons name="trophy-outline" size={22} color={color} />
+              <Ionicons name={focused ? "trophy" : "trophy-outline"} size={22} color={color} />
             ),
         }}
       />
