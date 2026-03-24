@@ -92,12 +92,24 @@ The user has answered clarifying questions. Update your calorie/macro estimates 
 Return ONLY valid JSON with the same structure as before, but with updated values and confidence >= 0.85.
 Set needsClarification to false and clarificationQuestions to [].`;
 
+function normalizeItem(item: Record<string, unknown>) {
+  return {
+    name: String(item.name ?? "Unknown food"),
+    servingDescription: String(item.servingDescription ?? item.serving_description ?? item.serving ?? "1 serving"),
+    calories: Number(item.calories ?? item.kcal ?? item.cal ?? 0),
+    protein: Number(item.protein ?? item.proteins ?? 0),
+    carbs: Number(item.carbs ?? item.carbohydrates ?? item.carb ?? 0),
+    fat: Number(item.fat ?? item.fats ?? item.totalFat ?? 0),
+    confidence: Number(item.confidence ?? 0.8),
+  };
+}
+
 function computeTotals(items: Array<{ calories: number; protein: number; carbs: number; fat: number }>) {
   return {
-    totalCalories: items.reduce((s, i) => s + i.calories, 0),
-    totalProtein: items.reduce((s, i) => s + i.protein, 0),
-    totalCarbs: items.reduce((s, i) => s + i.carbs, 0),
-    totalFat: items.reduce((s, i) => s + i.fat, 0),
+    totalCalories: items.reduce((s, i) => s + (Number(i.calories) || 0), 0),
+    totalProtein: items.reduce((s, i) => s + (Number(i.protein) || 0), 0),
+    totalCarbs: items.reduce((s, i) => s + (Number(i.carbs) || 0), 0),
+    totalFat: items.reduce((s, i) => s + (Number(i.fat) || 0), 0),
   };
 }
 
@@ -148,10 +160,14 @@ router.post("/nutrition/analyze-photo", async (req: Request, res: Response) => {
     }
 
     const analysis = JSON.parse(jsonMatch[0]);
-    const totals = computeTotals(analysis.items ?? []);
+    const normalizedItems = (analysis.items ?? []).map(normalizeItem);
+    const totals = computeTotals(normalizedItems);
+    
+    req.log.info({ rawItems: analysis.items, normalizedItems, totals }, "Photo analysis result");
     
     res.json({
       ...analysis,
+      items: normalizedItems,
       ...totals,
       clarificationQuestions: analysis.clarificationQuestions ?? [],
     });
@@ -224,10 +240,14 @@ router.post("/nutrition/clarify", async (req: Request, res: Response) => {
     }
 
     const analysis = JSON.parse(jsonMatch[0]);
-    const totals = computeTotals(analysis.items ?? []);
+    const normalizedItems = (analysis.items ?? []).map(normalizeItem);
+    const totals = computeTotals(normalizedItems);
+    
+    req.log.info({ rawItems: analysis.items, normalizedItems, totals }, "Clarification result");
     
     res.json({
       ...analysis,
+      items: normalizedItems,
       ...totals,
       needsClarification: false,
       clarificationQuestions: [],
