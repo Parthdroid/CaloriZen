@@ -75,6 +75,15 @@ export default function TabLayout() {
         name="scan"
         options={{
           title: "Scan",
+          tabBarStyle: {
+            position: "absolute",
+            backgroundColor: isWeb ? "#0A0A0A" : "transparent",
+            borderTopWidth: 0,
+            elevation: 0,
+            ...(isWeb ? { height: 64, paddingBottom: 8 } : {}),
+          },
+          tabBarActiveTintColor: colors.tint,
+          tabBarInactiveTintColor: "rgba(255,255,255,0.4)",
           tabBarIcon: ({ color, focused }) =>
             isIOS ? (
               <SymbolView name="camera.viewfinder" tintColor={color} size={22} />

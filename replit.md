@@ -67,8 +67,10 @@ A mobile calorie and macro tracking app with:
 - Meal cards: compact rows with food name, time, and calorie count — no heavy borders
 - Tab bar: clean with outline/filled icon toggle on focus
 - Date picker: vertical day-number style (not pill labels)
-- Scan: prominent camera card, list-style gallery/barcode rows; during analysis shows meal photo with animated scan line overlay and cycling status tips; 90s timeout via Promise.race; non-food images detected gracefully
+- Scan: dark (#0A0A0A) camera-first unified hub with photo/barcode mode toggle, bottom toolbar (gallery, shutter, manual entry), viewfinder corners; during analysis shows meal photo with animated scan line overlay and cycling status tips; 90s timeout via Promise.race; non-food images detected gracefully
 - Goals: list-style goal rows with colored icons
+- Onboarding: multi-step Welcome → Height → Weight → Goals → Complete; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
+- Tab bar: dark transparent on Scan tab, standard white on other tabs
 
 ## Packages
 

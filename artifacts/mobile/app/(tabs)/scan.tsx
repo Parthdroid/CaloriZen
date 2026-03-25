@@ -7,11 +7,11 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
-  ScrollView,
   Image,
   Dimensions,
   Animated,
   Easing,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -20,9 +20,11 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/hooks/useTheme";
 import { useApp } from "@/context/AppContext";
-import { analyzePhoto } from "@workspace/api-client-react";
+import { analyzePhoto, lookupBarcode } from "@workspace/api-client-react";
 
-const { width: SCREEN_W } = Dimensions.get("window");
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+
+type ScanMode = "photo" | "barcode";
 
 const TIPS = [
   "Identifying foods...",
@@ -35,13 +37,17 @@ export default function ScanTab() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { setPendingAnalysis, setPendingImageBase64 } = useApp();
+  const [mode, setMode] = useState<ScanMode>("photo");
   const [loading, setLoading] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [tipIndex, setTipIndex] = useState(0);
+  const [barcodeInput, setBarcodeInput] = useState("");
+  const [barcodeLoading, setBarcodeLoading] = useState(false);
   const scanLineAnim = useRef(new Animated.Value(0)).current;
   const tipInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === "web" ? 40 : insets.top;
+  const bottomPad = Platform.OS === "web" ? 100 : insets.bottom + 70;
 
   const startScanAnimation = useCallback(() => {
     setTipIndex(0);
@@ -85,7 +91,6 @@ export default function ScanTab() {
         });
 
         const mimeType = blob.type || "image/jpeg";
-
         const analysis = await Promise.race([
           analyzePhoto({ imageBase64: base64, mimeType: mimeType as "image/jpeg" | "image/png" | "image/webp" | "image/gif" }),
           new Promise<never>((_, reject) => {
@@ -106,11 +111,7 @@ export default function ScanTab() {
           stopScanAnimation();
           setLoading(false);
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          Alert.alert(
-            "No food detected",
-            "We couldn't find any food in this photo. Try taking a clearer picture of your meal.",
-            [{ text: "OK" }]
-          );
+          Alert.alert("No food detected", "Try taking a clearer picture of your meal.", [{ text: "OK" }]);
           return;
         }
 
@@ -125,9 +126,7 @@ export default function ScanTab() {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
           isAbort ? "Request timed out" : "Analysis Failed",
-          isAbort
-            ? "The analysis is taking too long. Please try again with a clearer photo."
-            : "Something went wrong. Please try again.",
+          isAbort ? "Please try again with a clearer photo." : "Something went wrong. Please try again.",
           [{ text: "OK" }]
         );
       } finally {
@@ -169,138 +168,280 @@ export default function ScanTab() {
     }
   }, [handleImage]);
 
+  const handleBarcodeLookup = useCallback(async () => {
+    if (!barcodeInput.trim()) return;
+    setBarcodeLoading(true);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      const product = await lookupBarcode(barcodeInput.trim());
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setPendingAnalysis(null);
+      setPendingImageBase64(null);
+      router.push({
+        pathname: "/barcode",
+        params: { prefill: JSON.stringify(product) },
+      });
+    } catch {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Not Found", "We couldn't find this barcode. Try a different number or scan a photo instead.");
+    } finally {
+      setBarcodeLoading(false);
+    }
+  }, [barcodeInput, setPendingAnalysis, setPendingImageBase64]);
+
   if (loading && previewUri) {
     const translateY = scanLineAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, SCREEN_W * 0.65],
+      outputRange: [0, SCREEN_H * 0.5],
     });
 
     return (
       <View style={[styles.loadingContainer, { backgroundColor: "#000" }]}>
-        <View style={styles.scanPreview}>
-          <Image source={{ uri: previewUri }} style={styles.scanImage} resizeMode="cover" />
-          <View style={styles.scanOverlay}>
-            <Animated.View
-              style={[
-                styles.scanLine,
-                { backgroundColor: colors.tint, transform: [{ translateY }] },
-              ]}
-            />
-          </View>
-          <View style={[styles.scanCornerTL, { borderColor: colors.tint }]} />
-          <View style={[styles.scanCornerTR, { borderColor: colors.tint }]} />
-          <View style={[styles.scanCornerBL, { borderColor: colors.tint }]} />
-          <View style={[styles.scanCornerBR, { borderColor: colors.tint }]} />
+        <Image source={{ uri: previewUri }} style={styles.fullImage} resizeMode="cover" />
+        <View style={styles.scanOverlayFull}>
+          <Animated.View style={[styles.scanLine, { backgroundColor: colors.tint, transform: [{ translateY }] }]} />
         </View>
-        <View style={styles.loadingBottom}>
-          <ActivityIndicator size="small" color={colors.tint} />
-          <Text style={[styles.loadingTip, { color: "#fff" }]}>{TIPS[tipIndex]}</Text>
+        <View style={[styles.scanCornerTL, { borderColor: "#fff" }]} />
+        <View style={[styles.scanCornerTR, { borderColor: "#fff" }]} />
+        <View style={[styles.scanCornerBL, { borderColor: "#fff" }]} />
+        <View style={[styles.scanCornerBR, { borderColor: "#fff" }]} />
+        <View style={[styles.loadingBottom, { bottom: bottomPad + 20 }]}>
+          <View style={styles.loadingPill}>
+            <ActivityIndicator size="small" color={colors.tint} />
+            <Text style={styles.loadingTip}>{TIPS[tipIndex]}</Text>
+          </View>
         </View>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: 120 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.headerArea}>
-        <Text style={[styles.title, { color: colors.text }]}>Scan</Text>
-        <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
-          Take a photo of your meal for instant nutrition analysis
-        </Text>
+    <View style={[styles.container, { backgroundColor: "#0A0A0A" }]}>
+      <View style={[styles.headerRow, { paddingTop: topPad + 8 }]}>
+        <Text style={styles.headerTitle}>Scanner</Text>
       </View>
 
-      <View style={styles.optionsArea}>
-        <Pressable
-          onPress={handleCamera}
-          style={({ pressed }) => [
-            styles.mainOption,
-            {
-              backgroundColor: colors.tint,
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
-        >
-          <View style={styles.mainOptionIcon}>
-            <Ionicons name="camera" size={36} color="#fff" />
+      <View style={styles.viewfinderArea}>
+        <View style={styles.viewfinderPlaceholder}>
+          <View style={[styles.vfCornerTL, { borderColor: "rgba(255,255,255,0.5)" }]} />
+          <View style={[styles.vfCornerTR, { borderColor: "rgba(255,255,255,0.5)" }]} />
+          <View style={[styles.vfCornerBL, { borderColor: "rgba(255,255,255,0.5)" }]} />
+          <View style={[styles.vfCornerBR, { borderColor: "rgba(255,255,255,0.5)" }]} />
+          <View style={styles.vfCenter}>
+            <Ionicons name={mode === "photo" ? "restaurant-outline" : "barcode-outline"} size={48} color="rgba(255,255,255,0.3)" />
+            <Text style={styles.vfHint}>
+              {mode === "photo" ? "Point at your food" : "Position barcode in frame"}
+            </Text>
           </View>
-          <Text style={styles.mainOptionTitle}>Take Photo</Text>
-          <Text style={styles.mainOptionSub}>Point at your meal</Text>
-        </Pressable>
-
-        <Pressable
-          onPress={handleGallery}
-          style={({ pressed }) => [
-            styles.secondaryOption,
-            {
-              backgroundColor: colors.backgroundTertiary,
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
-        >
-          <View style={[styles.secondaryIcon, { backgroundColor: colors.tint + "12" }]}>
-            <Ionicons name="images-outline" size={24} color={colors.tint} />
-          </View>
-          <View style={styles.secondaryText}>
-            <Text style={[styles.secondaryTitle, { color: colors.text }]}>Choose from Gallery</Text>
-            <Text style={[styles.secondarySub, { color: colors.textTertiary }]}>Select a meal photo</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.push("/barcode")}
-          style={({ pressed }) => [
-            styles.secondaryOption,
-            {
-              backgroundColor: colors.backgroundTertiary,
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
-        >
-          <View style={[styles.secondaryIcon, { backgroundColor: colors.purple + "12" }]}>
-            <Ionicons name="barcode-outline" size={24} color={colors.purple} />
-          </View>
-          <View style={styles.secondaryText}>
-            <Text style={[styles.secondaryTitle, { color: colors.text }]}>Scan Barcode</Text>
-            <Text style={[styles.secondarySub, { color: colors.textTertiary }]}>Packaged food</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-        </Pressable>
+        </View>
       </View>
 
-      <Text style={[styles.tip, { color: colors.textTertiary }]}>
-        Best with good lighting and a clear view of your food
-      </Text>
-    </ScrollView>
+      {mode === "barcode" && (
+        <View style={styles.barcodeInputArea}>
+          <View style={styles.barcodeInputRow}>
+            <Ionicons name="barcode-outline" size={20} color="rgba(255,255,255,0.5)" />
+            <TextInput
+              value={barcodeInput}
+              onChangeText={setBarcodeInput}
+              placeholder="Enter barcode number..."
+              placeholderTextColor="rgba(255,255,255,0.35)"
+              style={styles.barcodeTextInput}
+              keyboardType="numeric"
+              returnKeyType="search"
+              onSubmitEditing={handleBarcodeLookup}
+              autoFocus
+            />
+            {barcodeLoading ? (
+              <ActivityIndicator size="small" color={colors.tint} />
+            ) : barcodeInput.length > 0 ? (
+              <Pressable onPress={handleBarcodeLookup}>
+                <View style={[styles.barcodeLookupBtn, { backgroundColor: colors.tint }]}>
+                  <Ionicons name="search" size={16} color="#fff" />
+                </View>
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+      )}
+
+      <View style={[styles.bottomToolbar, { paddingBottom: Platform.OS === "web" ? 80 : insets.bottom + 60 }]}>
+        <View style={styles.modeToggle}>
+          <Pressable
+            onPress={() => { setMode("photo"); Haptics.selectionAsync(); }}
+            style={[styles.modeBtn, mode === "photo" && styles.modeBtnActive, mode === "photo" && { backgroundColor: "rgba(255,255,255,0.15)" }]}
+          >
+            <Ionicons name="scan-outline" size={16} color={mode === "photo" ? "#fff" : "rgba(255,255,255,0.5)"} />
+            <Text style={[styles.modeBtnText, mode === "photo" && styles.modeBtnTextActive]}>Scan food</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => { setMode("barcode"); Haptics.selectionAsync(); }}
+            style={[styles.modeBtn, mode === "barcode" && styles.modeBtnActive, mode === "barcode" && { backgroundColor: "rgba(255,255,255,0.15)" }]}
+          >
+            <Ionicons name="barcode-outline" size={16} color={mode === "barcode" ? "#fff" : "rgba(255,255,255,0.5)"} />
+            <Text style={[styles.modeBtnText, mode === "barcode" && styles.modeBtnTextActive]}>Barcode</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.captureRow}>
+          <Pressable onPress={handleGallery} style={styles.sideBtn}>
+            <Ionicons name="images-outline" size={24} color="#fff" />
+          </Pressable>
+
+          <Pressable
+            onPress={mode === "photo" ? handleCamera : handleBarcodeLookup}
+            style={({ pressed }) => [
+              styles.captureBtn,
+              { transform: [{ scale: pressed ? 0.92 : 1 }] },
+            ]}
+          >
+            <View style={styles.captureBtnInner}>
+              <Ionicons name={mode === "photo" ? "camera" : "search"} size={28} color="#0A0A0A" />
+            </View>
+          </Pressable>
+
+          <Pressable onPress={() => router.push("/barcode")} style={styles.sideBtn}>
+            <Ionicons name="create-outline" size={24} color="#fff" />
+          </Pressable>
+        </View>
+      </View>
+    </View>
   );
 }
 
+const VF_SIZE = SCREEN_W * 0.72;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
+  container: { flex: 1 },
+  headerRow: {
+    alignItems: "center",
+    paddingBottom: 12,
   },
-  loadingContainer: {
+  headerTitle: {
+    fontSize: 17,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
+  },
+  viewfinderArea: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  scanPreview: {
-    width: SCREEN_W * 0.8,
-    height: SCREEN_W * 0.8,
-    borderRadius: 24,
-    overflow: "hidden",
+  viewfinderPlaceholder: {
+    width: VF_SIZE,
+    height: VF_SIZE,
     position: "relative",
   },
-  scanImage: {
+  vfCornerTL: { position: "absolute", top: 0, left: 0, width: 32, height: 32, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 16 },
+  vfCornerTR: { position: "absolute", top: 0, right: 0, width: 32, height: 32, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 16 },
+  vfCornerBL: { position: "absolute", bottom: 0, left: 0, width: 32, height: 32, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 16 },
+  vfCornerBR: { position: "absolute", bottom: 0, right: 0, width: 32, height: 32, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 16 },
+  vfCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  vfHint: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.35)",
+  },
+  barcodeInputArea: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  barcodeInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  barcodeTextInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+    color: "#fff",
+  },
+  barcodeLookupBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomToolbar: {
+    paddingHorizontal: 24,
+    gap: 20,
+  },
+  modeToggle: {
+    flexDirection: "row",
+    alignSelf: "center",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    padding: 3,
+  },
+  modeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  modeBtnActive: {},
+  modeBtnText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: "rgba(255,255,255,0.5)",
+  },
+  modeBtnTextActive: {
+    color: "#fff",
+  },
+  captureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 32,
+  },
+  sideBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  captureBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  captureBtnInner: {
+    flex: 1,
+    width: "100%",
+    borderRadius: 32,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  fullImage: {
+    ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
   },
-  scanOverlay: {
+  scanOverlayFull: {
     ...StyleSheet.absoluteFillObject,
     overflow: "hidden",
   },
@@ -310,129 +451,28 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     opacity: 0.8,
   },
-  scanCornerTL: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 28,
-    height: 28,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderTopLeftRadius: 24,
-  },
-  scanCornerTR: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 28,
-    height: 28,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderTopRightRadius: 24,
-  },
-  scanCornerBL: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: 28,
-    height: 28,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomLeftRadius: 24,
-  },
-  scanCornerBR: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 28,
-    height: 28,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomRightRadius: 24,
-  },
+  scanCornerTL: { position: "absolute", top: "20%", left: "12%", width: 32, height: 32, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 12 },
+  scanCornerTR: { position: "absolute", top: "20%", right: "12%", width: 32, height: 32, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 12 },
+  scanCornerBL: { position: "absolute", bottom: "30%", left: "12%", width: 32, height: 32, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 12 },
+  scanCornerBR: { position: "absolute", bottom: "30%", right: "12%", width: 32, height: 32, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 12 },
   loadingBottom: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  loadingPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginTop: 32,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
   loadingTip: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Inter_500Medium",
-  },
-  headerArea: {
-    marginBottom: 28,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 21,
-  },
-  optionsArea: {
-    gap: 12,
-    marginBottom: 24,
-  },
-  mainOption: {
-    borderRadius: 24,
-    paddingVertical: 32,
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 4,
-  },
-  mainOptionIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  mainOptionTitle: {
-    fontSize: 18,
-    fontFamily: "Inter_700Bold",
     color: "#fff",
-  },
-  mainOptionSub: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.7)",
-  },
-  secondaryOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
-  },
-  secondaryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  secondaryText: {
-    flex: 1,
-    gap: 2,
-  },
-  secondaryTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-  },
-  secondarySub: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-  },
-  tip: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
   },
 });

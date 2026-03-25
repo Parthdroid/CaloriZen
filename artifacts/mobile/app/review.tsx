@@ -36,7 +36,7 @@ function MiniRing({ value, goal, color, size = 40 }: { value: number; goal: numb
 
   return (
     <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
-      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={colors.border} strokeWidth={3.5} fill="none" />
+      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={colors.backgroundTertiary} strokeWidth={3.5} fill="none" />
       <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={3.5} fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
     </Svg>
   );

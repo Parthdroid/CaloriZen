@@ -212,7 +212,9 @@ export default function HomeScreen() {
           style={({ pressed }) => [
             styles.actionBtn,
             {
-              backgroundColor: colors.backgroundTertiary,
+              backgroundColor: colors.background,
+              borderWidth: 1.5,
+              borderColor: colors.backgroundTertiary,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },

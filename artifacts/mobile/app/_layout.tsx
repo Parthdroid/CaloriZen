@@ -6,12 +6,13 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
@@ -27,10 +28,36 @@ const queryClient = new QueryClient({
   },
 });
 
-function RootLayoutNav() {
+const ONBOARDING_KEY = "@onboarding_complete";
+
+function RootLayoutNav({ onboardingDone }: { onboardingDone: boolean }) {
+  if (!onboardingDone) {
+    return (
+      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+        <Stack.Screen
+          name="onboarding"
+          options={{ headerShown: false, animation: "fade" }}
+        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="barcode"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="review"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
+      </Stack>
+    );
+  }
+
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="onboarding"
+        options={{ headerShown: false, animation: "fade" }}
+      />
       <Stack.Screen
         name="barcode"
         options={{ headerShown: false, presentation: "modal" }}
@@ -50,14 +77,25 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(true);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
+      setOnboardingDone(val === "true");
+      setOnboardingChecked(true);
+    }).catch(() => {
+      setOnboardingChecked(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if ((fontsLoaded || fontError) && onboardingChecked) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, onboardingChecked]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || !onboardingChecked) return null;
 
   return (
     <SafeAreaProvider>
@@ -66,7 +104,7 @@ export default function RootLayout() {
           <AppProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <KeyboardProvider>
-                <RootLayoutNav />
+                <RootLayoutNav onboardingDone={onboardingDone} />
               </KeyboardProvider>
             </GestureHandlerRootView>
           </AppProvider>
