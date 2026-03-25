@@ -218,7 +218,7 @@ export default function ScanTab() {
   return (
     <View style={[styles.container, { backgroundColor: "#0A0A0A" }]}>
       <View style={[styles.headerRow, { paddingTop: topPad + 8 }]}>
-        <Text style={styles.headerTitle}>Scanner</Text>
+        <Text style={styles.headerTitle}>Scan</Text>
       </View>
 
       <View style={styles.viewfinderArea}>

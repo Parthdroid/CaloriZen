@@ -58,18 +58,16 @@ A mobile calorie and macro tracking app with:
 - **Nutrition goals**: Set and edit daily calorie/macro targets
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
-### Design System (Cal AI / HealthifyMe Snap style)
-- Clean, borderless card design with subtle backgrounds instead of heavy borders
-- Orange accent: `#FF6B35`, dark/light theme via `useTheme()` hook
-- Font: Inter (400/500/600/700)
-- Color tokens: protein (blue #3B82F6), carbs (amber #F59E0B), fat (red #EF4444), calories (orange)
-- Home: calorie ring with macro progress rings (not bars)
-- Meal cards: compact rows with food name, time, and calorie count — no heavy borders
-- Tab bar: clean with outline/filled icon toggle on focus
-- Date picker: vertical day-number style (not pill labels)
-- Scan: dark (#0A0A0A) camera-first unified hub with photo/barcode mode toggle, bottom toolbar (gallery, shutter, manual entry), viewfinder corners; during analysis shows meal photo with animated scan line overlay and cycling status tips; 90s timeout via Promise.race; non-food images detected gracefully
-- Goals: list-style goal rows with colored icons
-- Onboarding: multi-step Welcome → Height → Weight → Goals → Complete; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
+### Design System (Cal AI-inspired premium)
+- Clean, borderless card design with subtle backgrounds; gradient accents via `expo-linear-gradient`
+- Orange accent: `#FF6B35` → `#FF8A5C` gradient; dark/light theme via `useTheme()` hook
+- Font: Inter (400/500/600/700); larger 32px headings with tight -0.8 letter-spacing
+- Color tokens: protein (blue #3B82F6), carbs (amber #F59E0B), fat (red #EF4444), calories (orange gradient)
+- Home: gradient calorie ring (SVG LinearGradient), macro progress bars with labels, gradient "Scan Meal" button, outlined "Barcode" button
+- Onboarding: dark theme (#0F0F0F → #1A1A2E gradient), step numbers (01/02/03), gradient buttons, animated slide transitions, emoji goal cards; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
+- Scan: dark (#0A0A0A) camera-first unified hub with photo/barcode mode toggle, bottom toolbar (gallery, shutter, manual entry), viewfinder corners; animated scan line overlay and cycling tips; 90s timeout via Promise.race
+- Goals: rounded cards with colored icons and checkmark badges; edit mode with inline inputs
+- Log: horizontal scrollable date picker with day abbreviations, orange highlight for selected date, today dot indicator
 - Tab bar: dark transparent on Scan tab, standard white on other tabs
 
 ## Packages
