@@ -214,43 +214,43 @@ export default function ScanTab() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: "#0A0A0A" }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 4 }]}>
         <View style={styles.headerSide} />
-        <Text style={styles.headerTitle}>Scanner</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Scanner</Text>
         <View style={styles.headerSide} />
       </View>
 
       <View style={styles.cameraArea}>
-        <View style={styles.viewfinder}>
-          <View style={[styles.cornerTL, styles.corner]} />
-          <View style={[styles.cornerTR, styles.corner]} />
-          <View style={[styles.cornerBL, styles.corner]} />
-          <View style={[styles.cornerBR, styles.corner]} />
+        <View style={[styles.viewfinder, { backgroundColor: colors.backgroundTertiary }]}>
+          <View style={[styles.cornerTL, styles.corner, { borderColor: colors.textTertiary }]} />
+          <View style={[styles.cornerTR, styles.corner, { borderColor: colors.textTertiary }]} />
+          <View style={[styles.cornerBL, styles.corner, { borderColor: colors.textTertiary }]} />
+          <View style={[styles.cornerBR, styles.corner, { borderColor: colors.textTertiary }]} />
 
           <View style={styles.vfCenter}>
-            <Ionicons name="restaurant-outline" size={40} color="rgba(255,255,255,0.2)" />
-            <Text style={styles.vfHint}>Point camera at your meal</Text>
+            <Ionicons name="camera-outline" size={44} color={colors.textTertiary} />
+            <Text style={[styles.vfHint, { color: colors.textTertiary }]}>Point camera at your meal</Text>
           </View>
         </View>
       </View>
 
       {showBarcode && (
         <View style={styles.barcodeOverlay}>
-          <View style={styles.barcodeCard}>
+          <View style={[styles.barcodeCard, { backgroundColor: colors.card }]}>
             <View style={styles.barcodeHeader}>
-              <Text style={styles.barcodeTitle}>Enter Barcode</Text>
+              <Text style={[styles.barcodeTitle, { color: colors.text }]}>Enter Barcode</Text>
               <Pressable onPress={() => setShowBarcode(false)} hitSlop={12}>
-                <Ionicons name="close" size={22} color="rgba(255,255,255,0.6)" />
+                <Ionicons name="close" size={22} color={colors.textTertiary} />
               </Pressable>
             </View>
-            <View style={styles.barcodeInputRow}>
+            <View style={[styles.barcodeInputRow, { backgroundColor: colors.backgroundTertiary }]}>
               <TextInput
                 value={barcodeInput}
                 onChangeText={setBarcodeInput}
                 placeholder="Barcode number..."
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                style={styles.barcodeInput}
+                placeholderTextColor={colors.textTertiary}
+                style={[styles.barcodeInput, { color: colors.text }]}
                 keyboardType="numeric"
                 returnKeyType="search"
                 onSubmitEditing={handleBarcodeLookup}
@@ -269,40 +269,40 @@ export default function ScanTab() {
       )}
 
       <View style={[styles.bottomArea, { paddingBottom: Platform.OS === "web" ? 76 : insets.bottom + 56 }]}>
-        <View style={styles.toolbar}>
+        <View style={[styles.toolbar, { backgroundColor: colors.card }]}>
           <View style={styles.toolbarLabel}>
-            <Ionicons name="scan-outline" size={15} color="#fff" />
-            <Text style={styles.toolbarLabelText}>Scan food</Text>
+            <Ionicons name="scan-outline" size={15} color={colors.text} />
+            <Text style={[styles.toolbarLabelText, { color: colors.text }]}>Scan food</Text>
           </View>
-          <View style={styles.toolbarDivider} />
+          <View style={[styles.toolbarDivider, { backgroundColor: colors.border }]} />
           <Pressable
             onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }}
             style={styles.toolbarIcon}
             accessibilityLabel="Barcode"
           >
-            <Ionicons name="barcode-outline" size={20} color={showBarcode ? "#fff" : "rgba(255,255,255,0.5)"} />
+            <Ionicons name="barcode-outline" size={20} color={showBarcode ? colors.text : colors.textTertiary} />
           </Pressable>
           <Pressable onPress={handleGallery} style={styles.toolbarIcon} accessibilityLabel="Gallery">
-            <Ionicons name="images-outline" size={20} color="rgba(255,255,255,0.5)" />
+            <Ionicons name="images-outline" size={20} color={colors.textTertiary} />
           </Pressable>
           <Pressable onPress={() => router.push("/barcode")} style={styles.toolbarIcon} accessibilityLabel="Manual entry">
-            <Ionicons name="create-outline" size={20} color="rgba(255,255,255,0.5)" />
+            <Ionicons name="create-outline" size={20} color={colors.textTertiary} />
           </Pressable>
         </View>
 
         <View style={styles.shutterRow}>
           <Pressable style={styles.flashBtn} accessibilityLabel="Flash">
-            <Ionicons name="flash-outline" size={22} color="#fff" />
+            <Ionicons name="flash-outline" size={22} color={colors.textSecondary} />
           </Pressable>
 
           <Pressable
             onPress={handleCamera}
             style={({ pressed }) => [
               styles.shutterBtn,
-              { transform: [{ scale: pressed ? 0.92 : 1 }] },
+              { borderColor: colors.text, transform: [{ scale: pressed ? 0.92 : 1 }] },
             ]}
           >
-            <View style={styles.shutterInner} />
+            <View style={[styles.shutterInner, { backgroundColor: colors.text }]} />
           </Pressable>
 
           <View style={styles.flashBtn} />
@@ -329,7 +329,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontFamily: "Inter_600SemiBold",
-    color: "#fff",
     letterSpacing: -0.2,
   },
 
@@ -342,16 +341,17 @@ const styles = StyleSheet.create({
     width: VF,
     height: VF,
     position: "relative",
+    borderRadius: 20,
   },
   corner: {
     position: "absolute",
     width: CORNER,
     height: CORNER,
   },
-  cornerTL: { top: 0, left: 0, borderTopWidth: 2.5, borderLeftWidth: 2.5, borderTopLeftRadius: 14, borderColor: "rgba(255,255,255,0.45)" },
-  cornerTR: { top: 0, right: 0, borderTopWidth: 2.5, borderRightWidth: 2.5, borderTopRightRadius: 14, borderColor: "rgba(255,255,255,0.45)" },
-  cornerBL: { bottom: 0, left: 0, borderBottomWidth: 2.5, borderLeftWidth: 2.5, borderBottomLeftRadius: 14, borderColor: "rgba(255,255,255,0.45)" },
-  cornerBR: { bottom: 0, right: 0, borderBottomWidth: 2.5, borderRightWidth: 2.5, borderBottomRightRadius: 14, borderColor: "rgba(255,255,255,0.45)" },
+  cornerTL: { top: 0, left: 0, borderTopWidth: 2.5, borderLeftWidth: 2.5, borderTopLeftRadius: 14 },
+  cornerTR: { top: 0, right: 0, borderTopWidth: 2.5, borderRightWidth: 2.5, borderTopRightRadius: 14 },
+  cornerBL: { bottom: 0, left: 0, borderBottomWidth: 2.5, borderLeftWidth: 2.5, borderBottomLeftRadius: 14 },
+  cornerBR: { bottom: 0, right: 0, borderBottomWidth: 2.5, borderRightWidth: 2.5, borderBottomRightRadius: 14 },
   vfCenter: {
     flex: 1,
     alignItems: "center",
@@ -361,7 +361,6 @@ const styles = StyleSheet.create({
   vfHint: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.25)",
   },
 
   barcodeOverlay: {
@@ -372,7 +371,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   barcodeCard: {
-    backgroundColor: "rgba(30,30,30,0.95)",
     borderRadius: 16,
     padding: 16,
     gap: 12,
@@ -385,12 +383,10 @@ const styles = StyleSheet.create({
   barcodeTitle: {
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
-    color: "#fff",
   },
   barcodeInputRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -400,7 +396,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontFamily: "Inter_400Regular",
-    color: "#fff",
   },
   barcodeSearchBtn: {
     width: 32,
@@ -418,7 +413,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: "rgba(60,60,60,0.7)",
     borderRadius: 28,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -433,12 +427,10 @@ const styles = StyleSheet.create({
   toolbarLabelText: {
     fontSize: 13,
     fontFamily: "Inter_500Medium",
-    color: "#fff",
   },
   toolbarDivider: {
     width: 1,
     height: 16,
-    backgroundColor: "rgba(255,255,255,0.15)",
     marginHorizontal: 4,
   },
   toolbarIcon: {
@@ -467,7 +459,6 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.9)",
     alignItems: "center",
     justifyContent: "center",
     padding: 5,
@@ -476,7 +467,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     borderRadius: 30,
-    backgroundColor: "#fff",
   },
 
   loadingContainer: { flex: 1, position: "relative" },
