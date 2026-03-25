@@ -218,7 +218,7 @@ export default function ReviewScreen() {
         )}
 
         {/* Calories hero card */}
-        <View style={[styles.calorieCard, { backgroundColor: colors.card, borderColor: colors.border, marginTop: pendingImageBase64 ? -28 : 16 }]}>
+        <View style={[styles.calorieCard, { backgroundColor: colors.card, marginTop: pendingImageBase64 ? -28 : 16 }]}>
           <View style={styles.calorieCenter}>
             <View style={styles.calorieRingWrap}>
               <MiniRing value={totalCalories} goal={2000} color={colors.tint} size={72} />
@@ -240,7 +240,7 @@ export default function ReviewScreen() {
 
         {/* Clarification Questions */}
         {analysis.needsClarification && questions.length > 0 && (
-          <View style={[styles.clarifyCard, { backgroundColor: colors.card, borderColor: colors.tint + "30" }]}>
+          <View style={[styles.clarifyCard, { backgroundColor: colors.card }]}>
             <View style={styles.clarifyHeaderRow}>
               <View style={[styles.clarifyIconBg, { backgroundColor: colors.tint + "18" }]}>
                 <Ionicons name="chatbubble-ellipses" size={18} color={colors.tint} />
@@ -266,7 +266,6 @@ export default function ReviewScreen() {
                         styles.optionChip,
                         {
                           backgroundColor: clarificationAnswers[qi] === opt ? colors.tint : colors.backgroundTertiary,
-                          borderColor: clarificationAnswers[qi] === opt ? colors.tint : colors.border,
                         },
                       ]}
                     >
@@ -302,20 +301,20 @@ export default function ReviewScreen() {
         <View style={styles.sectionWrap}>
           <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Detected Items</Text>
           {editedItems.map((item, index) => (
-            <View key={index} style={[styles.foodCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View key={index} style={[styles.foodCard, { backgroundColor: colors.card }]}>
               {editingItem === index ? (
                 <View style={styles.editForm}>
                   <TextInput
                     value={item.name}
                     onChangeText={(v) => updateItem(index, { name: v })}
-                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}
+                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
                     placeholder="Food name"
                     placeholderTextColor={colors.textTertiary}
                   />
                   <TextInput
                     value={item.servingDescription}
                     onChangeText={(v) => updateItem(index, { servingDescription: v })}
-                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}
+                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
                     placeholder="Serving (e.g. 1 cup)"
                     placeholderTextColor={colors.textTertiary}
                   />
@@ -329,7 +328,7 @@ export default function ReviewScreen() {
                           value={String(item[field])}
                           onChangeText={(v) => updateItem(index, { [field]: parseFloat(v) || 0 })}
                           keyboardType="decimal-pad"
-                          style={[styles.macroEditInput, { color: colors.text, backgroundColor: colors.backgroundTertiary, borderColor: colors.border }]}
+                          style={[styles.macroEditInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
                           selectTextOnFocus
                         />
                       </View>
@@ -396,7 +395,7 @@ export default function ReviewScreen() {
         {/* Meal type selector — pill style */}
         <View style={styles.sectionWrap}>
           <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Log as</Text>
-          <View style={[styles.mealTypeRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.mealTypeRow, { backgroundColor: colors.backgroundTertiary }]}>
             {MEAL_TYPES.map(({ value, label, icon }) => (
               <Pressable
                 key={value}
@@ -503,7 +502,6 @@ const styles = StyleSheet.create({
   calorieCard: {
     marginHorizontal: 16,
     borderRadius: 24,
-    borderWidth: 1,
     padding: 20,
     gap: 16,
   },
@@ -547,7 +545,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 12,
     borderRadius: 20,
-    borderWidth: 1.5,
     padding: 16,
     gap: 14,
   },
@@ -585,7 +582,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
   },
   optionText: {
     fontSize: 13,
@@ -616,7 +612,6 @@ const styles = StyleSheet.create({
   },
   foodCard: {
     borderRadius: 18,
-    borderWidth: 1,
     padding: 14,
     gap: 10,
   },
@@ -669,7 +664,6 @@ const styles = StyleSheet.create({
   editForm: { gap: 10 },
   editInput: {
     borderRadius: 12,
-    borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
@@ -691,7 +685,6 @@ const styles = StyleSheet.create({
   macroEditInput: {
     width: "100%",
     borderRadius: 10,
-    borderWidth: 1,
     paddingHorizontal: 6,
     paddingVertical: 8,
     fontSize: 15,
@@ -711,7 +704,6 @@ const styles = StyleSheet.create({
   mealTypeRow: {
     flexDirection: "row",
     borderRadius: 16,
-    borderWidth: 1,
     padding: 4,
   },
   mealTypeItem: {
@@ -734,7 +726,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingTop: 10,
-    borderTopWidth: 1,
+    borderTopWidth: 0,
   },
   saveBtn: {
     flexDirection: "row",

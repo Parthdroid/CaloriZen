@@ -130,7 +130,7 @@ export default function BarcodeScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Barcode Input */}
-        <View style={[styles.inputCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <View style={[styles.inputCard, { backgroundColor: colors.backgroundTertiary }]}>
           <View style={styles.inputRow}>
             <Ionicons name="barcode-outline" size={22} color={colors.textSecondary} />
             <TextInput
@@ -176,7 +176,7 @@ export default function BarcodeScreen() {
         {/* Product Result */}
         {product && (
           <View style={styles.productSection}>
-            <View style={[styles.productCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.productCard, { backgroundColor: colors.card }]}>
               <View style={styles.productHeader}>
                 <View style={[styles.productIconBg, { backgroundColor: colors.tint + "18" }]}>
                   <Ionicons name="cube-outline" size={24} color={colors.tint} />
@@ -215,7 +215,7 @@ export default function BarcodeScreen() {
             </View>
 
             {/* Servings */}
-            <View style={[styles.servingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.servingsCard, { backgroundColor: colors.card }]}>
               <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Servings</Text>
               <View style={styles.servingsRow}>
                 <Pressable
@@ -245,7 +245,7 @@ export default function BarcodeScreen() {
             </View>
 
             {/* Meal Type */}
-            <View style={[styles.mealTypeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.mealTypeCard, { backgroundColor: colors.card }]}>
               <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Meal</Text>
               <View style={styles.mealTypes}>
                 {MEAL_TYPES.map(({ value, label }) => (
@@ -256,7 +256,6 @@ export default function BarcodeScreen() {
                       styles.mealTypeBtn,
                       {
                         backgroundColor: mealType === value ? colors.tint : colors.backgroundTertiary,
-                        borderColor: mealType === value ? colors.tint : colors.border,
                       },
                     ]}
                   >
@@ -324,7 +323,6 @@ const styles = StyleSheet.create({
   },
   inputCard: {
     borderRadius: 20,
-    borderWidth: 1,
     padding: 16,
     gap: 12,
   },
@@ -361,7 +359,6 @@ const styles = StyleSheet.create({
   },
   productCard: {
     borderRadius: 20,
-    borderWidth: 1,
     padding: 16,
   },
   productHeader: {
@@ -407,7 +404,6 @@ const styles = StyleSheet.create({
   },
   servingsCard: {
     borderRadius: 20,
-    borderWidth: 1,
     padding: 16,
     gap: 10,
   },
@@ -443,7 +439,6 @@ const styles = StyleSheet.create({
   },
   mealTypeCard: {
     borderRadius: 20,
-    borderWidth: 1,
     padding: 16,
     gap: 10,
   },
@@ -456,7 +451,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
   },
   mealTypeBtnText: {
     fontSize: 13,

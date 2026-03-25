@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,10 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Image,
+  Dimensions,
+  Animated,
+  Easing,
 } from "react-native";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -18,17 +22,54 @@ import { useTheme } from "@/hooks/useTheme";
 import { useApp } from "@/context/AppContext";
 import { analyzePhoto } from "@workspace/api-client-react";
 
+const { width: SCREEN_W } = Dimensions.get("window");
+
+const TIPS = [
+  "Identifying foods...",
+  "Estimating portions...",
+  "Calculating macros...",
+  "Almost done...",
+];
+
 export default function ScanTab() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { setPendingAnalysis, setPendingImageBase64 } = useApp();
   const [loading, setLoading] = useState(false);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [tipIndex, setTipIndex] = useState(0);
+  const scanLineAnim = useRef(new Animated.Value(0)).current;
+  const tipInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  const startScanAnimation = useCallback(() => {
+    setTipIndex(0);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scanLineAnim, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(scanLineAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])
+    ).start();
+    tipInterval.current = setInterval(() => {
+      setTipIndex((prev) => Math.min(prev + 1, TIPS.length - 1));
+    }, 4000);
+  }, [scanLineAnim]);
+
+  const stopScanAnimation = useCallback(() => {
+    scanLineAnim.stopAnimation();
+    scanLineAnim.setValue(0);
+    if (tipInterval.current) {
+      clearInterval(tipInterval.current);
+      tipInterval.current = null;
+    }
+  }, [scanLineAnim]);
+
   const handleImage = useCallback(
     async (uri: string) => {
+      setPreviewUri(uri);
       setLoading(true);
+      startScanAnimation();
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       try {
         const response = await fetch(uri);
@@ -44,18 +85,57 @@ export default function ScanTab() {
         });
 
         const mimeType = blob.type || "image/jpeg";
-        const analysis = await analyzePhoto({ imageBase64: base64, mimeType: mimeType as "image/jpeg" | "image/png" | "image/webp" | "image/gif" });
 
+        const analysis = await Promise.race([
+          analyzePhoto({ imageBase64: base64, mimeType: mimeType as "image/jpeg" | "image/png" | "image/webp" | "image/gif" }),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => {
+              const err = new Error("Request timed out");
+              err.name = "AbortError";
+              reject(err);
+            }, 90000);
+          }),
+        ]);
+
+        const items = analysis.items ?? [];
+        const isNonFood = items.length === 0 ||
+          (items.length === 1 && (analysis.totalCalories ?? 0) === 0 &&
+            (items[0]?.name?.toLowerCase().includes("non-food") || items[0]?.name?.toLowerCase().includes("not food")));
+
+        if (isNonFood) {
+          stopScanAnimation();
+          setLoading(false);
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Alert.alert(
+            "No food detected",
+            "We couldn't find any food in this photo. Try taking a clearer picture of your meal.",
+            [{ text: "OK" }]
+          );
+          return;
+        }
+
+        stopScanAnimation();
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setPendingAnalysis(analysis);
         setPendingImageBase64(base64);
         router.push("/review");
-      } catch (err) {
-        Alert.alert("Analysis Failed", "Could not analyze this photo. Please try again.");
+      } catch (err: unknown) {
+        stopScanAnimation();
+        const isAbort = err instanceof Error && err.name === "AbortError";
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        Alert.alert(
+          isAbort ? "Request timed out" : "Analysis Failed",
+          isAbort
+            ? "The analysis is taking too long. Please try again with a clearer photo."
+            : "Something went wrong. Please try again.",
+          [{ text: "OK" }]
+        );
       } finally {
         setLoading(false);
+        setPreviewUri(null);
       }
     },
-    [setPendingAnalysis, setPendingImageBase64]
+    [setPendingAnalysis, setPendingImageBase64, startScanAnimation, stopScanAnimation]
   );
 
   const handleCamera = useCallback(async () => {
@@ -66,8 +146,8 @@ export default function ScanTab() {
     }
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
-      quality: 0.8,
-      base64: false,
+      quality: 0.7,
+      allowsEditing: false,
     });
     if (!result.canceled && result.assets[0]) {
       await handleImage(result.assets[0].uri);
@@ -82,24 +162,39 @@ export default function ScanTab() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 0.8,
+      quality: 0.7,
     });
     if (!result.canceled && result.assets[0]) {
       await handleImage(result.assets[0].uri);
     }
   }, [handleImage]);
 
-  if (loading) {
+  if (loading && previewUri) {
+    const translateY = scanLineAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, SCREEN_W * 0.65],
+    });
+
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContent}>
-          <View style={[styles.loadingRing, { borderColor: colors.tint + "20" }]}>
-            <ActivityIndicator size="large" color={colors.tint} />
+      <View style={[styles.loadingContainer, { backgroundColor: "#000" }]}>
+        <View style={styles.scanPreview}>
+          <Image source={{ uri: previewUri }} style={styles.scanImage} resizeMode="cover" />
+          <View style={styles.scanOverlay}>
+            <Animated.View
+              style={[
+                styles.scanLine,
+                { backgroundColor: colors.tint, transform: [{ translateY }] },
+              ]}
+            />
           </View>
-          <Text style={[styles.loadingTitle, { color: colors.text }]}>Analyzing your meal...</Text>
-          <Text style={[styles.loadingSubtitle, { color: colors.textTertiary }]}>
-            Identifying foods and estimating nutrition
-          </Text>
+          <View style={[styles.scanCornerTL, { borderColor: colors.tint }]} />
+          <View style={[styles.scanCornerTR, { borderColor: colors.tint }]} />
+          <View style={[styles.scanCornerBL, { borderColor: colors.tint }]} />
+          <View style={[styles.scanCornerBR, { borderColor: colors.tint }]} />
+        </View>
+        <View style={styles.loadingBottom}>
+          <ActivityIndicator size="small" color={colors.tint} />
+          <Text style={[styles.loadingTip, { color: "#fff" }]}>{TIPS[tipIndex]}</Text>
         </View>
       </View>
     );
@@ -194,28 +289,76 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingContent: {
+  scanPreview: {
+    width: SCREEN_W * 0.8,
+    height: SCREEN_W * 0.8,
+    borderRadius: 24,
+    overflow: "hidden",
+    position: "relative",
+  },
+  scanImage: {
+    width: "100%",
+    height: "100%",
+  },
+  scanOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+  },
+  scanLine: {
+    height: 3,
+    width: "100%",
+    borderRadius: 2,
+    opacity: 0.8,
+  },
+  scanCornerTL: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 28,
+    height: 28,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderTopLeftRadius: 24,
+  },
+  scanCornerTR: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderTopRightRadius: 24,
+  },
+  scanCornerBL: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 24,
+  },
+  scanCornerBR: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 24,
+  },
+  loadingBottom: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    paddingHorizontal: 40,
+    gap: 10,
+    marginTop: 32,
   },
-  loadingRing: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  loadingTitle: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-  },
-  loadingSubtitle: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
+  loadingTip: {
+    fontSize: 16,
+    fontFamily: "Inter_500Medium",
   },
   headerArea: {
     marginBottom: 28,
