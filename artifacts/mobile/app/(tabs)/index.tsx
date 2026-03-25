@@ -174,34 +174,19 @@ export default function HomeScreen() {
         })}
       </View>
 
-      <View style={styles.actionRow}>
-        <Pressable
-          onPress={async () => {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.push("/(tabs)/scan");
-          }}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: colors.tint, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <Ionicons name="camera-outline" size={18} color="#fff" />
-          <Text style={styles.actionBtnTextLight}>Scan Meal</Text>
-        </Pressable>
-        <Pressable
-          onPress={async () => {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/barcode");
-          }}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: colors.card, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <Ionicons name="barcode-outline" size={18} color={colors.text} />
-          <Text style={[styles.actionBtnTextDark, { color: colors.text }]}>Barcode</Text>
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={async () => {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          router.push("/(tabs)/scan");
+        }}
+        style={({ pressed }) => [
+          styles.scanBtn,
+          { backgroundColor: colors.tint, opacity: pressed ? 0.9 : 1 },
+        ]}
+      >
+        <Ionicons name="scan-outline" size={20} color="#fff" />
+        <Text style={styles.scanBtnText}>Scan</Text>
+      </Pressable>
 
       <View style={styles.mealsSection}>
         <View style={styles.mealsHeader}>
@@ -363,29 +348,20 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
 
-  actionRow: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 10,
-    marginBottom: 28,
-  },
-  actionBtn: {
-    flex: 1,
+  scanBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 7,
+    gap: 8,
+    marginHorizontal: 16,
     borderRadius: 14,
     paddingVertical: 14,
+    marginBottom: 28,
   },
-  actionBtnTextLight: {
-    fontSize: 15,
+  scanBtnText: {
+    fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
-  },
-  actionBtnTextDark: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
   },
 
   mealsSection: {
