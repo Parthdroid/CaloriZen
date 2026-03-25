@@ -12,9 +12,8 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
+import Svg, { Circle } from "react-native-svg";
 import { useQueryClient } from "@tanstack/react-query";
-import { LinearGradient as ExpoLinearGradient } from "expo-linear-gradient";
 
 import { useTheme } from "@/hooks/useTheme";
 import { MealCard } from "@/components/MealCard";
@@ -24,54 +23,48 @@ import {
   getListMealsQueryKey,
 } from "@workspace/api-client-react";
 
-function CalorieRing({ consumed, goal, size }: { consumed: number; goal: number; size: number }) {
-  const { colors } = useTheme();
-  const strokeWidth = 12;
+function ProgressRing({
+  consumed,
+  goal,
+  size,
+  strokeWidth,
+  color,
+  trackColor,
+}: {
+  consumed: number;
+  goal: number;
+  size: number;
+  strokeWidth: number;
+  color: string;
+  trackColor: string;
+}) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(consumed / (goal || 1), 1);
   const strokeDashoffset = circumference * (1 - progress);
-  const remaining = Math.max(goal - consumed, 0);
-  const isOver = consumed > goal;
 
   return (
-    <View style={{ alignItems: "center", justifyContent: "center", width: size, height: size }}>
-      <Svg width={size} height={size} style={{ position: "absolute" }}>
-        <Defs>
-          <LinearGradient id="calRing" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#FF6B35" />
-            <Stop offset="1" stopColor="#FF8A5C" />
-          </LinearGradient>
-        </Defs>
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={colors.backgroundTertiary} strokeWidth={strokeWidth} fill="none" />
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={isOver ? colors.fat : "url(#calRing)"} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" transform={`rotate(-90 ${size / 2} ${size / 2})`} />
-      </Svg>
-      <View style={{ alignItems: "center" }}>
-        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 44, color: colors.text, letterSpacing: -2 }}>
-          {Math.round(remaining)}
-        </Text>
-        <Text style={{ fontFamily: "Inter_500Medium", fontSize: 12, color: colors.textTertiary, marginTop: -2, textTransform: "uppercase", letterSpacing: 1 }}>
-          {isOver ? "over" : "remaining"}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function MacroBar({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
-  const { colors } = useTheme();
-  const progress = Math.min(value / (goal || 1), 1);
-
-  return (
-    <View style={styles.macroBarItem}>
-      <View style={styles.macroBarTop}>
-        <Text style={[styles.macroBarLabel, { color: colors.textSecondary }]}>{label}</Text>
-        <Text style={[styles.macroBarValue, { color }]}>{Math.round(value)}<Text style={[styles.macroBarGoal, { color: colors.textTertiary }]}>/{goal}g</Text></Text>
-      </View>
-      <View style={[styles.macroBarTrack, { backgroundColor: colors.backgroundTertiary }]}>
-        <View style={[styles.macroBarFill, { backgroundColor: color, width: `${progress * 100}%` }]} />
-      </View>
-    </View>
+    <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={trackColor}
+        strokeWidth={strokeWidth}
+        fill="none"
+      />
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+      />
+    </Svg>
   );
 }
 
@@ -83,17 +76,7 @@ export default function HomeScreen() {
   const today = new Date().toISOString().split("T")[0];
   const { data: summary, isLoading, refetch } = useGetDailySummary({ date: today });
 
-  const handleScanMeal = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/(tabs)/scan");
-  }, []);
-
-  const handleScanBarcode = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/barcode");
-  }, []);
-
-  const topPad = Platform.OS === "web" ? 56 : insets.top;
+  const topPad = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : 0;
 
   const meals = summary?.meals ?? [];
@@ -106,101 +89,170 @@ export default function HomeScreen() {
   const goalCarbs = summary?.goalCarbs ?? 200;
   const goalFat = summary?.goalFat ?? 65;
 
-  const dateLabel = new Date().toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+  const remaining = Math.max(goalCalories - totalCalories, 0);
+  const isOver = totalCalories > goalCalories;
+
+  const dateLabel = new Date().toLocaleDateString([], {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+
+  const handleRefresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getListMealsQueryKey() });
+    refetch();
+  }, [queryClient, refetch]);
+
+  const macros = [
+    { label: "Protein", value: totalProtein, goal: goalProtein, color: colors.protein, unit: "g" },
+    { label: "Carbs", value: totalCarbs, goal: goalCarbs, color: colors.carbs, unit: "g" },
+    { label: "Fat", value: totalFat, goal: goalFat, color: colors.fat, unit: "g" },
+  ];
 
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad + 100 }}
+      contentContainerStyle={{ paddingTop: topPad + 12, paddingBottom: bottomPad + 100 }}
       refreshControl={
-        <RefreshControl
-          refreshing={isLoading}
-          onRefresh={() => {
-            queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getListMealsQueryKey() });
-            refetch();
-          }}
-          tintColor={colors.tint}
-        />
+        <RefreshControl refreshing={isLoading} onRefresh={handleRefresh} tintColor={colors.tint} />
       }
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
         <View>
-          <Text style={[styles.greeting, { color: colors.textTertiary }]}>{dateLabel}</Text>
-          <Text style={[styles.title, { color: colors.text }]}>Today</Text>
+          <Text style={[styles.dateText, { color: colors.textTertiary }]}>{dateLabel}</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Dashboard</Text>
         </View>
-        <Pressable onPress={() => router.push("/(tabs)/goals")} style={[styles.profileBtn, { backgroundColor: colors.backgroundTertiary }]}>
-          <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
-        </Pressable>
-      </View>
-
-      <View style={[styles.dashCard, { backgroundColor: colors.card }]}>
-        <CalorieRing consumed={totalCalories} goal={goalCalories} size={170} />
-        <View style={styles.consumedRow}>
-          <View style={[styles.consumedChip, { backgroundColor: colors.tint + "12" }]}>
-            <Ionicons name="flame" size={12} color={colors.tint} />
-            <Text style={[styles.consumedText, { color: colors.tint }]}>{Math.round(totalCalories)} eaten</Text>
-          </View>
-          <View style={[styles.consumedChip, { backgroundColor: colors.backgroundTertiary }]}>
-            <Ionicons name="flag" size={12} color={colors.textTertiary} />
-            <Text style={[styles.consumedText, { color: colors.textTertiary }]}>{goalCalories} goal</Text>
-          </View>
-        </View>
-        <View style={styles.macroBars}>
-          <MacroBar label="Protein" value={totalProtein} goal={goalProtein} color={colors.protein} />
-          <MacroBar label="Carbs" value={totalCarbs} goal={goalCarbs} color={colors.carbs} />
-          <MacroBar label="Fat" value={totalFat} goal={goalFat} color={colors.fat} />
-        </View>
-      </View>
-
-      <View style={styles.actions}>
         <Pressable
-          onPress={handleScanMeal}
-          style={({ pressed }) => [styles.actionBtn, { transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+          onPress={() => router.push("/(tabs)/goals")}
+          style={[styles.settingsBtn, { borderColor: colors.border }]}
+          accessibilityLabel="Settings"
         >
-          <ExpoLinearGradient colors={["#FF6B35", "#FF8A5C"]} style={styles.actionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-            <Ionicons name="camera" size={20} color="#fff" />
-            <Text style={styles.actionBtnTextWhite}>Scan Meal</Text>
-          </ExpoLinearGradient>
+          <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
         </Pressable>
+      </View>
+
+      <View style={[styles.calorieSection, { backgroundColor: colors.backgroundSecondary }]}>
+        <View style={styles.calorieMain}>
+          <View style={styles.ringContainer}>
+            <ProgressRing
+              consumed={totalCalories}
+              goal={goalCalories}
+              size={136}
+              strokeWidth={10}
+              color={isOver ? colors.fat : colors.tint}
+              trackColor={colors.backgroundTertiary}
+            />
+            <View style={styles.ringCenter}>
+              <Text style={[styles.calorieNumber, { color: colors.text }]}>
+                {Math.round(remaining)}
+              </Text>
+              <Text style={[styles.calorieLabel, { color: colors.textTertiary }]}>
+                {isOver ? "over" : "kcal left"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.calorieStats}>
+            <View style={styles.statRow}>
+              <View style={[styles.statDot, { backgroundColor: colors.tint }]} />
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Consumed</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{Math.round(totalCalories)}</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: colors.backgroundTertiary }]} />
+            <View style={styles.statRow}>
+              <View style={[styles.statDot, { backgroundColor: colors.backgroundTertiary }]} />
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Target</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{goalCalories}</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: colors.backgroundTertiary }]} />
+            <View style={styles.statRow}>
+              <View style={[styles.statDot, { backgroundColor: isOver ? colors.fat : "#22C55E" }]} />
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{isOver ? "Over" : "Remaining"}</Text>
+              <Text style={[styles.statValue, { color: isOver ? colors.fat : colors.text }]}>{Math.round(remaining)}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.macroSection}>
+        <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>MACRONUTRIENTS</Text>
+        <View style={styles.macroGrid}>
+          {macros.map((m) => {
+            const pct = Math.min(m.value / (m.goal || 1), 1);
+            return (
+              <View key={m.label} style={[styles.macroCard, { backgroundColor: colors.backgroundSecondary }]}>
+                <View style={styles.macroCardTop}>
+                  <View style={styles.macroRingWrap}>
+                    <ProgressRing consumed={m.value} goal={m.goal} size={40} strokeWidth={4} color={m.color} trackColor={colors.backgroundTertiary} />
+                    <View style={styles.macroRingCenter}>
+                      <Text style={[styles.macroPct, { color: m.color }]}>{Math.round(pct * 100)}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.macroName, { color: colors.textSecondary }]}>{m.label}</Text>
+                </View>
+                <Text style={[styles.macroValueText, { color: colors.text }]}>
+                  {Math.round(m.value)}<Text style={[styles.macroGoalText, { color: colors.textTertiary }]}>/{m.goal}{m.unit}</Text>
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.quickActions}>
         <Pressable
-          onPress={handleScanBarcode}
+          onPress={async () => {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.push("/(tabs)/scan");
+          }}
           style={({ pressed }) => [
-            styles.actionBtn,
-            styles.actionBtnOutline,
-            { borderColor: colors.backgroundTertiary, transform: [{ scale: pressed ? 0.97 : 1 }] },
+            styles.quickBtn,
+            { backgroundColor: colors.text, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <Ionicons name="barcode-outline" size={20} color={colors.text} />
-          <Text style={[styles.actionBtnTextDark, { color: colors.text }]}>Barcode</Text>
+          <Ionicons name="camera-outline" size={18} color={colors.background} />
+          <Text style={[styles.quickBtnText, { color: colors.background }]}>Scan Meal</Text>
+        </Pressable>
+        <Pressable
+          onPress={async () => {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.push("/barcode");
+          }}
+          style={({ pressed }) => [
+            styles.quickBtn,
+            { backgroundColor: colors.backgroundSecondary, borderWidth: 1, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <Ionicons name="barcode-outline" size={18} color={colors.text} />
+          <Text style={[styles.quickBtnText, { color: colors.text }]}>Barcode</Text>
         </Pressable>
       </View>
 
       <View style={styles.mealsSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Meals</Text>
+        <View style={styles.mealsSectionHeader}>
+          <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>RECENT MEALS</Text>
           {meals.length > 0 && (
             <Pressable onPress={() => router.push("/(tabs)/log")} hitSlop={12}>
-              <Text style={[styles.seeAll, { color: colors.tint }]}>See all</Text>
+              <Text style={[styles.seeAllBtn, { color: colors.tint }]}>View all</Text>
             </Pressable>
           )}
         </View>
 
         {isLoading ? (
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Loading...</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>Loading...</Text>
           </View>
         ) : meals.length === 0 ? (
-          <View style={[styles.emptyState, { backgroundColor: colors.backgroundSecondary }]}>
-            <View style={[styles.emptyIcon, { backgroundColor: colors.tint + "10" }]}>
-              <Ionicons name="restaurant-outline" size={28} color={colors.tint} />
-            </View>
-            <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>No meals yet</Text>
-            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>Scan your first meal to start tracking</Text>
+          <View style={[styles.emptyContainer, { backgroundColor: colors.backgroundSecondary }]}>
+            <Ionicons name="restaurant-outline" size={24} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No meals logged today</Text>
+            <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
+              Use the scanner to add your first meal
+            </Text>
           </View>
         ) : (
-          <View style={styles.mealList}>
+          <View style={styles.mealsList}>
             {meals.slice(0, 5).map((meal) => (
               <MealCard key={meal.id} meal={meal} />
             ))}
@@ -213,35 +265,186 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", paddingHorizontal: 24, marginBottom: 24 },
-  greeting: { fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 2 },
-  title: { fontSize: 32, fontFamily: "Inter_700Bold", letterSpacing: -0.8 },
-  profileBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  dashCard: { marginHorizontal: 20, borderRadius: 28, paddingVertical: 32, paddingHorizontal: 24, alignItems: "center", gap: 20, marginBottom: 20 },
-  consumedRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: -4 },
-  consumedChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
-  consumedText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
-  macroBars: { width: "100%", gap: 14 },
-  macroBarItem: { gap: 6 },
-  macroBarTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  macroBarLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  macroBarValue: { fontSize: 14, fontFamily: "Inter_700Bold" },
-  macroBarGoal: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  macroBarTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
-  macroBarFill: { height: "100%", borderRadius: 3 },
-  actions: { flexDirection: "row", paddingHorizontal: 20, gap: 10, marginBottom: 28 },
-  actionBtn: { flex: 1, borderRadius: 16, overflow: "hidden" },
-  actionGradient: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15 },
-  actionBtnOutline: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderWidth: 1.5 },
-  actionBtnTextWhite: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: "#fff" },
-  actionBtnTextDark: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
-  mealsSection: { gap: 10 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24 },
-  sectionTitle: { fontSize: 20, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
-  seeAll: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  mealList: { gap: 0 },
-  emptyState: { marginHorizontal: 20, padding: 40, borderRadius: 20, alignItems: "center", gap: 10 },
-  emptyIcon: { width: 56, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", marginBottom: 4 },
-  emptyTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
-  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center" },
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  dateText: { fontSize: 12, fontFamily: "Inter_500Medium", letterSpacing: 0.2, marginBottom: 1 },
+  headerTitle: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.6 },
+  settingsBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  calorieSection: {
+    marginHorizontal: 16,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  calorieMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+  },
+  ringContainer: {
+    width: 136,
+    height: 136,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringCenter: {
+    position: "absolute",
+    alignItems: "center",
+  },
+  calorieNumber: {
+    fontSize: 32,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -1.5,
+  },
+  calorieLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    marginTop: -2,
+  },
+  calorieStats: {
+    flex: 1,
+    gap: 0,
+  },
+  statRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    gap: 8,
+  },
+  statDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statLabel: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+  statValue: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+  },
+  statDivider: {
+    height: 1,
+  },
+
+  macroSection: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    gap: 10,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1,
+  },
+  macroGrid: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  macroCard: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 14,
+    gap: 10,
+  },
+  macroCardTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  macroRingWrap: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  macroRingCenter: {
+    position: "absolute",
+  },
+  macroPct: {
+    fontSize: 9,
+    fontFamily: "Inter_700Bold",
+  },
+  macroName: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    flex: 1,
+  },
+  macroValueText: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
+  },
+  macroGoalText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+
+  quickActions: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    gap: 8,
+    marginBottom: 24,
+  },
+  quickBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderRadius: 12,
+    paddingVertical: 13,
+  },
+  quickBtnText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+  },
+
+  mealsSection: {
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  mealsSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  seeAllBtn: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+  },
+  mealsList: {
+    gap: 0,
+  },
+  emptyContainer: {
+    padding: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    gap: 6,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+  },
+  emptySubtext: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+  },
 });
