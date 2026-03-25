@@ -59,11 +59,11 @@ A mobile calorie and macro tracking app with:
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
 ### Design System (Cal AI-inspired premium)
-- Clean, borderless card design with subtle backgrounds; gradient accents via `expo-linear-gradient`
-- Orange accent: `#FF6B35` → `#FF8A5C` gradient; dark/light theme via `useTheme()` hook
-- Font: Inter (400/500/600/700); larger 32px headings with tight -0.8 letter-spacing
-- Color tokens: protein (blue #3B82F6), carbs (amber #F59E0B), fat (red #EF4444), calories (orange gradient)
-- Home: gradient calorie ring (SVG LinearGradient), macro progress bars with labels, gradient "Scan Meal" button, outlined "Barcode" button
+- Clean, smooth, Cal AI-inspired light theme; soft off-white (#FAFAFA) background, pure white cards
+- Orange accent: `#FF6B35`; iOS-style gray palette (text #1E1E1E, secondary #8E8E93, tertiary #AEAEB2)
+- Font: Inter (400/500/600/700); 28px date heading, tight letter-spacing
+- Color tokens: protein (blue #5B9FF3), carbs (amber #FFBF47), fat (red #FF6B6B), calories (orange)
+- Home: centered calorie ring with remaining count, eaten/goal stats with dots+divider, macro mini-ring cards with percentages, clean orange Scan Meal button + white Barcode button
 - Onboarding: dark theme (#0F0F0F → #1A1A2E gradient), step numbers (01/02/03), gradient buttons, animated slide transitions, emoji goal cards; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
 - Scan: dark (#0A0A0A) camera-first unified hub with photo/barcode mode toggle, bottom toolbar (gallery, shutter, manual entry), viewfinder corners; animated scan line overlay and cycling tips; 90s timeout via Promise.race
 - Goals: rounded cards with colored icons and checkmark badges; edit mode with inline inputs
