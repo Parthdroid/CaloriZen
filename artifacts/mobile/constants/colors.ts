@@ -1,36 +1,36 @@
 const accent = "#FF6B35";
 const accentLight = "#FF8A5C";
-const green = "#22C55E";
-const blue = "#3B82F6";
+const green = "#34C759";
+const blue = "#007AFF";
 const purple = "#8B5CF6";
 
 export default {
   light: {
-    text: "#1E1E1E",
-    textSecondary: "#8E8E93",
+    text: "#000000",
+    textSecondary: "#6C6C70",
     textTertiary: "#AEAEB2",
-    background: "#FAFAFA",
-    backgroundSecondary: "#FFFFFF",
-    backgroundTertiary: "#F2F2F7",
+    background: "#FFFFFF",
+    backgroundSecondary: "#F2F2F7",
+    backgroundTertiary: "#E5E5EA",
     card: "#FFFFFF",
-    border: "#E5E5EA",
-    borderLight: "#F2F2F7",
+    border: "#D1D1D6",
+    borderLight: "#E5E5EA",
     tint: accent,
     tintLight: accentLight,
-    tabIconDefault: "#C7C7CC",
+    tabIconDefault: "#8E8E93",
     tabIconSelected: accent,
     success: green,
     info: blue,
     purple: purple,
-    protein: "#5B9FF3",
-    carbs: "#FFBF47",
-    fat: "#FF6B6B",
+    protein: "#007AFF",
+    carbs: "#FF9500",
+    fat: "#FF3B30",
     calories: accent,
     shadow: "#000000",
-    cardShadow: "rgba(0,0,0,0.04)",
+    cardShadow: "rgba(0,0,0,0.06)",
   },
   dark: {
-    text: "#F5F5F7",
+    text: "#FFFFFF",
     textSecondary: "#98989F",
     textTertiary: "#636366",
     background: "#000000",
@@ -46,9 +46,9 @@ export default {
     success: green,
     info: blue,
     purple: purple,
-    protein: "#64B5F6",
-    carbs: "#FFD54F",
-    fat: "#EF5350",
+    protein: "#64D2FF",
+    carbs: "#FFD60A",
+    fat: "#FF453A",
     calories: accent,
     shadow: "#000000",
     cardShadow: "rgba(0,0,0,0.3)",

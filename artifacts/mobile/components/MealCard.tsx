@@ -74,7 +74,7 @@ export function MealCard({ meal, onPress }: Props) {
       style={({ pressed }) => [
         styles.card,
         {
-          backgroundColor: colors.card,
+          backgroundColor: colors.backgroundSecondary,
           opacity: pressed ? 0.7 : 1,
         },
       ]}
@@ -109,8 +109,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     gap: 12,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderRadius: 14,
   },
   iconWrap: {
     width: 40,

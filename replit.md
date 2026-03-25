@@ -59,16 +59,17 @@ A mobile calorie and macro tracking app with:
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
 ### Design System (Cal AI-inspired premium)
-- Clean, smooth, Cal AI-inspired light theme; soft off-white (#FAFAFA) background, pure white cards
-- Orange accent: `#FF6B35`; iOS-style gray palette (text #1E1E1E, secondary #8E8E93, tertiary #AEAEB2)
-- Font: Inter (400/500/600/700); 28px date heading, tight letter-spacing
-- Color tokens: protein (blue #5B9FF3), carbs (amber #FFBF47), fat (red #FF6B6B), calories (orange)
-- Home: centered calorie ring with remaining count, eaten/goal stats with dots+divider, macro mini-ring cards with percentages, clean orange Scan Meal button + white Barcode button
+- Pure white (#FFFFFF) background, iOS system gray (#F2F2F7) for cards and secondary surfaces
+- Orange accent: `#FF6B35`; pure black (#000000) text, secondary #6C6C70, tertiary #AEAEB2
+- Font: Inter (400/500/600/700); 34px bold titles, tight letter-spacing
+- Color tokens: protein (blue #007AFF), carbs (amber #FF9500), fat (red #FF3B30), calories (orange)
+- Home: "Today" title, 180px SVG calorie ring with remaining kcal, Consumed/Target stats row, macro mini-rings with percentage, black "Scan" button, "Recent" meals section
 - Onboarding: dark theme (#0F0F0F → #1A1A2E gradient), step numbers (01/02/03), gradient buttons, animated slide transitions, emoji goal cards; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
-- Scan: dark (#0A0A0A) camera-first unified hub with photo/barcode mode toggle, bottom toolbar (gallery, shutter, manual entry), viewfinder corners; animated scan line overlay and cycling tips; 90s timeout via Promise.race
-- Goals: rounded cards with colored icons and checkmark badges; edit mode with inline inputs
-- Log: horizontal scrollable date picker with day abbreviations, orange highlight for selected date, today dot indicator
-- Tab bar: dark transparent on Scan tab, standard white on other tabs
+- Scan: light theme, centered camera placeholder box, three option buttons (Gallery/Barcode/Manual), expandable barcode input; animated scan line overlay during analysis; 90s timeout via Promise.race
+- Goals: #F2F2F7 cards with colored icons, big numbers, "Edit" pill button; edit mode with inline inputs and black save button
+- Log: horizontal scrollable date picker with black selected pill, auto-scrolls to today, summary strip with colored macro values, meal cards grouped by type
+- Tab bar: translucent blur on iOS, light with top border on web, orange active tint
+- MealCard: rounded #F2F2F7 cards with colored icon, meal name, time, calories
 
 ## Packages
 

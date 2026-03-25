@@ -16,69 +16,34 @@ import { useTheme } from "@/hooks/useTheme";
 import { useGetGoals, useUpdateGoals } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
-type GoalInput = {
-  dailyCalories: string;
-  dailyProtein: string;
-  dailyCarbs: string;
-  dailyFat: string;
-};
+type GoalInput = { dailyCalories: string; dailyProtein: string; dailyCarbs: string; dailyFat: string };
 
 export default function GoalsScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   const { data: goals, isLoading } = useGetGoals();
   const { mutate: updateGoals, isPending } = useUpdateGoals();
-
   const [editing, setEditing] = useState(false);
-  const [inputs, setInputs] = useState<GoalInput>({
-    dailyCalories: "2000",
-    dailyProtein: "150",
-    dailyCarbs: "200",
-    dailyFat: "65",
-  });
+  const [inputs, setInputs] = useState<GoalInput>({ dailyCalories: "2000", dailyProtein: "150", dailyCarbs: "200", dailyFat: "65" });
 
   useEffect(() => {
-    if (goals) {
-      setInputs({
-        dailyCalories: String(goals.dailyCalories),
-        dailyProtein: String(goals.dailyProtein),
-        dailyCarbs: String(goals.dailyCarbs),
-        dailyFat: String(goals.dailyFat),
-      });
-    }
+    if (goals) setInputs({ dailyCalories: String(goals.dailyCalories), dailyProtein: String(goals.dailyProtein), dailyCarbs: String(goals.dailyCarbs), dailyFat: String(goals.dailyFat) });
   }, [goals]);
 
   const topPad = Platform.OS === "web" ? 56 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : 0;
 
   const handleSave = () => {
-    const calories = parseInt(inputs.dailyCalories);
-    const protein = parseInt(inputs.dailyProtein);
-    const carbs = parseInt(inputs.dailyCarbs);
-    const fat = parseInt(inputs.dailyFat);
-
-    if (isNaN(calories) || isNaN(protein) || isNaN(carbs) || isNaN(fat)) {
-      Alert.alert("Invalid Input", "Please enter valid numbers for all goals.");
-      return;
-    }
-
-    updateGoals(
-      { data: { dailyCalories: calories, dailyProtein: protein, dailyCarbs: carbs, dailyFat: fat } },
-      {
-        onSuccess: async () => {
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          queryClient.invalidateQueries({ queryKey: ["getGoals"] });
-          queryClient.invalidateQueries({ queryKey: ["getDailySummary"] });
-          setEditing(false);
-        },
-        onError: () => Alert.alert("Error", "Failed to update goals. Please try again."),
-      }
-    );
+    const vals = { dailyCalories: parseInt(inputs.dailyCalories), dailyProtein: parseInt(inputs.dailyProtein), dailyCarbs: parseInt(inputs.dailyCarbs), dailyFat: parseInt(inputs.dailyFat) };
+    if (Object.values(vals).some(isNaN)) { Alert.alert("Invalid Input", "Please enter valid numbers."); return; }
+    updateGoals({ data: vals }, {
+      onSuccess: async () => { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); qc.invalidateQueries({ queryKey: ["getGoals"] }); qc.invalidateQueries({ queryKey: ["getDailySummary"] }); setEditing(false); },
+      onError: () => Alert.alert("Error", "Failed to update goals."),
+    });
   };
 
-  const goalFields: Array<{ key: keyof GoalInput; label: string; unit: string; color: string; icon: string }> = [
+  const fields: Array<{ key: keyof GoalInput; label: string; unit: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = [
     { key: "dailyCalories", label: "Calories", unit: "kcal", color: colors.tint, icon: "flame" },
     { key: "dailyProtein", label: "Protein", unit: "g", color: colors.protein, icon: "fitness" },
     { key: "dailyCarbs", label: "Carbs", unit: "g", color: colors.carbs, icon: "nutrition" },
@@ -87,57 +52,45 @@ export default function GoalsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad + 100 }}
+      style={[st.root, { backgroundColor: colors.background }]}
+      contentContainerStyle={{ paddingTop: topPad + 12, paddingBottom: bottomPad + 100 }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.title, { color: colors.text }]}>Goals</Text>
-          <Text style={[styles.subtitle, { color: colors.textTertiary }]}>Daily nutrition targets</Text>
-        </View>
+      <View style={st.header}>
+        <Text style={[st.title, { color: colors.text }]}>Goals</Text>
         {!editing ? (
-          <Pressable onPress={() => setEditing(true)} style={[styles.editBtn, { backgroundColor: colors.tint + "12" }]}>
-            <Ionicons name="pencil-outline" size={14} color={colors.tint} />
-            <Text style={[styles.editBtnText, { color: colors.tint }]}>Edit</Text>
+          <Pressable onPress={() => setEditing(true)} style={[st.editBtn, { backgroundColor: colors.backgroundSecondary }]}>
+            <Text style={[st.editBtnText, { color: colors.text }]}>Edit</Text>
           </Pressable>
         ) : (
-          <Pressable onPress={() => setEditing(false)} style={[styles.editBtn, { backgroundColor: colors.backgroundTertiary }]}>
-            <Ionicons name="close" size={14} color={colors.textSecondary} />
+          <Pressable onPress={() => setEditing(false)} hitSlop={12}>
+            <Ionicons name="close" size={24} color={colors.textSecondary} />
           </Pressable>
         )}
       </View>
 
-      <View style={styles.goalsList}>
-        {goalFields.map(({ key, label, unit, color, icon }) => (
-          <View key={key} style={[styles.goalCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.goalIconWrap, { backgroundColor: color + "12" }]}>
-              <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color={color} />
+      <View style={st.cards}>
+        {fields.map(({ key, label, unit, color, icon }) => (
+          <View key={key} style={[st.card, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={st.cardRow}>
+              <Ionicons name={icon} size={20} color={color} />
+              <Text style={[st.cardLabel, { color: colors.textSecondary }]}>{label}</Text>
             </View>
-            <View style={styles.goalInfo}>
-              <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>{label}</Text>
-              {editing ? (
-                <View style={styles.inputRow}>
-                  <TextInput
-                    value={inputs[key]}
-                    onChangeText={(v) => setInputs((p) => ({ ...p, [key]: v }))}
-                    keyboardType="numeric"
-                    style={[styles.input, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
-                    selectTextOnFocus
-                  />
-                  <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
-                </View>
-              ) : (
-                <View style={styles.valueRow}>
-                  <Text style={[styles.goalValue, { color }]}>{isLoading ? "..." : inputs[key]}</Text>
-                  <Text style={[styles.unit, { color: colors.textTertiary }]}>{unit}</Text>
-                </View>
-              )}
-            </View>
-            {!editing && (
-              <View style={[styles.goalBadge, { backgroundColor: color + "10" }]}>
-                <Ionicons name="checkmark-circle" size={16} color={color} />
+            {editing ? (
+              <View style={st.editRow}>
+                <TextInput
+                  value={inputs[key]}
+                  onChangeText={(v) => setInputs((p) => ({ ...p, [key]: v }))}
+                  keyboardType="numeric"
+                  style={[st.input, { color: colors.text, borderColor: colors.border }]}
+                  selectTextOnFocus
+                />
+                <Text style={[st.unit, { color: colors.textTertiary }]}>{unit}</Text>
               </View>
+            ) : (
+              <Text style={[st.cardValue, { color: colors.text }]}>
+                {isLoading ? "..." : inputs[key]} <Text style={{ color: colors.textTertiary, fontSize: 14, fontFamily: "Inter_400Regular" }}>{unit}</Text>
+              </Text>
             )}
           </View>
         ))}
@@ -147,52 +100,40 @@ export default function GoalsScreen() {
         <Pressable
           onPress={handleSave}
           disabled={isPending}
-          style={({ pressed }) => [
-            styles.saveBtn,
-            { backgroundColor: colors.tint, opacity: pressed || isPending ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
-          ]}
+          style={({ pressed }) => [st.saveBtn, { backgroundColor: colors.text, opacity: pressed || isPending ? 0.8 : 1 }]}
         >
-          {isPending ? (
-            <Text style={styles.saveBtnText}>Saving...</Text>
-          ) : (
-            <>
-              <Ionicons name="checkmark" size={18} color="#fff" />
-              <Text style={styles.saveBtnText}>Save Goals</Text>
-            </>
-          )}
+          <Text style={[st.saveBtnText, { color: colors.background }]}>{isPending ? "Saving..." : "Save Goals"}</Text>
         </Pressable>
       )}
 
-      <View style={[styles.infoCard, { backgroundColor: colors.backgroundTertiary }]}>
+      <View style={[st.info, { backgroundColor: colors.backgroundSecondary }]}>
         <Ionicons name="information-circle-outline" size={16} color={colors.textTertiary} />
-        <Text style={[styles.infoText, { color: colors.textTertiary }]}>
-          Consult a healthcare professional for personalized nutrition advice.
-        </Text>
+        <Text style={[st.infoText, { color: colors.textTertiary }]}>Consult a healthcare professional for personalized nutrition advice.</Text>
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", paddingHorizontal: 24, marginBottom: 24 },
-  title: { fontSize: 32, fontFamily: "Inter_700Bold", letterSpacing: -0.8 },
-  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", marginTop: 2 },
-  editBtn: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
-  editBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  goalsList: { paddingHorizontal: 20, gap: 10, marginBottom: 20 },
-  goalCard: { flexDirection: "row", alignItems: "center", borderRadius: 20, padding: 18, gap: 14 },
-  goalIconWrap: { width: 48, height: 48, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  goalInfo: { flex: 1, gap: 4 },
-  goalLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  valueRow: { flexDirection: "row", alignItems: "baseline", gap: 4 },
-  goalValue: { fontSize: 24, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
-  goalBadge: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  inputRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  input: { flex: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 18, fontFamily: "Inter_600SemiBold" },
+const st = StyleSheet.create({
+  root: { flex: 1 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24, marginBottom: 24 },
+  title: { fontSize: 34, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  editBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  editBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+
+  cards: { paddingHorizontal: 20, gap: 10, marginBottom: 20 },
+  card: { borderRadius: 16, padding: 18 },
+  cardRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  cardLabel: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  cardValue: { fontSize: 28, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+
+  editRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  input: { flex: 1, borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 20, fontFamily: "Inter_600SemiBold" },
   unit: { fontSize: 14, fontFamily: "Inter_400Regular" },
-  saveBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginHorizontal: 20, paddingVertical: 16, borderRadius: 16, marginBottom: 20 },
-  saveBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
-  infoCard: { flexDirection: "row", gap: 10, marginHorizontal: 20, padding: 16, borderRadius: 16, alignItems: "flex-start" },
+
+  saveBtn: { marginHorizontal: 20, borderRadius: 14, paddingVertical: 16, alignItems: "center", marginBottom: 20 },
+  saveBtnText: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+
+  info: { flexDirection: "row", gap: 10, marginHorizontal: 20, padding: 16, borderRadius: 14, alignItems: "flex-start" },
   infoText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 });
