@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "AI Calorie Tracker",
+    "name": "NutriSnap",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -43,8 +43,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow AI Calorie Tracker to access your photos to analyze meals.",
-          "cameraPermission": "Allow AI Calorie Tracker to take photos of your meals."
+          "photosPermission": "Allow NutriSnap to access your photos to analyze meals.",
+          "cameraPermission": "Allow NutriSnap to take photos of your meals."
         }
       ]
     ],

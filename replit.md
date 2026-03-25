@@ -48,7 +48,7 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
-## Project: AI Calorie Tracker
+## Project: NutriSnap
 
 A mobile calorie and macro tracking app with:
 - **AI photo analysis**: Take a photo of a meal; GPT-4 vision estimates calories and macros
