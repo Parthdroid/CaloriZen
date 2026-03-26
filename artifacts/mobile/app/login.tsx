@@ -145,24 +145,39 @@ export default function LoginScreen() {
         </Text>
 
         <View style={s.buttonContainer}>
-          <Pressable
-            onPress={handleAppleSignIn}
-            disabled={loading !== null}
-            style={({ pressed }) => [
-              s.authButton,
-              s.appleButton,
-              { opacity: loading !== null && loading !== "apple" ? 0.5 : pressed ? 0.9 : 1 },
-            ]}
-          >
-            {loading === "apple" ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Ionicons name="logo-apple" size={22} color="#fff" />
-                <Text style={s.appleButtonText}>Sign in with Apple</Text>
-              </>
-            )}
-          </Pressable>
+          {Platform.OS !== "web" ? (
+            <Pressable
+              onPress={handleAppleSignIn}
+              disabled={loading !== null}
+              style={({ pressed }) => [
+                s.authButton,
+                s.appleButton,
+                { opacity: loading !== null && loading !== "apple" ? 0.5 : pressed ? 0.9 : 1 },
+              ]}
+            >
+              {loading === "apple" ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="logo-apple" size={22} color="#fff" />
+                  <Text style={s.appleButtonText}>Sign in with Apple</Text>
+                </>
+              )}
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => Alert.alert("Apple Sign In", "Sign in with Apple is available on iOS devices. Please use the NutriSnap app on your iPhone or iPad to sign in with Apple.")}
+              style={({ pressed }) => [
+                s.authButton,
+                s.appleButton,
+                { opacity: pressed ? 0.9 : 0.6 },
+              ]}
+            >
+              <Ionicons name="logo-apple" size={22} color="#fff" />
+              <Text style={s.appleButtonText}>Sign in with Apple</Text>
+              <Text style={s.iosOnlyBadge}>iOS only</Text>
+            </Pressable>
+          )}
 
           <Pressable
             onPress={handleGoogleSignIn}
@@ -267,5 +282,16 @@ const s = StyleSheet.create({
   footerLink: {
     color: "rgba(255,255,255,0.5)",
     textDecorationLine: "underline",
+  },
+  iosOnlyBadge: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "rgba(255,255,255,0.4)",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: "hidden",
+    marginLeft: 4,
   },
 });
