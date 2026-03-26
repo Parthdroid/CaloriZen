@@ -88,17 +88,18 @@ export function MealCard({ meal, onPress }: Props) {
       </View>
 
       <View style={styles.info}>
-        <Text style={[styles.itemNames, { color: colors.text }]} numberOfLines={1}>
-          {itemNames}
-        </Text>
-        <Text style={[styles.time, { color: colors.textTertiary }]}>{time}</Text>
-      </View>
-
-      <View style={styles.calCol}>
-        <Text style={[styles.calValue, { color: colors.text }]}>
-          {Math.round(meal.totalCalories)}
-        </Text>
-        <Text style={[styles.calUnit, { color: colors.textTertiary }]}>cal</Text>
+        <View style={styles.topRow}>
+          <Text style={[styles.itemNames, { color: colors.text }]} numberOfLines={1}>
+            {itemNames}
+          </Text>
+          <Text style={[styles.time, { color: colors.textTertiary }]}>{time}</Text>
+        </View>
+        <View style={styles.chipRow}>
+          <Text style={[styles.calChip, { color: colors.tint }]}>🔥 {Math.round(meal.totalCalories)}</Text>
+          <Text style={[styles.macroChip, { color: colors.protein }]}>{Math.round(meal.totalProtein)}g</Text>
+          <Text style={[styles.macroChip, { color: colors.carbs }]}>{Math.round(meal.totalCarbs)}g</Text>
+          <Text style={[styles.macroChip, { color: colors.fat }]}>{Math.round(meal.totalFat)}g</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -109,40 +110,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     gap: 12,
-    marginHorizontal: 20,
+    marginHorizontal: 0,
     marginBottom: 8,
     borderRadius: 14,
   },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
   info: {
     flex: 1,
-    gap: 2,
+    gap: 5,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   itemNames: {
-    fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    flex: 1,
+    marginRight: 8,
   },
   time: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
   },
-  calCol: {
-    alignItems: "flex-end",
+  chipRow: {
+    flexDirection: "row",
+    gap: 10,
   },
-  calValue: {
-    fontSize: 16,
-    fontFamily: "Inter_700Bold",
+  calChip: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
   },
-  calUnit: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
+  macroChip: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
   },
 });
