@@ -101,17 +101,25 @@ export default function ScanTab() {
   }, [setPendingAnalysis, setPendingImageBase64, startScan, stopScan]);
 
   const handleCamera = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Camera Permission", "NutriSnap needs camera access to scan your meals."); return; }
-    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.7, allowsEditing: false });
-    if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Camera access needed", "Go to Settings and allow NutriSnap to use your camera."); return; }
+      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.7, allowsEditing: false });
+      if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
+    } catch {
+      Alert.alert("Camera not available", "Your device camera couldn't be opened. Try using Gallery instead.");
+    }
   }, [handleImage]);
 
   const handleGallery = useCallback(async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Photo Library", "NutriSnap needs photo access to analyze your meals."); return; }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Photo access needed", "Go to Settings and allow NutriSnap to access your photos."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.7 });
+      if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
+    } catch {
+      Alert.alert("Couldn't open photos", "Something went wrong opening your photo library. Please try again.");
+    }
   }, [handleImage]);
 
   const handleBarcode = useCallback(async () => {
