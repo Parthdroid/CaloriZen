@@ -148,6 +148,25 @@ export default function LoginScreen() {
 
         <View style={s.buttonContainer}>
           <Pressable
+            onPress={handleAppleSignIn}
+            disabled={loading !== null}
+            style={({ pressed }) => [
+              s.authButton,
+              s.appleButton,
+              { opacity: loading !== null && loading !== "apple" ? 0.5 : pressed ? 0.9 : 1 },
+            ]}
+          >
+            {loading === "apple" ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <>
+                <Ionicons name="logo-apple" size={22} color="#fff" />
+                <Text style={s.appleButtonText}>Sign in with Apple</Text>
+              </>
+            )}
+          </Pressable>
+
+          <Pressable
             onPress={handleGoogleSignIn}
             disabled={loading !== null}
             style={({ pressed }) => [
@@ -166,52 +185,10 @@ export default function LoginScreen() {
                   <Path d="M24 46c5.4 0 10.3-1.8 14.1-5l-6.5-5.5C29.6 37.1 27 38 24 38c-6 0-11.1-3.8-12.9-9.2l-7 5.4C7.8 41.3 15.3 46 24 46z" fill="#4CAF50" />
                   <Path d="M44.5 20H24v8.5h11.8c-1 3.2-3 5.8-5.6 7.5l6.5 5.5C40.6 38 46 32 46 24c0-1.3-.2-2.7-.5-4z" fill="#1976D2" />
                 </Svg>
-                <Text style={s.googleButtonText}>Continue with Google®</Text>
+                <Text style={s.googleButtonText}>Sign in with Google</Text>
               </>
             )}
           </Pressable>
-
-          {Platform.OS === "ios" && (
-            <Pressable
-              onPress={handleAppleSignIn}
-              disabled={loading !== null}
-              style={({ pressed }) => [
-                s.authButton,
-                s.appleButton,
-                { opacity: loading !== null && loading !== "apple" ? 0.5 : pressed ? 0.9 : 1 },
-              ]}
-            >
-              {loading === "apple" ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="logo-apple" size={20} color="#fff" />
-                  <Text style={s.appleButtonText}>Continue with Apple®</Text>
-                </>
-              )}
-            </Pressable>
-          )}
-
-          {Platform.OS === "web" && (
-            <Pressable
-              onPress={handleAppleSignIn}
-              disabled={loading !== null}
-              style={({ pressed }) => [
-                s.authButton,
-                s.appleButton,
-                { opacity: loading !== null && loading !== "apple" ? 0.5 : pressed ? 0.9 : 1 },
-              ]}
-            >
-              {loading === "apple" ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="logo-apple" size={20} color="#fff" />
-                  <Text style={s.appleButtonText}>Continue with Apple®</Text>
-                </>
-              )}
-            </Pressable>
-          )}
         </View>
       </View>
 
