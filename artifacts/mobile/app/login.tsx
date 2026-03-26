@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Path } from "react-native-svg";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
@@ -159,10 +160,13 @@ export default function LoginScreen() {
               <ActivityIndicator color="#000" size="small" />
             ) : (
               <>
-                <View style={s.googleIconWrap}>
-                  <Text style={s.googleG}>G</Text>
-                </View>
-                <Text style={s.googleButtonText}>Continue with Google</Text>
+                <Svg width={20} height={20} viewBox="0 0 48 48">
+                  <Path d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z" fill="#FFC107" />
+                  <Path d="M3.2 14.1l7.1 5.2C12.3 15.1 17.7 11 24 11c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 14.9 2 7.2 6.9 3.2 14.1z" fill="#FF3D00" />
+                  <Path d="M24 46c5.4 0 10.3-1.8 14.1-5l-6.5-5.5C29.6 37.1 27 38 24 38c-6 0-11.1-3.8-12.9-9.2l-7 5.4C7.8 41.3 15.3 46 24 46z" fill="#4CAF50" />
+                  <Path d="M44.5 20H24v8.5h11.8c-1 3.2-3 5.8-5.6 7.5l6.5 5.5C40.6 38 46 32 46 24c0-1.3-.2-2.7-.5-4z" fill="#1976D2" />
+                </Svg>
+                <Text style={s.googleButtonText}>Continue with Google®</Text>
               </>
             )}
           </Pressable>
@@ -182,7 +186,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Ionicons name="logo-apple" size={20} color="#fff" />
-                  <Text style={s.appleButtonText}>Continue with Apple</Text>
+                  <Text style={s.appleButtonText}>Continue with Apple®</Text>
                 </>
               )}
             </Pressable>
@@ -203,7 +207,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Ionicons name="logo-apple" size={20} color="#fff" />
-                  <Text style={s.appleButtonText}>Continue with Apple</Text>
+                  <Text style={s.appleButtonText}>Continue with Apple®</Text>
                 </>
               )}
             </Pressable>
@@ -257,19 +261,6 @@ const s = StyleSheet.create({
   },
   googleButton: {
     backgroundColor: "#fff",
-  },
-  googleIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#4285F4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  googleG: {
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
   },
   googleButtonText: {
     fontSize: 16,
