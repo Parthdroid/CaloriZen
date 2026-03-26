@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -132,16 +133,11 @@ export default function LoginScreen() {
       />
 
       <View style={[s.content, { paddingTop: topPad + 80 }]}>
-        <View style={s.logoBadge}>
-          <LinearGradient
-            colors={["#FF6B35", "#FF8A5C"]}
-            style={s.logoGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Ionicons name="flame" size={36} color="#fff" />
-          </LinearGradient>
-        </View>
+        <Image
+          source={require("@/assets/logo.png")}
+          style={s.logoImage}
+          resizeMode="contain"
+        />
 
         <Text style={s.title}>NutriSnap™</Text>
         <Text style={s.subtitle}>
@@ -213,18 +209,15 @@ export default function LoginScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0F0F0F" },
   content: { flex: 1, paddingHorizontal: 32, alignItems: "center" },
-  logoBadge: { marginBottom: 24 },
-  logoGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
+  logoImage: {
+    width: 140,
+    height: 140,
+    marginBottom: 16,
   },
   title: {
     fontSize: 36,
     fontFamily: "Inter_700Bold",
-    color: "#FF6B35",
+    color: "#2E7D32",
     letterSpacing: -1,
     marginBottom: 12,
   },
