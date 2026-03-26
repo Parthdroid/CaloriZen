@@ -77,14 +77,16 @@ A mobile calorie and macro tracking app with:
 ### `artifacts/mobile` (`@workspace/mobile`)
 
 Expo React Native app (iOS/Android/Web). Key files:
-- `app/_layout.tsx` — root stack with providers (QueryClient, AppProvider)
+- `app/_layout.tsx` — root stack with providers (QueryClient, AuthProvider, AppProvider); redirects to login if unauthenticated
+- `app/login.tsx` — login screen with Google and Apple sign-in buttons, dark gradient theme
 - `app/(tabs)/_layout.tsx` — 4-tab layout (Home/Log/Scan/Goals)
 - `app/(tabs)/index.tsx` — home screen: calorie ring, macro bars, quick actions
 - `app/(tabs)/log.tsx` — food log with date picker
 - `app/(tabs)/scan.tsx` — scan tab with camera/gallery options
-- `app/(tabs)/goals.tsx` — goals CRUD with edit mode
+- `app/(tabs)/goals.tsx` — goals CRUD with edit mode + sign-out button
 - `app/barcode.tsx` — barcode lookup modal
 - `app/review.tsx` — AI analysis review with clarification Q&A, editable items
+- `context/AuthContext.tsx` — auth state management (user, token, signIn, signOut); stores JWT in AsyncStorage; wires `setAuthTokenGetter` for API client
 - `context/AppContext.tsx` — shared state (pendingAnalysis, selectedDate)
 - `constants/colors.ts` — theme tokens for light/dark mode
 - `components/MacroRing.tsx` — SVG ring for macros
@@ -96,8 +98,10 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
 - App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
+- Auth: `src/lib/auth.ts` — JWT sign/verify, `requireAuth` and `optionalAuth` middleware
+- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/auth.ts` handles Google/Apple sign-in (POST /api/auth/google, POST /api/auth/apple, GET /api/auth/me)
+- All meal/goal routes use `optionalAuth` to associate data with users when logged in
+- Depends on: `@workspace/db`, `@workspace/api-zod`, `google-auth-library`, `jsonwebtoken`
 - `pnpm --filter @workspace/api-server run dev` — run the dev server
 - `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
@@ -108,7 +112,10 @@ Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client insta
 
 - `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
 - `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
+- `src/schema/users.ts` — users table (id, email, name, avatarUrl, provider, providerId)
+- `src/schema/meals.ts` — meals table with optional userId for multi-user support
+- `src/schema/goals.ts` — goals table with optional userId for multi-user support
+- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas
 - `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
 - Exports: `.` (pool, db, schema), `./schema` (schema only)
 

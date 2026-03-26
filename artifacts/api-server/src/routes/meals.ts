@@ -1,7 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, mealsTable, mealItemSchema } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and, isNull } from "drizzle-orm";
 import { z } from "zod";
+import { optionalAuth, type AuthRequest } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -36,7 +37,7 @@ function formatMeal(meal: typeof mealsTable.$inferSelect) {
   };
 }
 
-router.get("/meals", async (req: Request, res: Response) => {
+router.get("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
   const dateStr = req.query.date as string | undefined;
   let start: Date;
   let end: Date;
@@ -50,18 +51,24 @@ router.get("/meals", async (req: Request, res: Response) => {
     end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   }
 
+  const userId = req.user?.userId ?? null;
+  const userFilter = userId ? eq(mealsTable.userId, userId) : isNull(mealsTable.userId);
+
   const meals = await db
     .select()
     .from(mealsTable)
     .where(
-      sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
+      and(
+        userFilter,
+        sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
+      )
     )
     .orderBy(mealsTable.loggedAt);
 
   res.json(meals.map(formatMeal));
 });
 
-router.post("/meals", async (req: Request, res: Response) => {
+router.post("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
   const parsed = createMealBodySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -74,6 +81,7 @@ router.post("/meals", async (req: Request, res: Response) => {
   const [meal] = await db
     .insert(mealsTable)
     .values({
+      userId: req.user?.userId ?? null,
       mealType,
       items,
       imageUrl: imageUrl ?? null,
@@ -154,7 +162,7 @@ router.delete("/meals/:id", async (req: Request, res: Response) => {
   res.status(204).send();
 });
 
-router.get("/daily-summary", async (req: Request, res: Response) => {
+router.get("/daily-summary", optionalAuth, async (req: AuthRequest, res: Response) => {
   const dateStr = req.query.date as string | undefined;
   let start: Date;
   let end: Date;
@@ -173,15 +181,22 @@ router.get("/daily-summary", async (req: Request, res: Response) => {
 
   const { goalsTable } = await import("@workspace/db");
 
+  const userId = req.user?.userId ?? null;
+  const mealUserFilter = userId ? eq(mealsTable.userId, userId) : isNull(mealsTable.userId);
+  const goalUserFilter = userId ? eq(goalsTable.userId, userId) : isNull(goalsTable.userId);
+
   const meals = await db
     .select()
     .from(mealsTable)
     .where(
-      sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
+      and(
+        mealUserFilter,
+        sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
+      )
     )
     .orderBy(mealsTable.loggedAt);
 
-  const allGoals = await db.select().from(goalsTable).limit(1);
+  const allGoals = await db.select().from(goalsTable).where(goalUserFilter).limit(1);
   const goals = allGoals[0] ?? {
     dailyCalories: 2000,
     dailyProtein: 150,

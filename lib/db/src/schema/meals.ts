@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, real, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, real, integer, jsonb, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -16,6 +16,7 @@ export type MealItem = z.infer<typeof mealItemSchema>;
 
 export const mealsTable = pgTable("meals", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id"),
   mealType: text("meal_type").notNull().default("snack"),
   loggedAt: timestamp("logged_at").notNull().defaultNow(),
   imageUrl: text("image_url"),

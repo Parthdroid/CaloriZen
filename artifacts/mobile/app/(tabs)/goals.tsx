@@ -15,6 +15,9 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "@/hooks/useTheme";
 import { useGetGoals, useUpdateGoals } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type GoalInput = { dailyCalories: string; dailyProtein: string; dailyCarbs: string; dailyFat: string };
 
@@ -22,6 +25,7 @@ export default function GoalsScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
+  const { user, signOut } = useAuth();
   const { data: goals, isLoading } = useGetGoals();
   const { mutate: updateGoals, isPending } = useUpdateGoals();
   const [editing, setEditing] = useState(false);
@@ -110,6 +114,43 @@ export default function GoalsScreen() {
         <Ionicons name="information-circle-outline" size={16} color={colors.textTertiary} />
         <Text style={[st.infoText, { color: colors.textTertiary }]}>Consult a healthcare professional for personalized nutrition advice.</Text>
       </View>
+
+      {user && (
+        <View style={st.accountSection}>
+          <View style={[st.accountCard, { backgroundColor: colors.backgroundSecondary }]}>
+            <View style={st.accountRow}>
+              <View style={[st.accountAvatar, { backgroundColor: colors.tint + "20" }]}>
+                <Ionicons name="person" size={18} color={colors.tint} />
+              </View>
+              <View style={st.accountInfo}>
+                <Text style={[st.accountName, { color: colors.text }]}>{user.name || "User"}</Text>
+                <Text style={[st.accountEmail, { color: colors.textTertiary }]}>{user.email}</Text>
+              </View>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => {
+              Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Sign Out",
+                  style: "destructive",
+                  onPress: async () => {
+                    await signOut();
+                    await AsyncStorage.removeItem("@onboarding_complete");
+                    qc.clear();
+                    router.replace("/login");
+                  },
+                },
+              ]);
+            }}
+            style={({ pressed }) => [st.signOutBtn, { opacity: pressed ? 0.8 : 1 }]}
+          >
+            <Ionicons name="log-out-outline" size={18} color="#FF3B30" />
+            <Text style={st.signOutText}>Sign Out</Text>
+          </Pressable>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -136,4 +177,14 @@ const st = StyleSheet.create({
 
   info: { flexDirection: "row", gap: 10, marginHorizontal: 20, padding: 16, borderRadius: 14, alignItems: "flex-start" },
   infoText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+
+  accountSection: { marginTop: 32, paddingHorizontal: 20, gap: 12 },
+  accountCard: { borderRadius: 16, padding: 16 },
+  accountRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  accountAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  accountInfo: { flex: 1, gap: 2 },
+  accountName: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  accountEmail: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  signOutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,59,48,0.2)", backgroundColor: "rgba(255,59,48,0.05)" },
+  signOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#FF3B30" },
 });

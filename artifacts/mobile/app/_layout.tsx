@@ -6,7 +6,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Redirect, Stack } from "expo-router";
+import { Stack, Redirect } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { setBaseUrl } from "@workspace/api-client-react";
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -30,53 +31,8 @@ const queryClient = new QueryClient({
 
 const ONBOARDING_KEY = "@onboarding_complete";
 
-function RootLayoutNav({ onboardingDone }: { onboardingDone: boolean }) {
-  if (!onboardingDone) {
-    return (
-      <Stack screenOptions={{ headerBackTitle: "Back" }}>
-        <Stack.Screen
-          name="onboarding"
-          options={{ headerShown: false, animation: "fade" }}
-        />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="barcode"
-          options={{ headerShown: false, presentation: "modal" }}
-        />
-        <Stack.Screen
-          name="review"
-          options={{ headerShown: false, presentation: "modal" }}
-        />
-      </Stack>
-    );
-  }
-
-  return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="onboarding"
-        options={{ headerShown: false, animation: "fade" }}
-      />
-      <Stack.Screen
-        name="barcode"
-        options={{ headerShown: false, presentation: "modal" }}
-      />
-      <Stack.Screen
-        name="review"
-        options={{ headerShown: false, presentation: "modal" }}
-      />
-    </Stack>
-  );
-}
-
-export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
+function RootLayoutNav() {
+  const { user, isLoading: authLoading } = useAuth();
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(true);
 
@@ -89,25 +45,55 @@ export default function RootLayout() {
     });
   }, []);
 
+  if (authLoading || !onboardingChecked) return null;
+
+  const isLoggedIn = !!user;
+  const needsOnboarding = isLoggedIn && !onboardingDone;
+
+  return (
+    <>
+      {!isLoggedIn && <Redirect href="/login" />}
+      {isLoggedIn && needsOnboarding && <Redirect href="/onboarding" />}
+      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
+        <Stack.Screen name="barcode" options={{ headerShown: false, presentation: "modal" }} />
+        <Stack.Screen name="review" options={{ headerShown: false, presentation: "modal" }} />
+      </Stack>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
   useEffect(() => {
-    if ((fontsLoaded || fontError) && onboardingChecked) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, onboardingChecked]);
+  }, [fontsLoaded, fontError]);
 
-  if ((!fontsLoaded && !fontError) || !onboardingChecked) return null;
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <AppProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav onboardingDone={onboardingDone} />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </AppProvider>
+          <AuthProvider>
+            <AppProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </AppProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
