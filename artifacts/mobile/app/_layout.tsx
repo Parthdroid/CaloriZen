@@ -6,7 +6,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, Redirect } from "expo-router";
+import { Stack, Redirect, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -33,6 +33,7 @@ const ONBOARDING_KEY = "@onboarding_complete";
 
 function RootLayoutNav() {
   const { user, isLoading: authLoading } = useAuth();
+  const segments = useSegments();
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(true);
 
@@ -49,14 +50,18 @@ function RootLayoutNav() {
 
   const isLoggedIn = !!user;
   const needsOnboarding = isLoggedIn && !onboardingDone;
+  const publicRoutes = ["login", "terms", "privacy"];
+  const isPublicRoute = publicRoutes.includes(segments[0] as string);
 
   return (
     <>
-      {!isLoggedIn && <Redirect href="/login" />}
+      {!isLoggedIn && !isPublicRoute && <Redirect href="/login" />}
       {isLoggedIn && needsOnboarding && <Redirect href="/onboarding" />}
       <Stack screenOptions={{ headerBackTitle: "Back" }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="terms" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
         <Stack.Screen name="barcode" options={{ headerShown: false, presentation: "modal" }} />
         <Stack.Screen name="review" options={{ headerShown: false, presentation: "modal" }} />

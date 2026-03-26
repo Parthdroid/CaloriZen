@@ -15,6 +15,7 @@ import Svg, { Path } from "react-native-svg";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const { signIn } = useAuth();
   const [loading, setLoading] = useState<"google" | "apple" | null>(null);
 
+  const router = useRouter();
   const redirectUri = AuthSession.makeRedirectUri({ scheme: "nutrisnap" });
 
   const handleGoogleSignIn = async () => {
@@ -141,7 +143,7 @@ export default function LoginScreen() {
           </LinearGradient>
         </View>
 
-        <Text style={s.title}>NutriSnap</Text>
+        <Text style={s.title}>NutriSnap™</Text>
         <Text style={s.subtitle}>
           AI-powered calorie tracking{"\n"}from a single photo
         </Text>
@@ -194,7 +196,14 @@ export default function LoginScreen() {
 
       <View style={[s.footer, { paddingBottom: bottomPad }]}>
         <Text style={s.footerText}>
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          By continuing, you agree to our{" "}
+          <Text style={s.footerLink} onPress={() => router.push("/terms")}>
+            Terms of Service
+          </Text>
+          {" "}and{" "}
+          <Text style={s.footerLink} onPress={() => router.push("/privacy")}>
+            Privacy Policy
+          </Text>
         </Text>
       </View>
     </View>
@@ -261,5 +270,9 @@ const s = StyleSheet.create({
     color: "rgba(255,255,255,0.25)",
     textAlign: "center",
     lineHeight: 18,
+  },
+  footerLink: {
+    color: "rgba(255,255,255,0.5)",
+    textDecorationLine: "underline",
   },
 });
