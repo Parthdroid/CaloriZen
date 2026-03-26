@@ -23,17 +23,57 @@ import {
   getListMealsQueryKey,
 } from "@workspace/api-client-react";
 
-function Ring({ value, max, size, sw, color, track }: { value: number; max: number; size: number; sw: number; color: string; track: string }) {
+function CalorieRing({ eaten, goal, size, colors }: { eaten: number; goal: number; size: number; colors: Record<string, string> }) {
+  const sw = 10;
   const r = (size - sw) / 2;
   const c = 2 * Math.PI * r;
-  const p = Math.min(value / (max || 1), 1);
+  const pct = Math.min(eaten / (goal || 1), 1);
+  const isOver = eaten > goal;
+  const remaining = Math.max(goal - eaten, 0);
   return (
-    <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
-      <Circle cx={size / 2} cy={size / 2} r={r} stroke={track} strokeWidth={sw} fill="none" />
-      <Circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={sw} fill="none" strokeDasharray={c} strokeDashoffset={c * (1 - p)} strokeLinecap="round" />
-    </Svg>
+    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size} style={{ position: "absolute", transform: [{ rotate: "-90deg" }] }}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={colors.backgroundTertiary} strokeWidth={sw} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={isOver ? colors.fat : colors.tint} strokeWidth={sw} fill="none" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} strokeLinecap="round" />
+      </Svg>
+      <View style={{ alignItems: "center" }}>
+        <Text style={{ fontSize: 44, fontFamily: "Inter_700Bold", color: colors.text, letterSpacing: -2, includeFontPadding: false }}>{Math.round(remaining)}</Text>
+        <Text style={{ fontSize: 13, fontFamily: "Inter_500Medium", color: colors.textSecondary, marginTop: -4 }}>remaining</Text>
+      </View>
+    </View>
   );
 }
+
+function MacroBar({ label, current, goal, color, colors }: { label: string; current: number; goal: number; color: string; colors: Record<string, string> }) {
+  const pct = Math.min(current / (goal || 1), 1);
+  return (
+    <View style={ms.row}>
+      <View style={ms.labelCol}>
+        <View style={[ms.dot, { backgroundColor: color }]} />
+        <Text style={[ms.label, { color: colors.text }]}>{label}</Text>
+      </View>
+      <View style={ms.barCol}>
+        <View style={[ms.barTrack, { backgroundColor: colors.backgroundTertiary }]}>
+          <View style={[ms.barFill, { backgroundColor: color, width: `${Math.round(pct * 100)}%` }]} />
+        </View>
+      </View>
+      <Text style={[ms.values, { color: colors.textSecondary }]}>
+        <Text style={{ color: colors.text, fontFamily: "Inter_600SemiBold" }}>{Math.round(current)}</Text>/{goal}g
+      </Text>
+    </View>
+  );
+}
+
+const ms = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 },
+  labelCol: { flexDirection: "row", alignItems: "center", gap: 6, width: 72 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  label: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  barCol: { flex: 1 },
+  barTrack: { height: 6, borderRadius: 3, overflow: "hidden" },
+  barFill: { height: 6, borderRadius: 3 },
+  values: { fontSize: 13, fontFamily: "Inter_400Regular", width: 64, textAlign: "right" },
+});
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -54,8 +94,6 @@ export default function HomeScreen() {
   const gPro = summary?.goalProtein ?? 150;
   const gCarb = summary?.goalCarbs ?? 200;
   const gFat = summary?.goalFat ?? 65;
-  const remaining = Math.max(gCal - cal, 0);
-  const isOver = cal > gCal;
 
   const handleRefresh = useCallback(() => {
     qc.invalidateQueries({ queryKey: getGetDailySummaryQueryKey() });
@@ -63,22 +101,21 @@ export default function HomeScreen() {
     refetch();
   }, [qc, refetch]);
 
-  const macros = [
-    { label: "Protein", val: pro, goal: gPro, color: colors.protein, unit: "g" },
-    { label: "Carbs", val: carb, goal: gCarb, color: colors.carbs, unit: "g" },
-    { label: "Fat", val: fat, goal: gFat, color: colors.fat, unit: "g" },
-  ];
-
   return (
     <ScrollView
       style={[s.root, { backgroundColor: colors.background }]}
-      contentContainerStyle={{ paddingTop: topPad + 8, paddingBottom: bottomPad + 100 }}
+      contentContainerStyle={{ paddingTop: topPad + 4, paddingBottom: bottomPad + 100 }}
       refreshControl={<RefreshControl refreshing={isLoading} onRefresh={handleRefresh} tintColor={colors.textTertiary} />}
       showsVerticalScrollIndicator={false}
     >
       <View style={s.header}>
-        <Text style={[s.title, { color: colors.text }]}>Today</Text>
-        <Pressable onPress={() => router.push("/(tabs)/goals")} hitSlop={8} accessibilityLabel="Goals">
+        <View>
+          <Text style={[s.greeting, { color: colors.textSecondary }]}>Today</Text>
+          <Text style={[s.dateText, { color: colors.text }]}>
+            {new Date().toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" })}
+          </Text>
+        </View>
+        <Pressable onPress={() => router.push("/(tabs)/goals")} hitSlop={8}>
           <View style={[s.profileCircle, { backgroundColor: colors.backgroundSecondary }]}>
             <Ionicons name="person" size={16} color={colors.textTertiary} />
           </View>
@@ -86,41 +123,25 @@ export default function HomeScreen() {
       </View>
 
       <View style={s.ringSection}>
-        <View style={s.ringWrap}>
-          <Ring value={cal} max={gCal} size={180} sw={14} color={isOver ? colors.fat : colors.tint} track={colors.backgroundSecondary} />
-          <View style={s.ringInner}>
-            <Text style={[s.ringNum, { color: colors.text }]}>{Math.round(remaining)}</Text>
-            <Text style={[s.ringLabel, { color: colors.textSecondary }]}>kcal left</Text>
-          </View>
+        <CalorieRing eaten={cal} goal={gCal} size={200} colors={colors} />
+      </View>
+
+      <View style={s.eatenRow}>
+        <View style={s.eatenItem}>
+          <Text style={[s.eatenVal, { color: colors.tint }]}>{Math.round(cal)}</Text>
+          <Text style={[s.eatenLabel, { color: colors.textTertiary }]}>eaten</Text>
+        </View>
+        <View style={[s.eatenDivider, { backgroundColor: colors.backgroundTertiary }]} />
+        <View style={s.eatenItem}>
+          <Text style={[s.eatenVal, { color: colors.textSecondary }]}>{gCal}</Text>
+          <Text style={[s.eatenLabel, { color: colors.textTertiary }]}>goal</Text>
         </View>
       </View>
 
-      <View style={s.statsRow}>
-        <View style={s.statItem}>
-          <Text style={[s.statNum, { color: colors.text }]}>{Math.round(cal)}</Text>
-          <Text style={[s.statLabel, { color: colors.textTertiary }]}>Consumed</Text>
-        </View>
-        <View style={[s.statDivider, { backgroundColor: colors.backgroundSecondary }]} />
-        <View style={s.statItem}>
-          <Text style={[s.statNum, { color: colors.text }]}>{gCal}</Text>
-          <Text style={[s.statLabel, { color: colors.textTertiary }]}>Target</Text>
-        </View>
-      </View>
-
-      <View style={s.macroRow}>
-        {macros.map((m) => {
-          const pct = Math.min(m.val / (m.goal || 1), 1);
-          return (
-            <View key={m.label} style={s.macroItem}>
-              <View style={s.macroRingWrap}>
-                <Ring value={m.val} max={m.goal} size={48} sw={5} color={m.color} track={colors.backgroundSecondary} />
-                <Text style={[s.macroPct, { color: m.color }]}>{Math.round(pct * 100)}</Text>
-              </View>
-              <Text style={[s.macroValue, { color: colors.text }]}>{Math.round(m.val)}<Text style={{ color: colors.textTertiary }}>{m.unit}</Text></Text>
-              <Text style={[s.macroLabel, { color: colors.textSecondary }]}>{m.label}</Text>
-            </View>
-          );
-        })}
+      <View style={[s.macroCard, { backgroundColor: colors.backgroundSecondary }]}>
+        <MacroBar label="Protein" current={pro} goal={gPro} color={colors.protein} colors={colors} />
+        <MacroBar label="Carbs" current={carb} goal={gCarb} color={colors.carbs} colors={colors} />
+        <MacroBar label="Fat" current={fat} goal={gFat} color={colors.fat} colors={colors} />
       </View>
 
       <Pressable
@@ -128,15 +149,15 @@ export default function HomeScreen() {
           await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           router.push("/(tabs)/scan");
         }}
-        style={({ pressed }) => [s.scanBtn, { backgroundColor: colors.text, opacity: pressed ? 0.8 : 1 }]}
+        style={({ pressed }) => [s.logFoodBtn, { backgroundColor: colors.tint, opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
       >
-        <Ionicons name="scan-outline" size={20} color={colors.background} />
-        <Text style={[s.scanBtnText, { color: colors.background }]}>Scan</Text>
+        <Ionicons name="add" size={22} color="#fff" />
+        <Text style={s.logFoodText}>Log Food</Text>
       </Pressable>
 
       <View style={s.mealsBlock}>
         <View style={s.mealsHead}>
-          <Text style={[s.mealsTitle, { color: colors.text }]}>Recent</Text>
+          <Text style={[s.mealsTitle, { color: colors.text }]}>Recent Meals</Text>
           {meals.length > 0 && (
             <Pressable onPress={() => router.push("/(tabs)/log")} hitSlop={12}>
               <Text style={[s.seeAll, { color: colors.tint }]}>See all</Text>
@@ -147,9 +168,9 @@ export default function HomeScreen() {
           <Text style={[s.emptyText, { color: colors.textTertiary }]}>Loading...</Text>
         ) : meals.length === 0 ? (
           <View style={[s.emptyCard, { backgroundColor: colors.backgroundSecondary }]}>
-            <Ionicons name="restaurant-outline" size={24} color={colors.textTertiary} />
-            <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>No meals logged</Text>
-            <Text style={[s.emptyText, { color: colors.textTertiary }]}>Tap Scan to add your first meal</Text>
+            <Ionicons name="restaurant-outline" size={28} color={colors.textTertiary} />
+            <Text style={[s.emptyTitle, { color: colors.textSecondary }]}>No meals yet</Text>
+            <Text style={[s.emptyText, { color: colors.textTertiary }]}>Tap Log Food to get started</Text>
           </View>
         ) : (
           <View>{meals.slice(0, 5).map((meal) => <MealCard key={meal.id} meal={meal} />)}</View>
@@ -161,37 +182,29 @@ export default function HomeScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24, marginBottom: 8 },
-  title: { fontSize: 34, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24, marginBottom: 4 },
+  greeting: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  dateText: { fontSize: 22, fontFamily: "Inter_700Bold", letterSpacing: -0.3, marginTop: 1 },
   profileCircle: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 
-  ringSection: { alignItems: "center", paddingVertical: 16 },
-  ringWrap: { width: 180, height: 180, alignItems: "center", justifyContent: "center" },
-  ringInner: { position: "absolute", alignItems: "center" },
-  ringNum: { fontSize: 40, fontFamily: "Inter_700Bold", letterSpacing: -2 },
-  ringLabel: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: -2 },
+  ringSection: { alignItems: "center", paddingVertical: 12 },
 
-  statsRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 32, marginBottom: 24 },
-  statItem: { alignItems: "center" },
-  statNum: { fontSize: 20, fontFamily: "Inter_600SemiBold", letterSpacing: -0.5 },
-  statLabel: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
-  statDivider: { width: 1, height: 32 },
+  eatenRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 28, marginBottom: 20 },
+  eatenItem: { alignItems: "center" },
+  eatenVal: { fontSize: 22, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  eatenLabel: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  eatenDivider: { width: 1, height: 28 },
 
-  macroRow: { flexDirection: "row", justifyContent: "space-around", paddingHorizontal: 16, marginBottom: 24 },
-  macroItem: { alignItems: "center", gap: 4 },
-  macroRingWrap: { width: 48, height: 48, alignItems: "center", justifyContent: "center" },
-  macroPct: { position: "absolute", fontSize: 11, fontFamily: "Inter_700Bold" },
-  macroValue: { fontSize: 15, fontFamily: "Inter_600SemiBold", letterSpacing: -0.3 },
-  macroLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  macroCard: { marginHorizontal: 24, borderRadius: 16, paddingHorizontal: 18, paddingVertical: 10, marginBottom: 20 },
 
-  scanBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginHorizontal: 24, borderRadius: 14, paddingVertical: 16, marginBottom: 32 },
-  scanBtnText: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  logFoodBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginHorizontal: 24, borderRadius: 14, paddingVertical: 16, marginBottom: 28 },
+  logFoodText: { fontSize: 17, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
   mealsBlock: { paddingHorizontal: 24, gap: 12 },
   mealsHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  mealsTitle: { fontSize: 20, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
+  mealsTitle: { fontSize: 18, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
   seeAll: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  emptyCard: { padding: 32, borderRadius: 16, alignItems: "center", gap: 6 },
-  emptyTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  emptyCard: { padding: 36, borderRadius: 16, alignItems: "center", gap: 8 },
+  emptyTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
   emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center" },
 });

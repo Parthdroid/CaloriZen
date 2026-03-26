@@ -59,17 +59,18 @@ A mobile calorie and macro tracking app with:
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
 ### Design System (Cal AI-inspired premium)
-- Pure white (#FFFFFF) background, iOS system gray (#F2F2F7) for cards and secondary surfaces
+- Pure white (#FFFFFF) background, iOS system gray (#F2F2F7) for cards and secondary surfaces, #E5E5EA for tertiary/track
 - Orange accent: `#FF6B35`; pure black (#000000) text, secondary #6C6C70, tertiary #AEAEB2
-- Font: Inter (400/500/600/700); 34px bold titles, tight letter-spacing
+- Font: Inter (400/500/600/700); 22px bold date title, tight letter-spacing
 - Color tokens: protein (blue #007AFF), carbs (amber #FF9500), fat (red #FF3B30), calories (orange)
-- Home: "Today" title, 180px SVG calorie ring with remaining kcal, Consumed/Target stats row, macro mini-rings with percentage, black "Scan" button, "Recent" meals section
+- Home: "Today" subtitle + weekday date, 200px thin (10px stroke) SVG calorie ring with remaining count, eaten (orange) / goal stats below ring, horizontal macro progress bars (Protein/Carbs/Fat) with current/goal values, orange "Log Food" CTA button, "Recent Meals" section
 - Onboarding: dark theme (#0F0F0F → #1A1A2E gradient), step numbers (01/02/03), gradient buttons, animated slide transitions, emoji goal cards; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
-- Scan: light theme, centered camera placeholder box, three option buttons (Gallery/Barcode/Manual), expandable barcode input; animated scan line overlay during analysis; 90s timeout via Promise.race
-- Goals: #F2F2F7 cards with colored icons, big numbers, "Edit" pill button; edit mode with inline inputs and black save button
+- Scan: "Scan Food" title, centered camera box with tinted icon circle + "Take a Photo" text, three option buttons (Gallery/Barcode/Manual), expandable barcode input; animated scan line overlay during analysis; 90s timeout via Promise.race
+- Goals: #F2F2F7 cards with colored icons, big numbers, "Edit" pill button; edit mode with bordered inputs and black save button
 - Log: horizontal scrollable date picker with black selected pill, auto-scrolls to today, summary strip with colored macro values, meal cards grouped by type
 - Tab bar: translucent blur on iOS, light with top border on web, orange active tint
 - MealCard: rounded #F2F2F7 cards with colored icon, meal name, time, calories
+- Images are NOT stored in DB — base64 used only during AI analysis then discarded; DB stores text-only meal records (~500 bytes each)
 
 ## Packages
 

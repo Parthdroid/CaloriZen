@@ -12,6 +12,7 @@ import {
   Animated,
   Easing,
   TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -22,8 +23,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useApp } from "@/context/AppContext";
 import { analyzePhoto, lookupBarcode } from "@workspace/api-client-react";
 
-const { width: SW, height: SH } = Dimensions.get("window");
-
+const { height: SH } = Dimensions.get("window");
 const TIPS = ["Identifying foods...", "Estimating portions...", "Calculating macros...", "Almost done..."];
 
 export default function ScanTab() {
@@ -102,14 +102,14 @@ export default function ScanTab() {
 
   const handleCamera = useCallback(async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Camera Permission", "Please allow camera access."); return; }
+    if (status !== "granted") { Alert.alert("Camera Permission", "NutriSnap needs camera access to scan your meals."); return; }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.7, allowsEditing: false });
     if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
   }, [handleImage]);
 
   const handleGallery = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Gallery Permission", "Please allow photo access."); return; }
+    if (status !== "granted") { Alert.alert("Photo Library", "NutriSnap needs photo access to analyze your meals."); return; }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.7 });
     if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
   }, [handleImage]);
@@ -134,9 +134,10 @@ export default function ScanTab() {
     return (
       <View style={[st.loadWrap, { backgroundColor: "#000" }]}>
         <Image source={{ uri: previewUri }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+        <View style={StyleSheet.absoluteFillObject} />
         <Animated.View style={[st.scanLine, { backgroundColor: colors.tint, transform: [{ translateY: ty }] }]} />
         <View style={[st.loadPill, { bottom: bottomPad + 20 }]}>
-          <ActivityIndicator size="small" color={colors.tint} />
+          <ActivityIndicator size="small" color="#fff" />
           <Text style={st.loadTip}>{TIPS[tipIndex]}</Text>
         </View>
       </View>
@@ -144,28 +145,31 @@ export default function ScanTab() {
   }
 
   return (
-    <View style={[st.root, { backgroundColor: colors.background }]}>
-      <View style={[st.header, { paddingTop: topPad + 4 }]}>
-        <Text style={[st.headerTitle, { color: colors.text }]}>Scanner</Text>
+    <KeyboardAvoidingView style={[st.root, { backgroundColor: colors.background }]} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <View style={[st.header, { paddingTop: topPad + 8 }]}>
+        <Text style={[st.headerTitle, { color: colors.text }]}>Scan Food</Text>
       </View>
 
       <View style={st.body}>
-        <Pressable onPress={handleCamera} style={({ pressed }) => [st.cameraBox, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
-          <Ionicons name="camera" size={48} color={colors.textTertiary} />
-          <Text style={[st.cameraHint, { color: colors.textTertiary }]}>Tap to take a photo</Text>
+        <Pressable onPress={handleCamera} style={({ pressed }) => [st.cameraBox, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+          <View style={[st.cameraIconWrap, { backgroundColor: colors.tint + "15" }]}>
+            <Ionicons name="camera" size={32} color={colors.tint} />
+          </View>
+          <Text style={[st.cameraTitle, { color: colors.text }]}>Take a Photo</Text>
+          <Text style={[st.cameraHint, { color: colors.textTertiary }]}>Point your camera at any meal</Text>
         </Pressable>
 
         <View style={st.optionRow}>
-          <Pressable onPress={handleGallery} style={[st.optionBtn, { backgroundColor: colors.backgroundSecondary }]}>
-            <Ionicons name="images-outline" size={22} color={colors.textSecondary} />
+          <Pressable onPress={handleGallery} style={({ pressed }) => [st.optionBtn, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
+            <Ionicons name="images-outline" size={24} color={colors.text} />
             <Text style={[st.optionLabel, { color: colors.textSecondary }]}>Gallery</Text>
           </Pressable>
-          <Pressable onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }} style={[st.optionBtn, { backgroundColor: showBarcode ? colors.text : colors.backgroundSecondary }]}>
-            <Ionicons name="barcode-outline" size={22} color={showBarcode ? colors.background : colors.textSecondary} />
+          <Pressable onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }} style={({ pressed }) => [st.optionBtn, { backgroundColor: showBarcode ? colors.text : colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
+            <Ionicons name="barcode-outline" size={24} color={showBarcode ? colors.background : colors.text} />
             <Text style={[st.optionLabel, { color: showBarcode ? colors.background : colors.textSecondary }]}>Barcode</Text>
           </Pressable>
-          <Pressable onPress={() => router.push("/barcode")} style={[st.optionBtn, { backgroundColor: colors.backgroundSecondary }]}>
-            <Ionicons name="create-outline" size={22} color={colors.textSecondary} />
+          <Pressable onPress={() => router.push("/barcode")} style={({ pressed }) => [st.optionBtn, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
+            <Ionicons name="create-outline" size={24} color={colors.text} />
             <Text style={[st.optionLabel, { color: colors.textSecondary }]}>Manual</Text>
           </Pressable>
         </View>
@@ -177,40 +181,43 @@ export default function ScanTab() {
               onChangeText={setBarcodeInput}
               placeholder="Enter barcode number"
               placeholderTextColor={colors.textTertiary}
-              style={[st.barcodeInput, { color: colors.text, backgroundColor: colors.background }]}
+              style={[st.barcodeInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
               keyboardType="numeric"
               returnKeyType="search"
               onSubmitEditing={handleBarcode}
             />
-            <Pressable onPress={handleBarcode} style={[st.barcodeSend, { backgroundColor: colors.text }]}>
-              {barcodeLoading ? <ActivityIndicator size="small" color={colors.background} /> : <Ionicons name="arrow-forward" size={20} color={colors.background} />}
+            <Pressable onPress={handleBarcode} style={[st.barcodeSend, { backgroundColor: colors.tint }]}>
+              {barcodeLoading ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="search" size={18} color="#fff" />}
             </Pressable>
           </View>
         )}
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const st = StyleSheet.create({
   root: { flex: 1 },
-  header: { alignItems: "center", paddingBottom: 8 },
+  header: { alignItems: "center", paddingBottom: 4 },
   headerTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
 
-  body: { flex: 1, paddingHorizontal: 24, justifyContent: "center", gap: 20 },
-  cameraBox: { height: 280, borderRadius: 24, alignItems: "center", justifyContent: "center", gap: 12 },
-  cameraHint: { fontSize: 15, fontFamily: "Inter_500Medium" },
+  body: { flex: 1, paddingHorizontal: 24, justifyContent: "center", gap: 16, marginTop: -40 },
+
+  cameraBox: { borderRadius: 20, alignItems: "center", justifyContent: "center", paddingVertical: 48, gap: 12 },
+  cameraIconWrap: { width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center" },
+  cameraTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
+  cameraHint: { fontSize: 14, fontFamily: "Inter_400Regular" },
 
   optionRow: { flexDirection: "row", gap: 10 },
-  optionBtn: { flex: 1, alignItems: "center", paddingVertical: 16, borderRadius: 16, gap: 6 },
-  optionLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  optionBtn: { flex: 1, alignItems: "center", paddingVertical: 18, borderRadius: 16, gap: 6 },
+  optionLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
 
-  barcodeBox: { flexDirection: "row", alignItems: "center", gap: 10, padding: 6, borderRadius: 16 },
-  barcodeInput: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12 },
+  barcodeBox: { flexDirection: "row", alignItems: "center", gap: 8, padding: 6, borderRadius: 16 },
+  barcodeInput: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1 },
   barcodeSend: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
 
   loadWrap: { flex: 1 },
   scanLine: { height: 3, width: "100%", borderRadius: 2, opacity: 0.8 },
   loadPill: { position: "absolute", left: 0, right: 0, alignItems: "center" },
-  loadTip: { fontSize: 15, fontFamily: "Inter_500Medium", color: "#fff" },
+  loadTip: { fontSize: 15, fontFamily: "Inter_500Medium", color: "#fff", marginTop: 8 },
 });
