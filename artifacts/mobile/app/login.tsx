@@ -35,43 +35,57 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState<"google" | "apple" | null>(null);
 
   const router = useRouter();
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: "nutrisnap" });
+  const redirectUri = AuthSession.makeRedirectUri({
+    scheme: "nutrisnap",
+    path: "auth",
+    ...(Platform.OS === "web" ? { preferLocalhost: false } : {}),
+  });
 
   const handleGoogleSignIn = async () => {
     setLoading("google");
     try {
-      const nonce = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        Math.random().toString(36),
-      );
+      const state = Math.random().toString(36).substring(2);
 
       const authRequest = new AuthSession.AuthRequest({
         clientId: GOOGLE_CLIENT_ID,
         scopes: ["openid", "profile", "email"],
         redirectUri,
         responseType: AuthSession.ResponseType.IdToken,
-        extraParams: { nonce },
+        usePKCE: false,
+        extraParams: {
+          nonce: state,
+        },
       });
 
       const result = await authRequest.promptAsync(discovery);
 
-      if (result.type === "success" && result.params?.id_token) {
+      if (result.type === "success") {
+        const idToken = result.params?.id_token;
+        if (!idToken) {
+          throw new Error("No ID token received from Google");
+        }
+
         const resp = await fetch(`${API_BASE}/api/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: result.params.id_token }),
+          body: JSON.stringify({ idToken }),
         });
 
         if (!resp.ok) {
-          throw new Error("Server authentication failed");
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.error || "Server authentication failed");
         }
 
         const data = await resp.json();
         await signIn(data.token, data.user);
       } else if (result.type === "error") {
-        Alert.alert("Sign In Failed", "Google sign in was not completed. Please try again.");
+        const msg = result.error?.message || "Google sign in was not completed.";
+        Alert.alert("Sign In Failed", msg);
+      } else if (result.type === "dismiss") {
+        // User cancelled, do nothing
       }
     } catch (err: any) {
+      console.error("Google sign-in error:", err);
       Alert.alert("Sign In Error", err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(null);
