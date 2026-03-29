@@ -138,6 +138,19 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/landing` (`@workspace/landing`)
+
+React + Vite landing page for NutriSnap, targeting deployment at calorizen.ai. Cal AI-inspired premium design with:
+- Sticky header with logo, nav links, App Store/Google Play buttons
+- Hero section with bold headline, social proof, dual phone mockup, download CTAs
+- 6-card feature grid (Snap & Track, Smart Macro Tracking, Personalized Goals, Barcode Scanner, Daily Food Log, Private & Secure)
+- 3-step "How It Works" section
+- Dark download CTA section with store badges
+- Footer with Product, Legal, Connect links
+- SEO: meta description, Open Graph tags, accessible viewport
+- Responsive: mockup scales on mobile, secondary mockup hidden below md breakpoint
+- Port: 18150, preview path: `/landing/`
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
