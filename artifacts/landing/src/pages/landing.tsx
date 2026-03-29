@@ -67,82 +67,106 @@ function Hero() {
           </div>
           <div className="relative flex justify-center mt-8 md:mt-0">
             <div className="relative scale-[0.75] md:scale-100 origin-top">
+              {/* Phone 1: Home Screen */}
               <div className="w-[260px] h-[520px] bg-gray-900 rounded-[3rem] p-2.5 shadow-2xl rotate-[-3deg] translate-x-[-30px]">
-                <div className="w-full h-full bg-gradient-to-b from-gray-900 to-gray-800 rounded-[2.25rem] overflow-hidden flex flex-col">
-                  <div className="p-5 pt-10">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="w-full h-full bg-white rounded-[2.25rem] overflow-hidden flex flex-col">
+                  <div className="px-5 pt-12">
+                    <div className="flex items-center justify-between mb-5">
                       <div>
-                        <p className="text-gray-400 text-xs">Good morning</p>
-                        <p className="text-white text-lg font-bold">Scanner</p>
+                        <p className="font-bold text-xl text-gray-900 tracking-tight">Sarah</p>
+                        <p className="text-xs text-gray-400">Monday, Mar 29</p>
+                      </div>
+                      <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center">
+                        <span className="text-sm font-bold text-green-600">S</span>
                       </div>
                     </div>
-                    <div className="relative bg-gray-700/50 rounded-2xl aspect-[4/3] flex items-center justify-center overflow-hidden">
-                      <div className="absolute inset-4 border-2 border-white/30 rounded-xl"></div>
-                      <div className="text-4xl">🥞</div>
-                      <div className="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">AI</div>
-                    </div>
-                  </div>
-                  <div className="flex-1 bg-white rounded-t-3xl p-5 mt-2">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="text-2xl">🥞</div>
-                      <div>
-                        <p className="font-semibold text-sm text-gray-900">Pancakes with syrup</p>
-                        <p className="text-xs text-gray-400">695 cal</p>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 mb-3">
+                      <div className="flex-1">
+                        <p className="text-3xl font-bold text-gray-900 tracking-tight leading-none">1,248</p>
+                        <p className="text-xs text-gray-400 mt-1">Calories left</p>
+                        <div className="flex items-center gap-3 mt-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                            <span className="text-[10px] text-gray-400">Eaten 752</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-200"></div>
+                            <span className="text-[10px] text-gray-400">Goal 2,000</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative w-[72px] h-[72px]">
+                        <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+                          <circle cx="36" cy="36" r="30" fill="none" stroke="#F0F0F0" strokeWidth="8" />
+                          <circle cx="36" cy="36" r="30" fill="none" stroke="#34C759" strokeWidth="8" strokeDasharray="188.5" strokeDashoffset="117.7" strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-base">🔥</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                      <div className="bg-blue-50 rounded-lg p-2 text-center">
-                        <p className="text-xs text-gray-500">Protein</p>
-                        <p className="font-bold text-sm text-gray-900">12g</p>
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div className="bg-white rounded-xl p-2.5 shadow-sm border border-gray-100 text-center">
+                        <p className="font-bold text-sm text-gray-900">112<span className="text-[10px] font-semibold">g</span></p>
+                        <p className="text-[9px] text-gray-400 mt-0.5">Protein left</p>
+                        <span className="text-xs mt-1 block">💪</span>
                       </div>
-                      <div className="bg-amber-50 rounded-lg p-2 text-center">
-                        <p className="text-xs text-gray-500">Carbs</p>
-                        <p className="font-bold text-sm text-gray-900">89g</p>
+                      <div className="bg-white rounded-xl p-2.5 shadow-sm border border-gray-100 text-center">
+                        <p className="font-bold text-sm text-gray-900">142<span className="text-[10px] font-semibold">g</span></p>
+                        <p className="text-[9px] text-gray-400 mt-0.5">Carbs left</p>
+                        <span className="text-xs mt-1 block">🌾</span>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-2 text-center">
-                        <p className="text-xs text-gray-500">Fat</p>
-                        <p className="font-bold text-sm text-gray-900">29g</p>
+                      <div className="bg-white rounded-xl p-2.5 shadow-sm border border-gray-100 text-center">
+                        <p className="font-bold text-sm text-gray-900">38<span className="text-[10px] font-semibold">g</span></p>
+                        <p className="text-[9px] text-gray-400 mt-0.5">Fat left</p>
+                        <span className="text-xs mt-1 block">🥑</span>
                       </div>
+                    </div>
+                    <p className="font-bold text-sm text-gray-900 mb-2">Food intake</p>
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-sm">🥗</div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-xs text-gray-900">Greek Salad</p>
+                        <p className="text-[10px] text-gray-400">Lunch &middot; 12:30 PM</p>
+                      </div>
+                      <p className="font-semibold text-xs text-gray-600">320 cal</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-sm">🥣</div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-xs text-gray-900">Oatmeal with berries</p>
+                        <p className="text-[10px] text-gray-400">Breakfast &middot; 8:15 AM</p>
+                      </div>
+                      <p className="font-semibold text-xs text-gray-600">432 cal</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="hidden md:block absolute top-8 right-[-20px] w-[220px] h-[440px] bg-white rounded-[2.5rem] p-2 shadow-xl rotate-[5deg] border border-gray-100">
-                <div className="w-full h-full rounded-[2rem] overflow-hidden bg-white flex flex-col p-4">
-                  <div className="mb-3">
-                    <p className="text-xs text-gray-400 font-medium">Nutrition</p>
-                    <p className="font-bold text-gray-900 text-sm">Pancakes with blueberries & syrup</p>
-                  </div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-400">Calories</p>
-                      <p className="font-bold text-lg text-gray-900">695</p>
+              {/* Phone 2: Scan Screen */}
+              <div className="hidden md:block absolute top-8 right-[-20px] w-[220px] h-[440px] bg-gray-900 rounded-[2.5rem] p-2 shadow-xl rotate-[5deg]">
+                <div className="w-full h-full rounded-[2rem] overflow-hidden bg-white flex flex-col">
+                  <div className="px-4 pt-8">
+                    <p className="font-bold text-base text-gray-900 text-center mb-4">Scan Food</p>
+                    <div className="relative bg-gray-100 rounded-2xl aspect-square flex items-center justify-center mb-4">
+                      <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
+                        <svg className="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.04l-.821 1.315z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+                      </div>
+                      <p className="absolute bottom-3 text-[10px] font-medium text-gray-400">Take a Photo</p>
                     </div>
-                    <div className="w-px h-8 bg-gray-200"></div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-400">Carbs</p>
-                      <p className="font-bold text-lg text-gray-900">89g</p>
+                    <div className="space-y-2">
+                      <div className="bg-gray-50 rounded-xl py-2.5 flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25c0 .828.672 1.5 1.5 1.5z" /></svg>
+                        <span className="text-xs font-medium text-gray-700">Choose from Gallery</span>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl py-2.5 flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zm0 9.75c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zm9.75-9.75c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" /></svg>
+                        <span className="text-xs font-medium text-gray-700">Scan Barcode</span>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl py-2.5 flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" /></svg>
+                        <span className="text-xs font-medium text-gray-700">Describe Manually</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2 flex-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Protein</span>
-                      <span className="font-semibold text-gray-900">12g</span>
-                    </div>
-                    <div className="h-1.5 bg-blue-100 rounded-full"><div className="h-full w-[30%] bg-blue-500 rounded-full"></div></div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Fats</span>
-                      <span className="font-semibold text-gray-900">29g</span>
-                    </div>
-                    <div className="h-1.5 bg-green-100 rounded-full"><div className="h-full w-[45%] bg-green-500 rounded-full"></div></div>
-                    <div className="flex justify-between text-xs mt-3">
-                      <span className="text-gray-500">Health score</span>
-                      <span className="font-semibold text-green-600">7/10</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <button className="flex-1 border border-gray-200 text-xs font-medium py-2 rounded-lg text-gray-600">Fix Results</button>
-                    <button className="flex-1 bg-gray-900 text-white text-xs font-medium py-2 rounded-lg">Done</button>
                   </div>
                 </div>
               </div>
