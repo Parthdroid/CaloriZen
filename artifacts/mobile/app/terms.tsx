@@ -21,17 +21,17 @@ export default function TermsScreen() {
         <Text style={s.lastUpdated}>Last Updated: March 26, 2026</Text>
 
         <Text style={s.body}>
-          Welcome to NutriSnap™. These Terms and Conditions ("Terms") govern your access to and use of the NutriSnap™ mobile application ("App"), operated by NutriSnap™ ("Company," "we," "us," or "our"). By downloading, installing, or using the App, you agree to be bound by these Terms. If you do not agree, do not use the App.
+          Welcome to CaloriZen™. These Terms and Conditions ("Terms") govern your access to and use of the CaloriZen™ mobile application ("App"), operated by CaloriZen™ ("Company," "we," "us," or "our"). By downloading, installing, or using the App, you agree to be bound by these Terms. If you do not agree, do not use the App.
         </Text>
 
         <Text style={s.sectionTitle}>1. Acceptance of Terms</Text>
         <Text style={s.body}>
-          By creating an account or using NutriSnap™, you confirm that you are at least 13 years of age and have the legal capacity to enter into these Terms. If you are under 18, you must have permission from a parent or legal guardian. Your continued use of the App constitutes acceptance of these Terms and any future modifications.
+          By creating an account or using CaloriZen™, you confirm that you are at least 13 years of age and have the legal capacity to enter into these Terms. If you are under 18, you must have permission from a parent or legal guardian. Your continued use of the App constitutes acceptance of these Terms and any future modifications.
         </Text>
 
         <Text style={s.sectionTitle}>2. Description of Service</Text>
         <Text style={s.body}>
-          NutriSnap™ is an AI-powered calorie and nutrition tracking application that allows users to:{"\n\n"}
+          CaloriZen™ is an AI-powered calorie and nutrition tracking application that allows users to:{"\n\n"}
           • Photograph meals for automatic nutritional analysis{"\n"}
           • Scan food barcodes for product information{"\n"}
           • Track daily calorie and macronutrient intake{"\n"}
@@ -42,7 +42,7 @@ export default function TermsScreen() {
 
         <Text style={s.sectionTitle}>3. Account Registration</Text>
         <Text style={s.body}>
-          To use NutriSnap™, you must create an account using one of our supported authentication providers (Google or Apple Sign-In). You agree to:{"\n\n"}
+          To use CaloriZen™, you must create an account using one of our supported authentication providers (Google or Apple Sign-In). You agree to:{"\n\n"}
           • Provide accurate and complete information during registration{"\n"}
           • Maintain the security of your account credentials{"\n"}
           • Notify us immediately of any unauthorized use of your account{"\n"}
@@ -52,21 +52,21 @@ export default function TermsScreen() {
 
         <Text style={s.sectionTitle}>4. Intellectual Property</Text>
         <Text style={s.body}>
-          NutriSnap™ and all associated trademarks, logos, designs, text, graphics, and software are the exclusive property of the Company and are protected by intellectual property laws. The NutriSnap™ name and logo are trademarks pending registration. You may not:{"\n\n"}
+          CaloriZen™ and all associated trademarks, logos, designs, text, graphics, and software are the exclusive property of the Company and are protected by intellectual property laws. The CaloriZen™ name and logo are trademarks pending registration. You may not:{"\n\n"}
           • Copy, modify, or distribute any part of the App{"\n"}
           • Reverse engineer or decompile the App's software{"\n"}
-          • Use the NutriSnap™ name or branding without written permission{"\n"}
+          • Use the CaloriZen™ name or branding without written permission{"\n"}
           • Create derivative works based on the App
         </Text>
 
         <Text style={s.sectionTitle}>5. User Content</Text>
         <Text style={s.body}>
-          You retain ownership of photographs and data you submit through the App ("User Content"). By submitting User Content, you grant NutriSnap™ a non-exclusive, worldwide, royalty-free license to use, process, and analyze your content solely for the purpose of providing and improving our services. We will not sell, share, or publicly display your food photographs or personal nutrition data without your explicit consent.
+          You retain ownership of photographs and data you submit through the App ("User Content"). By submitting User Content, you grant CaloriZen™ a non-exclusive, worldwide, royalty-free license to use, process, and analyze your content solely for the purpose of providing and improving our services. We will not sell, share, or publicly display your food photographs or personal nutrition data without your explicit consent.
         </Text>
 
         <Text style={s.sectionTitle}>6. AI-Powered Analysis Disclaimer</Text>
         <Text style={s.body}>
-          The nutritional estimates provided by NutriSnap™ are generated by artificial intelligence and are approximations only. Results may vary based on image quality, food preparation methods, portion sizes, and other factors. NutriSnap™ does not guarantee the accuracy of any nutritional analysis.{"\n\n"}
+          The nutritional estimates provided by CaloriZen™ are generated by artificial intelligence and are approximations only. Results may vary based on image quality, food preparation methods, portion sizes, and other factors. CaloriZen™ does not guarantee the accuracy of any nutritional analysis.{"\n\n"}
           The App is not a substitute for professional medical, dietary, or nutritional advice. Always consult a qualified healthcare professional before making dietary changes, especially if you have allergies, medical conditions, or specific dietary requirements.
         </Text>
 
@@ -84,7 +84,7 @@ export default function TermsScreen() {
 
         <Text style={s.sectionTitle}>8. Subscription & Payments</Text>
         <Text style={s.body}>
-          NutriSnap™ may offer free and premium subscription tiers. If you purchase a subscription:{"\n\n"}
+          CaloriZen™ may offer free and premium subscription tiers. If you purchase a subscription:{"\n\n"}
           • Payment will be charged to your Apple ID or Google Play account{"\n"}
           • Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period{"\n"}
           • You can manage or cancel subscriptions through your device's app store settings{"\n"}
@@ -93,22 +93,22 @@ export default function TermsScreen() {
 
         <Text style={s.sectionTitle}>9. Limitation of Liability</Text>
         <Text style={s.body}>
-          To the maximum extent permitted by applicable law, NutriSnap™ and its officers, directors, employees, and agents shall not be liable for:{"\n\n"}
+          To the maximum extent permitted by applicable law, CaloriZen™ and its officers, directors, employees, and agents shall not be liable for:{"\n\n"}
           • Any indirect, incidental, special, consequential, or punitive damages{"\n"}
           • Loss of data, revenue, or profits{"\n"}
           • Health issues arising from reliance on AI-generated nutritional estimates{"\n"}
           • Service interruptions, errors, or inaccuracies{"\n\n"}
-          Our total liability shall not exceed the amount you have paid to NutriSnap™ in the twelve (12) months preceding the claim.
+          Our total liability shall not exceed the amount you have paid to CaloriZen™ in the twelve (12) months preceding the claim.
         </Text>
 
         <Text style={s.sectionTitle}>10. Indemnification</Text>
         <Text style={s.body}>
-          You agree to indemnify and hold harmless NutriSnap™, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, losses, liabilities, costs, and expenses (including attorney's fees) arising from your use of the App, violation of these Terms, or infringement of any third-party rights.
+          You agree to indemnify and hold harmless CaloriZen™, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, losses, liabilities, costs, and expenses (including attorney's fees) arising from your use of the App, violation of these Terms, or infringement of any third-party rights.
         </Text>
 
         <Text style={s.sectionTitle}>11. Third-Party Services</Text>
         <Text style={s.body}>
-          NutriSnap™ integrates with third-party services including but not limited to Google Sign-In, Apple Sign-In, and OpenAI. Your use of these services is subject to their respective terms and privacy policies. We are not responsible for the practices or availability of third-party services.
+          CaloriZen™ integrates with third-party services including but not limited to Google Sign-In, Apple Sign-In, and OpenAI. Your use of these services is subject to their respective terms and privacy policies. We are not responsible for the practices or availability of third-party services.
         </Text>
 
         <Text style={s.sectionTitle}>12. Modifications to Terms</Text>
@@ -129,13 +129,13 @@ export default function TermsScreen() {
         <Text style={s.sectionTitle}>15. Contact Information</Text>
         <Text style={s.body}>
           If you have questions or concerns about these Terms, please contact us at:{"\n\n"}
-          NutriSnap™{"\n"}
-          Email: legal@nutrisnap.app{"\n"}
-          Website: https://nutrisnap.app
+          CaloriZen™{"\n"}
+          Email: legal@calorizen.ai{"\n"}
+          Website: https://calorizen.ai
         </Text>
 
         <Text style={[s.body, { marginTop: 24, fontFamily: "Inter_600SemiBold" }]}>
-          By using NutriSnap™, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
+          By using CaloriZen™, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.
         </Text>
 
         <View style={{ height: 60 }} />

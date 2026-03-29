@@ -36,7 +36,7 @@ export default function LoginScreen() {
 
   const router = useRouter();
   const redirectUri = AuthSession.makeRedirectUri({
-    scheme: "nutrisnap",
+    scheme: "calorizen",
     path: "auth",
     ...(Platform.OS === "web" ? { preferLocalhost: false } : {}),
   });
@@ -153,7 +153,7 @@ export default function LoginScreen() {
           resizeMode="contain"
         />
 
-        <Text style={s.title}>NutriSnap™</Text>
+        <Text style={s.title}>CaloriZen™</Text>
         <Text style={s.subtitle}>
           AI-powered calorie tracking{"\n"}from a single photo
         </Text>
@@ -180,7 +180,7 @@ export default function LoginScreen() {
             </Pressable>
           ) : (
             <Pressable
-              onPress={() => Alert.alert("Apple Sign In", "Sign in with Apple is available on iOS devices. Please use the NutriSnap app on your iPhone or iPad to sign in with Apple.")}
+              onPress={() => Alert.alert("Apple Sign In", "Sign in with Apple is available on iOS devices. Please use the CaloriZen app on your iPhone or iPad to sign in with Apple.")}
               style={({ pressed }) => [
                 s.authButton,
                 s.appleButton,

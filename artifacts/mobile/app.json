@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "NutriSnap",
+    "name": "CaloriZen",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -43,8 +43,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow NutriSnap to access your photos to analyze meals.",
-          "cameraPermission": "Allow NutriSnap to take photos of your meals."
+          "photosPermission": "Allow CaloriZen to access your photos to analyze meals.",
+          "cameraPermission": "Allow CaloriZen to take photos of your meals."
         }
       ]
     ],

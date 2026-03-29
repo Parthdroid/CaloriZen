@@ -48,7 +48,7 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
-## Project: NutriSnap
+## Project: CaloriZen
 
 A mobile calorie and macro tracking app with:
 - **AI photo analysis**: Take a photo of a meal; GPT-4 vision estimates calories and macros
@@ -140,7 +140,7 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/landing` (`@workspace/landing`)
 
-React + Vite landing page for NutriSnap, targeting deployment at calorizen.ai. Cal AI-inspired premium design with:
+React + Vite landing page for CaloriZen, targeting deployment at calorizen.ai. Cal AI-inspired premium design with:
 - Sticky header with logo, nav links, App Store/Google Play buttons
 - Hero section with bold headline, social proof, dual phone mockup, download CTAs
 - 6-card feature grid (Snap & Track, Smart Macro Tracking, Personalized Goals, Barcode Scanner, Daily Food Log, Private & Secure)

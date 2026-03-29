@@ -21,7 +21,7 @@ export default function PrivacyScreen() {
         <Text style={s.lastUpdated}>Last Updated: March 26, 2026</Text>
 
         <Text style={s.body}>
-          NutriSnap™ ("Company," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy describes how we collect, use, store, and share your personal information when you use the NutriSnap™ mobile application ("App"). By using the App, you consent to the practices described in this policy.
+          CaloriZen™ ("Company," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy describes how we collect, use, store, and share your personal information when you use the CaloriZen™ mobile application ("App"). By using the App, you consent to the practices described in this policy.
         </Text>
 
         <Text style={s.sectionTitle}>1. Information We Collect</Text>
@@ -74,7 +74,7 @@ export default function PrivacyScreen() {
           • Service Providers: With trusted third-party providers who assist in operating the App (e.g., OpenAI for AI analysis, cloud hosting providers). These providers are contractually obligated to protect your data.{"\n"}
           • Authentication Providers: Google and Apple process authentication data according to their own privacy policies.{"\n"}
           • Legal Requirements: When required by law, regulation, subpoena, or court order.{"\n"}
-          • Safety: To protect the rights, property, or safety of NutriSnap™, our users, or the public.{"\n"}
+          • Safety: To protect the rights, property, or safety of CaloriZen™, our users, or the public.{"\n"}
           • Business Transfers: In connection with a merger, acquisition, or sale of assets, with appropriate notice to users.
         </Text>
 
@@ -87,7 +87,7 @@ export default function PrivacyScreen() {
           • Data Portability: Request your data in a portable, machine-readable format.{"\n"}
           • Opt-Out: Opt out of non-essential data collection and marketing communications.{"\n"}
           • Withdraw Consent: Withdraw consent for data processing where consent is the legal basis.{"\n\n"}
-          To exercise these rights, contact us at privacy@nutrisnap.app. We will respond within 30 days.
+          To exercise these rights, contact us at privacy@calorizen.ai. We will respond within 30 days.
         </Text>
 
         <Text style={s.sectionTitle}>6. Apple Sign-In & Hide My Email</Text>
@@ -97,7 +97,7 @@ export default function PrivacyScreen() {
 
         <Text style={s.sectionTitle}>7. Children's Privacy</Text>
         <Text style={s.body}>
-          NutriSnap™ is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we discover that a child under 13 has provided personal information, we will promptly delete it. If you believe a child under 13 has provided us with personal data, please contact us at privacy@nutrisnap.app.
+          CaloriZen™ is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we discover that a child under 13 has provided personal information, we will promptly delete it. If you believe a child under 13 has provided us with personal data, please contact us at privacy@calorizen.ai.
         </Text>
 
         <Text style={s.sectionTitle}>8. Data Retention</Text>
@@ -117,7 +117,7 @@ export default function PrivacyScreen() {
 
         <Text style={s.sectionTitle}>10. Cookies & Tracking</Text>
         <Text style={s.body}>
-          The NutriSnap™ mobile app does not use browser cookies. We may use mobile analytics SDKs to collect anonymized usage data for improving the App experience. You can opt out of analytics tracking in the App's settings.
+          The CaloriZen™ mobile app does not use browser cookies. We may use mobile analytics SDKs to collect anonymized usage data for improving the App experience. You can opt out of analytics tracking in the App's settings.
         </Text>
 
         <Text style={s.sectionTitle}>11. California Privacy Rights (CCPA)</Text>
@@ -142,15 +142,15 @@ export default function PrivacyScreen() {
         <Text style={s.sectionTitle}>14. Contact Us</Text>
         <Text style={s.body}>
           If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us at:{"\n\n"}
-          NutriSnap™{"\n"}
+          CaloriZen™{"\n"}
           Privacy Team{"\n"}
-          Email: privacy@nutrisnap.app{"\n"}
-          Website: https://nutrisnap.app{"\n\n"}
-          For data protection inquiries in the EU, you may also contact our designated Data Protection Officer at dpo@nutrisnap.app.
+          Email: privacy@calorizen.ai{"\n"}
+          Website: https://calorizen.ai{"\n\n"}
+          For data protection inquiries in the EU, you may also contact our designated Data Protection Officer at dpo@calorizen.ai.
         </Text>
 
         <Text style={[s.body, { marginTop: 24, fontFamily: "Inter_600SemiBold" }]}>
-          By using NutriSnap™, you acknowledge that you have read and understood this Privacy Policy and agree to the collection, use, and sharing of your information as described herein.
+          By using CaloriZen™, you acknowledge that you have read and understood this Privacy Policy and agree to the collection, use, and sharing of your information as described herein.
         </Text>
 
         <View style={{ height: 60 }} />

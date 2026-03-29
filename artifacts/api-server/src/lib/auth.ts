@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET || "nutrisnap-dev-secret-change-in-prod";
+const JWT_SECRET = process.env.JWT_SECRET || "calorizen-dev-secret-change-in-prod";
 
 export interface AuthPayload {
   userId: number;

@@ -103,7 +103,7 @@ export default function ScanTab() {
   const handleCamera = useCallback(async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") { Alert.alert("Camera access needed", "Go to Settings and allow NutriSnap to use your camera."); return; }
+      if (status !== "granted") { Alert.alert("Camera access needed", "Go to Settings and allow CaloriZen to use your camera."); return; }
       const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.7, allowsEditing: false });
       if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
     } catch {
@@ -114,7 +114,7 @@ export default function ScanTab() {
   const handleGallery = useCallback(async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") { Alert.alert("Photo access needed", "Go to Settings and allow NutriSnap to access your photos."); return; }
+      if (status !== "granted") { Alert.alert("Photo access needed", "Go to Settings and allow CaloriZen to access your photos."); return; }
       const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.7 });
       if (!result.canceled && result.assets[0]) await handleImage(result.assets[0].uri);
     } catch {
