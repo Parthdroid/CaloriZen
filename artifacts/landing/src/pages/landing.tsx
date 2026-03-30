@@ -68,18 +68,121 @@ function Hero() {
           <div className="relative flex justify-center items-center mt-8 md:mt-0 min-h-[480px] md:min-h-[580px]">
             <div className="relative">
               <div className="w-[240px] h-[480px] md:w-[270px] md:h-[540px] bg-gray-900 rounded-[2.5rem] md:rounded-[3rem] p-2 md:p-2.5 shadow-2xl rotate-[-3deg]">
-                <img
-                  src={`${BASE}mockup-app.jpg`}
-                  alt="CaloriZen app login screen"
-                  className="w-full h-full rounded-[2rem] md:rounded-[2.25rem] object-cover"
-                />
+                <div className="w-full h-full bg-[#F8F8FA] rounded-[2rem] md:rounded-[2.25rem] overflow-hidden flex flex-col">
+                  <div className="px-4 pt-10 pb-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-gray-400 text-[10px]">Hello,</p>
+                        <p className="font-bold text-base text-gray-900 tracking-tight">Sarah</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 shadow-sm border border-gray-100">
+                        <svg className="w-2.5 h-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span className="text-[9px] font-medium text-gray-500">Mon, Mar 30</span>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 mb-3">
+                      <div className="relative w-[68px] h-[68px] flex-shrink-0">
+                        <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+                          <circle cx="36" cy="36" r="30" fill="none" stroke="#F0F0F0" strokeWidth="7"/>
+                          <circle cx="36" cy="36" r="30" fill="none" stroke="#FF6B35" strokeWidth="7" strokeDasharray="188.5" strokeDashoffset="117.7" strokeLinecap="round"/>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-sm font-bold text-gray-900 leading-none">1,248</span>
+                          <span className="text-[7px] text-gray-400">left</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[10px] font-semibold text-gray-900 mb-1.5">Today's Calories</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#FF6B35]"></div>
+                            <span className="text-[8px] text-gray-400">Eaten 752</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-200"></div>
+                            <span className="text-[8px] text-gray-400">Goal 2,000</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">💪</span>
+                        <div className="flex-1">
+                          <div className="flex justify-between mb-0.5"><span className="text-[8px] font-medium text-gray-600">Protein</span><span className="text-[8px] text-gray-400">38/150g</span></div>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#007AFF] rounded-full" style={{width: "25%"}}></div></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">🌾</span>
+                        <div className="flex-1">
+                          <div className="flex justify-between mb-0.5"><span className="text-[8px] font-medium text-gray-600">Carbs</span><span className="text-[8px] text-gray-400">88/250g</span></div>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#FF9500] rounded-full" style={{width: "35%"}}></div></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">🥑</span>
+                        <div className="flex-1">
+                          <div className="flex justify-between mb-0.5"><span className="text-[8px] font-medium text-gray-600">Fat</span><span className="text-[8px] text-gray-400">22/65g</span></div>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#FF3B30] rounded-full" style={{width: "34%"}}></div></div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="font-semibold text-xs text-gray-900 mb-2">Today's meals</p>
+                    <div className="space-y-1.5">
+                      <div className="bg-white rounded-xl p-2.5 shadow-sm border border-gray-100 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center text-xs">🥗</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-[10px] text-gray-900">Greek Salad</p>
+                          <p className="text-[8px] text-gray-400">Lunch · 12:30 PM</p>
+                        </div>
+                        <span className="text-[9px] font-semibold text-[#FF6B35] bg-orange-50 px-1.5 py-0.5 rounded">320</span>
+                      </div>
+                      <div className="bg-white rounded-xl p-2.5 shadow-sm border border-gray-100 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-xs">🥣</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-[10px] text-gray-900">Oatmeal with Berries</p>
+                          <p className="text-[8px] text-gray-400">Breakfast · 8:15 AM</p>
+                        </div>
+                        <span className="text-[9px] font-semibold text-[#FF6B35] bg-orange-50 px-1.5 py-0.5 rounded">432</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="hidden md:block absolute top-6 -right-[100px] w-[220px] h-[440px] bg-gray-900 rounded-[2.5rem] p-2 shadow-xl rotate-[5deg]">
-                <img
-                  src={`${BASE}mockup-login.jpg`}
-                  alt="CaloriZen app screen"
-                  className="w-full h-full rounded-[2rem] object-cover"
-                />
+                <div className="w-full h-full rounded-[2rem] overflow-hidden bg-[#F8F8FA] flex flex-col">
+                  <div className="px-4 pt-8">
+                    <p className="font-bold text-sm text-gray-900 text-center">Scan Food</p>
+                    <p className="text-[9px] text-gray-400 text-center mb-3">Snap a photo to track calories</p>
+                    <div className="relative bg-gray-100 rounded-2xl aspect-square flex items-center justify-center mb-3 border-2 border-dashed border-gray-200">
+                      <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-[#FF6B35]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.04l-.821 1.315z"/><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                      </div>
+                      <p className="absolute bottom-2.5 text-[9px] font-medium text-gray-400">Take a Photo</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="bg-white rounded-xl py-2 px-3 flex items-center gap-2 shadow-sm border border-gray-100">
+                        <div className="w-5 h-5 rounded-md bg-blue-50 flex items-center justify-center">
+                          <svg className="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25c0 .828.672 1.5 1.5 1.5z"/></svg>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-700">Choose from Gallery</span>
+                      </div>
+                      <div className="bg-white rounded-xl py-2 px-3 flex items-center gap-2 shadow-sm border border-gray-100">
+                        <div className="w-5 h-5 rounded-md bg-purple-50 flex items-center justify-center">
+                          <svg className="w-3 h-3 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5z"/></svg>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-700">Scan Barcode</span>
+                      </div>
+                      <div className="bg-white rounded-xl py-2 px-3 flex items-center gap-2 shadow-sm border border-gray-100">
+                        <div className="w-5 h-5 rounded-md bg-green-50 flex items-center justify-center">
+                          <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z"/></svg>
+                        </div>
+                        <span className="text-[10px] font-medium text-gray-700">Describe Manually</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
