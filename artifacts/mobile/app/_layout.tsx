@@ -45,7 +45,7 @@ function RootLayoutNav() {
     }).catch(() => {
       setOnboardingChecked(true);
     });
-  }, []);
+  }, [segments]);
 
   if (authLoading || !onboardingChecked) return null;
 
