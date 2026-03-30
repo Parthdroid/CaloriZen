@@ -254,9 +254,8 @@ const s = StyleSheet.create({
     marginBottom: 24,
   },
   logoImage: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: 180,
+    height: 180,
   },
   title: {
     fontSize: 38,
