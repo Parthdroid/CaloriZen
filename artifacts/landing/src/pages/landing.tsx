@@ -26,7 +26,7 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative bg-white">
       <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -57,16 +57,16 @@ function Hero() {
               </a>
             </div>
           </div>
-          <div className="relative flex justify-center mt-8 md:mt-0">
-            <div className="relative scale-[0.85] md:scale-100 origin-top">
-              <div className="w-[280px] h-[560px] bg-gray-900 rounded-[3rem] p-2.5 shadow-2xl rotate-[-3deg] translate-x-[-20px]">
+          <div className="relative flex justify-center items-center mt-8 md:mt-0 min-h-[480px] md:min-h-[580px]">
+            <div className="relative">
+              <div className="w-[240px] h-[480px] md:w-[270px] md:h-[540px] bg-gray-900 rounded-[2.5rem] md:rounded-[3rem] p-2 md:p-2.5 shadow-2xl rotate-[-3deg]">
                 <img
                   src={`${BASE}mockup-app.jpg`}
                   alt="CaloriZen app login screen"
-                  className="w-full h-full rounded-[2.25rem] object-cover"
+                  className="w-full h-full rounded-[2rem] md:rounded-[2.25rem] object-cover"
                 />
               </div>
-              <div className="hidden md:block absolute top-10 right-[-30px] w-[230px] h-[460px] bg-gray-900 rounded-[2.5rem] p-2 shadow-xl rotate-[5deg]">
+              <div className="hidden md:block absolute top-6 -right-[100px] w-[220px] h-[440px] bg-gray-900 rounded-[2.5rem] p-2 shadow-xl rotate-[5deg]">
                 <img
                   src={`${BASE}mockup-login.jpg`}
                   alt="CaloriZen app screen"
