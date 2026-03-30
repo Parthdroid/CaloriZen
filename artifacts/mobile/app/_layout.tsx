@@ -8,6 +8,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, Redirect, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -52,14 +53,16 @@ function RootLayoutNav() {
   const needsOnboarding = isLoggedIn && !onboardingDone;
   const publicRoutes = ["login", "terms", "privacy"];
   const isPublicRoute = publicRoutes.includes(segments[0] as string);
+  const isLoginRoute = segments[0] === "login";
 
   return (
     <>
+      <StatusBar style={isLoginRoute ? "light" : "dark"} />
       {!isLoggedIn && !isPublicRoute && <Redirect href="/login" />}
       {isLoggedIn && needsOnboarding && <Redirect href="/onboarding" />}
-      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#F8F8FA" } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
         <Stack.Screen name="terms" options={{ headerShown: false }} />
         <Stack.Screen name="privacy" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
@@ -92,7 +95,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <AppProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
+              <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#F8F8FA" }}>
                 <KeyboardProvider>
                   <RootLayoutNav />
                 </KeyboardProvider>

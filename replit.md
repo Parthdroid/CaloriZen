@@ -58,19 +58,24 @@ A mobile calorie and macro tracking app with:
 - **Nutrition goals**: Set and edit daily calorie/macro targets
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
-### Design System (Cal AI-inspired premium)
-- Pure white (#FFFFFF) background, iOS system gray (#F2F2F7) for cards and secondary surfaces, #E5E5EA for tertiary/track
-- Orange accent: `#FF6B35`; pure black (#000000) text, secondary #6C6C70, tertiary #AEAEB2
-- Font: Inter (400/500/600/700); 22px bold date title, tight letter-spacing
-- Color tokens: protein (blue #007AFF), carbs (amber #FF9500), fat (red #FF3B30), calories (orange)
-- Home: "Today" subtitle + weekday date, 200px thin (10px stroke) SVG calorie ring with remaining count, eaten (orange) / goal stats below ring, horizontal macro progress bars (Protein/Carbs/Fat) with current/goal values, orange "Log Food" CTA button, "Recent Meals" section
-- Onboarding: dark theme (#0F0F0F → #1A1A2E gradient), step numbers (01/02/03), gradient buttons, animated slide transitions, emoji goal cards; AsyncStorage `@onboarding_complete` gates app entry; goals saved via API
-- Scan: "Scan Food" title, centered camera box with tinted icon circle + "Take a Photo" text, three option buttons (Gallery/Barcode/Manual), expandable barcode input; animated scan line overlay during analysis; 90s timeout via Promise.race
-- Goals: #F2F2F7 cards with colored icons, big numbers, "Edit" pill button; edit mode with bordered inputs and black save button
-- Log: horizontal scrollable date picker with black selected pill, auto-scrolls to today, summary strip with colored macro values, meal cards grouped by type
-- Tab bar: translucent blur on iOS, light with top border on web, orange active tint
-- MealCard: rounded #F2F2F7 cards with colored icon, meal name, time, calories
-- Images are NOT stored in DB — base64 used only during AI analysis then discarded; DB stores text-only meal records (~500 bytes each)
+### Design System (Studio-grade, Cal AI-inspired premium)
+- **Forced light mode**: `userInterfaceStyle: "light"` in app.json; `useTheme.ts` always returns light colors; no dark mode anywhere in the app interior
+- **Background**: Off-white `#F8F8FA` for root, pure `#FFFFFF` for cards with soft box shadows (0.04 opacity, 10px radius)
+- **Accent**: Orange `#FF6B35` throughout; FAB has matching orange glow shadow
+- **Text**: Black `#000000`, secondary `#3C3C43`, tertiary `#AEAEB2`
+- **Font**: Inter (400/500/600/700); tight letter-spacing on headings
+- **Color tokens**: protein (blue `#007AFF`), carbs (amber `#FF9500`), fat (red `#FF3B30`), calories (orange)
+- **Home**: "Hello," greeting + first name, date chip with calendar icon, large calorie card (120px ring, 52px remaining number, eaten/goal dots), macro progress bars with emoji icons and percentage fills, "Today's meals" section with meal cards
+- **Scan**: "Scan Food" title + subtitle, premium camera viewfinder box with corner brackets, camera icon circle, three option buttons (Gallery/Barcode/Manual) with colored icon backgrounds and hint text, expandable barcode input; animated scan line overlay with dark pill status during analysis; 90s timeout
+- **Log**: Horizontal scrollable date picker with white/black pill states, summary strip with dividers, meal cards grouped by type with section headers including icons
+- **Goals**: White cards with colored icon backgrounds, 32px bold values, orange edit pill button, sign out with red tint
+- **Login**: Dark gradient `#0A0A0F` → `#111128`, CaloriZen™ branding, feature row (Photo scan · Barcode · AI macros), black Apple + white Google buttons, footer with Terms/Privacy
+- **Onboarding**: Dark theme with 5-step flow (welcome/height/weight/goal/complete), gradient buttons, animated slide transitions, emoji goal cards; `@onboarding_complete` gates app entry; goals saved via API
+- **Tab bar**: Translucent blur on iOS (`systemChromeMaterialLight`), hairline top border on web, orange active tint
+- **MealCard**: White rounded cards with colored meal-type icon, calorie badge in orange tint, inline macro text (P · C · F), scale animation on press
+- **StatusBar**: Light on login screen, dark everywhere else
+- **Bundle ID**: `ai.calorizen.app` (iOS + Android); `CFBundleDisplayName: "CaloriZen"` for proper permission dialogs
+- **Images**: NOT stored in DB — base64 used only during AI analysis then discarded; DB stores text-only meal records (~500 bytes each)
 
 ## Packages
 

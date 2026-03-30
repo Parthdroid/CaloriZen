@@ -142,11 +142,13 @@ export default function ScanTab() {
     return (
       <View style={[st.loadWrap, { backgroundColor: "#000" }]}>
         <Image source={{ uri: previewUri }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
-        <View style={StyleSheet.absoluteFillObject} />
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: "rgba(0,0,0,0.25)" }]} />
         <Animated.View style={[st.scanLine, { backgroundColor: colors.tint, transform: [{ translateY: ty }] }]} />
         <View style={[st.loadPill, { bottom: bottomPad + 20 }]}>
-          <ActivityIndicator size="small" color="#fff" />
-          <Text style={st.loadTip}>{TIPS[tipIndex]}</Text>
+          <View style={st.loadPillInner}>
+            <ActivityIndicator size="small" color="#fff" />
+            <Text style={st.loadTip}>{TIPS[tipIndex]}</Text>
+          </View>
         </View>
       </View>
     );
@@ -154,47 +156,84 @@ export default function ScanTab() {
 
   return (
     <KeyboardAvoidingView style={[st.root, { backgroundColor: colors.background }]} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={[st.header, { paddingTop: topPad + 8 }]}>
+      <View style={[st.header, { paddingTop: topPad + 12 }]}>
         <Text style={[st.headerTitle, { color: colors.text }]}>Scan Food</Text>
+        <Text style={[st.headerSub, { color: colors.textTertiary }]}>AI-powered nutrition analysis</Text>
       </View>
 
       <View style={st.body}>
-        <Pressable onPress={handleCamera} style={({ pressed }) => [st.cameraBox, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-          <View style={[st.cameraIconWrap, { backgroundColor: colors.tint + "15" }]}>
-            <Ionicons name="camera" size={32} color={colors.tint} />
+        <Pressable
+          onPress={handleCamera}
+          style={({ pressed }) => [
+            st.cameraBox,
+            {
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+            },
+          ]}
+        >
+          <View style={st.viewfinder}>
+            <View style={[st.corner, st.cornerTL]} />
+            <View style={[st.corner, st.cornerTR]} />
+            <View style={[st.corner, st.cornerBL]} />
+            <View style={[st.corner, st.cornerBR]} />
+            <View style={st.cameraCenter}>
+              <View style={st.cameraIconCircle}>
+                <Ionicons name="camera" size={36} color="#FF6B35" />
+              </View>
+              <Text style={st.cameraTitle}>Take a Photo</Text>
+              <Text style={st.cameraHint}>Point camera at any meal or food item</Text>
+            </View>
           </View>
-          <Text style={[st.cameraTitle, { color: colors.text }]}>Take a Photo</Text>
-          <Text style={[st.cameraHint, { color: colors.textTertiary }]}>Point your camera at any meal</Text>
         </Pressable>
 
         <View style={st.optionRow}>
-          <Pressable onPress={handleGallery} style={({ pressed }) => [st.optionBtn, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
-            <Ionicons name="images-outline" size={24} color={colors.text} />
-            <Text style={[st.optionLabel, { color: colors.textSecondary }]}>Gallery</Text>
+          <Pressable
+            onPress={handleGallery}
+            style={({ pressed }) => [st.optionBtn, { opacity: pressed ? 0.8 : 1 }]}
+          >
+            <View style={[st.optionIconWrap, { backgroundColor: "#007AFF12" }]}>
+              <Ionicons name="images" size={22} color="#007AFF" />
+            </View>
+            <Text style={st.optionLabel}>Gallery</Text>
+            <Text style={st.optionHint}>Choose photo</Text>
           </Pressable>
-          <Pressable onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }} style={({ pressed }) => [st.optionBtn, { backgroundColor: showBarcode ? colors.text : colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
-            <Ionicons name="barcode-outline" size={24} color={showBarcode ? colors.background : colors.text} />
-            <Text style={[st.optionLabel, { color: showBarcode ? colors.background : colors.textSecondary }]}>Barcode</Text>
+          <Pressable
+            onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }}
+            style={({ pressed }) => [st.optionBtn, { opacity: pressed ? 0.8 : 1 }]}
+          >
+            <View style={[st.optionIconWrap, { backgroundColor: showBarcode ? "#FF6B3512" : "#34C75912" }]}>
+              <Ionicons name="barcode" size={22} color={showBarcode ? "#FF6B35" : "#34C759"} />
+            </View>
+            <Text style={st.optionLabel}>Barcode</Text>
+            <Text style={st.optionHint}>Scan package</Text>
           </Pressable>
-          <Pressable onPress={() => router.push("/barcode")} style={({ pressed }) => [st.optionBtn, { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.8 : 1 }]}>
-            <Ionicons name="create-outline" size={24} color={colors.text} />
-            <Text style={[st.optionLabel, { color: colors.textSecondary }]}>Manual</Text>
+          <Pressable
+            onPress={() => router.push("/barcode")}
+            style={({ pressed }) => [st.optionBtn, { opacity: pressed ? 0.8 : 1 }]}
+          >
+            <View style={[st.optionIconWrap, { backgroundColor: "#8B5CF612" }]}>
+              <Ionicons name="create" size={22} color="#8B5CF6" />
+            </View>
+            <Text style={st.optionLabel}>Manual</Text>
+            <Text style={st.optionHint}>Type it in</Text>
           </Pressable>
         </View>
 
         {showBarcode && (
-          <View style={[st.barcodeBox, { backgroundColor: colors.backgroundSecondary }]}>
+          <View style={st.barcodeBox}>
             <TextInput
               value={barcodeInput}
               onChangeText={setBarcodeInput}
               placeholder="Enter barcode number"
-              placeholderTextColor={colors.textTertiary}
-              style={[st.barcodeInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
+              placeholderTextColor="#AEAEB2"
+              style={st.barcodeInput}
               keyboardType="numeric"
               returnKeyType="search"
               onSubmitEditing={handleBarcode}
+              autoFocus
             />
-            <Pressable onPress={handleBarcode} style={[st.barcodeSend, { backgroundColor: colors.tint }]}>
+            <Pressable onPress={handleBarcode} style={st.barcodeSend}>
               {barcodeLoading ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="search" size={18} color="#fff" />}
             </Pressable>
           </View>
@@ -206,26 +245,118 @@ export default function ScanTab() {
 
 const st = StyleSheet.create({
   root: { flex: 1 },
-  header: { alignItems: "center", paddingBottom: 4 },
-  headerTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  header: { alignItems: "center", paddingBottom: 8, gap: 4 },
+  headerTitle: { fontSize: 20, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
+  headerSub: { fontSize: 13, fontFamily: "Inter_400Regular" },
 
-  body: { flex: 1, paddingHorizontal: 24, justifyContent: "center", gap: 16, marginTop: -40 },
+  body: { flex: 1, paddingHorizontal: 20, justifyContent: "center", gap: 20, marginTop: -30 },
 
-  cameraBox: { borderRadius: 20, alignItems: "center", justifyContent: "center", paddingVertical: 48, gap: 12 },
-  cameraIconWrap: { width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center" },
-  cameraTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
-  cameraHint: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  cameraBox: {
+    backgroundColor: "#fff",
+    borderRadius: 28,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
+    elevation: 4,
+  },
+  viewfinder: {
+    borderRadius: 24,
+    backgroundColor: "#F8F8FA",
+    paddingVertical: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
+  corner: { position: "absolute", width: 28, height: 28, borderColor: "#FF6B35" },
+  cornerTL: { top: 12, left: 12, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 8 },
+  cornerTR: { top: 12, right: 12, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 8 },
+  cornerBL: { bottom: 12, left: 12, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 8 },
+  cornerBR: { bottom: 12, right: 12, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 8 },
+  cameraCenter: { alignItems: "center", gap: 12 },
+  cameraIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#FF6B3510",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  cameraTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#000" },
+  cameraHint: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
 
   optionRow: { flexDirection: "row", gap: 10 },
-  optionBtn: { flex: 1, alignItems: "center", paddingVertical: 18, borderRadius: 16, gap: 6 },
-  optionLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  optionBtn: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 8,
+    borderRadius: 22,
+    gap: 6,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  optionIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
+  optionLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#000" },
+  optionHint: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
 
-  barcodeBox: { flexDirection: "row", alignItems: "center", gap: 8, padding: 6, borderRadius: 16 },
-  barcodeInput: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1 },
-  barcodeSend: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  barcodeBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 6,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  barcodeInput: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: "#F2F2F7",
+    color: "#000",
+  },
+  barcodeSend: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FF6B35",
+  },
 
   loadWrap: { flex: 1 },
-  scanLine: { height: 3, width: "100%", borderRadius: 2, opacity: 0.8 },
+  scanLine: { height: 3, width: "100%", borderRadius: 2, opacity: 0.9 },
   loadPill: { position: "absolute", left: 0, right: 0, alignItems: "center" },
-  loadTip: { fontSize: 15, fontFamily: "Inter_500Medium", color: "#fff", marginTop: 8 },
+  loadPillInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  loadTip: { fontSize: 15, fontFamily: "Inter_500Medium", color: "#fff" },
 });

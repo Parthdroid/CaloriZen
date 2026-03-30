@@ -43,10 +43,6 @@ export function MealCard({ meal, onPress }: Props) {
   const mealColor = MEAL_COLORS[meal.mealType] ?? "#FF6B35";
   const mealIcon = MEAL_ICONS[meal.mealType] ?? "restaurant";
   const itemNames = (meal.items as Array<{ name: string }>).map((i) => i.name).join(", ");
-  const totalWeight = (meal.items as Array<{ servingDescription?: string }>)
-    .map((i) => i.servingDescription || "")
-    .filter(Boolean)
-    .join(", ");
 
   const handleDelete = () => {
     Alert.alert("Delete Meal", "Are you sure you want to delete this meal?", [
@@ -76,12 +72,10 @@ export function MealCard({ meal, onPress }: Props) {
       onLongPress={handleDelete}
       style={({ pressed }) => [
         st.card,
-        {
-          opacity: pressed ? 0.7 : 1,
-        },
+        { transform: [{ scale: pressed ? 0.98 : 1 }] },
       ]}
     >
-      <View style={[st.iconWrap, { backgroundColor: mealColor + "14" }]}>
+      <View style={[st.iconWrap, { backgroundColor: mealColor + "12" }]}>
         <Ionicons name={mealIcon} size={20} color={mealColor} />
       </View>
 
@@ -90,20 +84,16 @@ export function MealCard({ meal, onPress }: Props) {
           <Text style={st.itemNames} numberOfLines={1}>{itemNames}</Text>
           <Text style={st.time}>{time}</Text>
         </View>
-        {totalWeight ? (
-          <Text style={st.servingText} numberOfLines={1}>🔥 {Math.round(meal.totalCalories)} cal</Text>
-        ) : (
-          <Text style={st.servingText}>🔥 {Math.round(meal.totalCalories)} cal</Text>
-        )}
-        <View style={st.macroRow}>
-          <View style={[st.macroPill, { backgroundColor: "#007AFF10" }]}>
-            <Text style={[st.macroText, { color: "#007AFF" }]}>{Math.round(meal.totalProtein)}g</Text>
+        <View style={st.bottomRow}>
+          <View style={st.calBadge}>
+            <Text style={st.calText}>{Math.round(meal.totalCalories)} cal</Text>
           </View>
-          <View style={[st.macroPill, { backgroundColor: "#FF950010" }]}>
-            <Text style={[st.macroText, { color: "#FF9500" }]}>{Math.round(meal.totalCarbs)}g</Text>
-          </View>
-          <View style={[st.macroPill, { backgroundColor: "#FF3B3010" }]}>
-            <Text style={[st.macroText, { color: "#FF3B30" }]}>{Math.round(meal.totalFat)}g</Text>
+          <View style={st.macroRow}>
+            <Text style={[st.macroText, { color: "#007AFF" }]}>P {Math.round(meal.totalProtein)}g</Text>
+            <Text style={st.macroDot}>·</Text>
+            <Text style={[st.macroText, { color: "#FF9500" }]}>C {Math.round(meal.totalCarbs)}g</Text>
+            <Text style={st.macroDot}>·</Text>
+            <Text style={[st.macroText, { color: "#FF3B30" }]}>F {Math.round(meal.totalFat)}g</Text>
           </View>
         </View>
       </View>
@@ -118,8 +108,7 @@ const st = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 14,
-    marginBottom: 4,
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -128,15 +117,15 @@ const st = StyleSheet.create({
     elevation: 1,
   },
   iconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 15,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   info: {
     flex: 1,
-    gap: 4,
+    gap: 6,
   },
   topRow: {
     flexDirection: "row",
@@ -153,25 +142,35 @@ const st = StyleSheet.create({
   time: {
     fontSize: 12,
     fontFamily: "Inter_500Medium",
-    color: "#AEAEB2",
+    color: "#C7C7CC",
   },
-  servingText: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-    color: "#6C6C70",
-  },
-  macroRow: {
+  bottomRow: {
     flexDirection: "row",
-    gap: 6,
-    marginTop: 2,
+    alignItems: "center",
+    gap: 10,
   },
-  macroPill: {
+  calBadge: {
+    backgroundColor: "#FF6B3510",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
+  calText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "#FF6B35",
+  },
+  macroRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   macroText: {
     fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_500Medium",
+  },
+  macroDot: {
+    fontSize: 11,
+    color: "#D1D1D6",
   },
 });

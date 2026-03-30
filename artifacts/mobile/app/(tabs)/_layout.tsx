@@ -18,28 +18,34 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarLabelStyle: {
-          fontFamily: "Inter_500Medium",
-          fontSize: 11,
+          fontFamily: "Inter_600SemiBold",
+          fontSize: 10,
+          letterSpacing: 0.2,
         },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.background,
+          backgroundColor: isIOS ? "transparent" : "rgba(255,255,255,0.97)",
           borderTopWidth: 0,
           elevation: 0,
-          ...(isWeb ? { height: 64, paddingBottom: 8 } : {}),
+          height: isWeb ? 64 : undefined,
+          ...(isWeb ? { paddingBottom: 8 } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={100}
-              tint="light"
+              intensity={95}
+              tint="systemChromeMaterialLight"
               style={StyleSheet.absoluteFill}
             />
           ) : isWeb ? (
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: colors.background, borderTopWidth: 0.5, borderTopColor: colors.border },
+                {
+                  backgroundColor: "rgba(255,255,255,0.97)",
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  borderTopColor: "rgba(0,0,0,0.08)",
+                },
               ]}
             />
           ) : null,
@@ -65,7 +71,7 @@ export default function TabLayout() {
             isIOS ? (
               <SymbolView name="list.bullet.circle.fill" tintColor={color} size={22} />
             ) : (
-              <Ionicons name={focused ? "list" : "list-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "list-circle" : "list-circle-outline"} size={24} color={color} />
             ),
         }}
       />
@@ -77,7 +83,7 @@ export default function TabLayout() {
             isIOS ? (
               <SymbolView name="camera.viewfinder" tintColor={color} size={22} />
             ) : (
-              <Ionicons name={focused ? "scan" : "scan-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "scan-circle" : "scan-circle-outline"} size={24} color={color} />
             ),
         }}
       />

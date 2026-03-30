@@ -47,11 +47,11 @@ export default function GoalsScreen() {
     });
   };
 
-  const fields: Array<{ key: keyof GoalInput; label: string; unit: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = [
-    { key: "dailyCalories", label: "Calories", unit: "kcal", color: colors.tint, icon: "flame" },
-    { key: "dailyProtein", label: "Protein", unit: "g", color: colors.protein, icon: "fitness" },
-    { key: "dailyCarbs", label: "Carbs", unit: "g", color: colors.carbs, icon: "nutrition" },
-    { key: "dailyFat", label: "Fat", unit: "g", color: colors.fat, icon: "water" },
+  const fields: Array<{ key: keyof GoalInput; label: string; unit: string; color: string; icon: keyof typeof Ionicons.glyphMap; bg: string }> = [
+    { key: "dailyCalories", label: "Daily Calories", unit: "kcal", color: colors.tint, icon: "flame", bg: colors.tint + "10" },
+    { key: "dailyProtein", label: "Daily Protein", unit: "g", color: colors.protein, icon: "fitness", bg: colors.protein + "10" },
+    { key: "dailyCarbs", label: "Daily Carbs", unit: "g", color: colors.carbs, icon: "nutrition", bg: colors.carbs + "10" },
+    { key: "dailyFat", label: "Daily Fat", unit: "g", color: colors.fat, icon: "water", bg: colors.fat + "10" },
   ];
 
   return (
@@ -63,8 +63,9 @@ export default function GoalsScreen() {
       <View style={st.header}>
         <Text style={[st.title, { color: colors.text }]}>Goals</Text>
         {!editing ? (
-          <Pressable onPress={() => setEditing(true)} style={[st.editBtn, { backgroundColor: colors.backgroundSecondary }]}>
-            <Text style={[st.editBtnText, { color: colors.text }]}>Edit</Text>
+          <Pressable onPress={() => setEditing(true)} style={st.editBtn}>
+            <Ionicons name="pencil" size={14} color="#FF6B35" />
+            <Text style={st.editBtnText}>Edit</Text>
           </Pressable>
         ) : (
           <Pressable onPress={() => setEditing(false)} hitSlop={12}>
@@ -74,11 +75,13 @@ export default function GoalsScreen() {
       </View>
 
       <View style={st.cards}>
-        {fields.map(({ key, label, unit, color, icon }) => (
-          <View key={key} style={[st.card, { backgroundColor: colors.backgroundSecondary }]}>
+        {fields.map(({ key, label, unit, color, icon, bg }) => (
+          <View key={key} style={st.card}>
             <View style={st.cardRow}>
-              <Ionicons name={icon} size={20} color={color} />
-              <Text style={[st.cardLabel, { color: colors.textSecondary }]}>{label}</Text>
+              <View style={[st.cardIconWrap, { backgroundColor: bg }]}>
+                <Ionicons name={icon} size={18} color={color} />
+              </View>
+              <Text style={st.cardLabel}>{label}</Text>
             </View>
             {editing ? (
               <View style={st.editRow}>
@@ -86,14 +89,14 @@ export default function GoalsScreen() {
                   value={inputs[key]}
                   onChangeText={(v) => setInputs((p) => ({ ...p, [key]: v }))}
                   keyboardType="numeric"
-                  style={[st.input, { color: colors.text, borderColor: colors.border }]}
+                  style={st.input}
                   selectTextOnFocus
                 />
-                <Text style={[st.unit, { color: colors.textTertiary }]}>{unit}</Text>
+                <Text style={st.unit}>{unit}</Text>
               </View>
             ) : (
               <Text style={[st.cardValue, { color: colors.text }]}>
-                {isLoading ? "..." : inputs[key]} <Text style={{ color: colors.textTertiary, fontSize: 14, fontFamily: "Inter_400Regular" }}>{unit}</Text>
+                {isLoading ? "..." : inputs[key]} <Text style={st.cardUnit}>{unit}</Text>
               </Text>
             )}
           </View>
@@ -104,27 +107,29 @@ export default function GoalsScreen() {
         <Pressable
           onPress={handleSave}
           disabled={isPending}
-          style={({ pressed }) => [st.saveBtn, { backgroundColor: colors.text, opacity: pressed || isPending ? 0.8 : 1 }]}
+          style={({ pressed }) => [st.saveBtn, { opacity: pressed || isPending ? 0.85 : 1 }]}
         >
-          <Text style={[st.saveBtnText, { color: colors.background }]}>{isPending ? "Saving..." : "Save Goals"}</Text>
+          <Text style={st.saveBtnText}>{isPending ? "Saving..." : "Save Goals"}</Text>
         </Pressable>
       )}
 
-      <View style={[st.info, { backgroundColor: colors.backgroundSecondary }]}>
-        <Ionicons name="information-circle-outline" size={16} color={colors.textTertiary} />
-        <Text style={[st.infoText, { color: colors.textTertiary }]}>Consult a healthcare professional for personalized nutrition advice.</Text>
+      <View style={st.infoCard}>
+        <Ionicons name="information-circle" size={18} color="#007AFF" />
+        <Text style={st.infoText}>Consult a healthcare professional for personalized nutrition advice.</Text>
       </View>
 
       {user && (
         <View style={st.accountSection}>
-          <View style={[st.accountCard, { backgroundColor: colors.backgroundSecondary }]}>
+          <View style={st.accountCard}>
             <View style={st.accountRow}>
-              <View style={[st.accountAvatar, { backgroundColor: colors.tint + "20" }]}>
-                <Ionicons name="person" size={18} color={colors.tint} />
+              <View style={[st.accountAvatar, { backgroundColor: colors.tint + "12" }]}>
+                <Text style={[st.accountAvatarText, { color: colors.tint }]}>
+                  {(user.name?.[0] || "U").toUpperCase()}
+                </Text>
               </View>
               <View style={st.accountInfo}>
                 <Text style={[st.accountName, { color: colors.text }]}>{user.name || "User"}</Text>
-                <Text style={[st.accountEmail, { color: colors.textTertiary }]}>{user.email}</Text>
+                <Text style={st.accountEmail}>{user.email}</Text>
               </View>
             </View>
           </View>
@@ -159,32 +164,71 @@ const st = StyleSheet.create({
   root: { flex: 1 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24, marginBottom: 24 },
   title: { fontSize: 34, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
-  editBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
-  editBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  editBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: "#FF6B3510" },
+  editBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#FF6B35" },
 
   cards: { paddingHorizontal: 20, gap: 10, marginBottom: 20 },
-  card: { borderRadius: 16, padding: 18 },
-  cardRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  cardLabel: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  cardValue: { fontSize: 28, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  card: {
+    borderRadius: 20,
+    padding: 18,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
+  cardIconWrap: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  cardLabel: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#AEAEB2" },
+  cardValue: { fontSize: 32, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  cardUnit: { fontSize: 16, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
 
   editRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  input: { flex: 1, borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 20, fontFamily: "Inter_600SemiBold" },
-  unit: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  input: { flex: 1, borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 22, fontFamily: "Inter_600SemiBold", color: "#000", backgroundColor: "#F8F8FA" },
+  unit: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
 
-  saveBtn: { marginHorizontal: 20, borderRadius: 14, paddingVertical: 16, alignItems: "center", marginBottom: 20 },
-  saveBtnText: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  saveBtn: { marginHorizontal: 20, borderRadius: 16, paddingVertical: 16, alignItems: "center", marginBottom: 20, backgroundColor: "#FF6B35" },
+  saveBtnText: { fontSize: 17, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
-  info: { flexDirection: "row", gap: 10, marginHorizontal: 20, padding: 16, borderRadius: 14, alignItems: "flex-start" },
-  infoText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+  infoCard: {
+    flexDirection: "row",
+    gap: 10,
+    marginHorizontal: 20,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "flex-start",
+    backgroundColor: "#007AFF08",
+  },
+  infoText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18, color: "#8E8E93" },
 
   accountSection: { marginTop: 32, paddingHorizontal: 20, gap: 12 },
-  accountCard: { borderRadius: 16, padding: 16 },
-  accountRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  accountAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  accountCard: {
+    borderRadius: 20,
+    padding: 16,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  accountRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  accountAvatar: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
+  accountAvatarText: { fontSize: 20, fontFamily: "Inter_700Bold" },
   accountInfo: { flex: 1, gap: 2 },
-  accountName: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
-  accountEmail: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  signOutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,59,48,0.2)", backgroundColor: "rgba(255,59,48,0.05)" },
+  accountName: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  accountEmail: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
+  signOutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: "#FF3B3008",
+    borderWidth: 1,
+    borderColor: "#FF3B3018",
+  },
   signOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#FF3B30" },
 });

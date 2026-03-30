@@ -7,9 +7,9 @@ const purple = "#8B5CF6";
 export default {
   light: {
     text: "#000000",
-    textSecondary: "#6C6C70",
+    textSecondary: "#3C3C43",
     textTertiary: "#AEAEB2",
-    background: "#FFFFFF",
+    background: "#F8F8FA",
     backgroundSecondary: "#F2F2F7",
     backgroundTertiary: "#E5E5EA",
     card: "#FFFFFF",

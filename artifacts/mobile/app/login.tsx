@@ -15,7 +15,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
@@ -81,8 +80,6 @@ export default function LoginScreen() {
       } else if (result.type === "error") {
         const msg = result.error?.message || "Google sign in was not completed.";
         Alert.alert("Sign In Failed", msg);
-      } else if (result.type === "dismiss") {
-        // User cancelled, do nothing
       }
     } catch (err: any) {
       console.error("Google sign-in error:", err);
@@ -140,23 +137,43 @@ export default function LoginScreen() {
   return (
     <View style={s.container}>
       <LinearGradient
-        colors={["#0F0F0F", "#1A1A2E", "#0F0F0F"]}
+        colors={["#0A0A0F", "#111128", "#0A0A0F"]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
 
-      <View style={[s.content, { paddingTop: topPad + 80 }]}>
-        <Image
-          source={require("@/assets/logo.png")}
-          style={s.logoImage}
-          resizeMode="contain"
-        />
+      <View style={[s.content, { paddingTop: topPad + 60 }]}>
+        <View style={s.logoGlow}>
+          <Image
+            source={require("@/assets/logo.png")}
+            style={s.logoImage}
+            resizeMode="contain"
+          />
+        </View>
 
-        <Text style={s.title}>CaloriZen™</Text>
+        <Text style={s.title}>CaloriZen</Text>
+        <Text style={s.trademark}>™</Text>
         <Text style={s.subtitle}>
-          AI-powered calorie tracking{"\n"}from a single photo
+          AI-powered nutrition tracking{"\n"}from a single photo
         </Text>
+
+        <View style={s.featureRow}>
+          <View style={s.featureItem}>
+            <Ionicons name="camera" size={16} color="rgba(255,255,255,0.5)" />
+            <Text style={s.featureText}>Photo scan</Text>
+          </View>
+          <View style={s.featureDot} />
+          <View style={s.featureItem}>
+            <Ionicons name="barcode" size={16} color="rgba(255,255,255,0.5)" />
+            <Text style={s.featureText}>Barcode</Text>
+          </View>
+          <View style={s.featureDot} />
+          <View style={s.featureItem}>
+            <Ionicons name="analytics" size={16} color="rgba(255,255,255,0.5)" />
+            <Text style={s.featureText}>AI macros</Text>
+          </View>
+        </View>
 
         <View style={s.buttonContainer}>
           {Platform.OS !== "web" ? (
@@ -174,22 +191,20 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Ionicons name="logo-apple" size={22} color="#fff" />
-                  <Text style={s.appleButtonText}>Sign in with Apple</Text>
+                  <Text style={s.appleButtonText}>Continue with Apple</Text>
                 </>
               )}
             </Pressable>
           ) : (
             <Pressable
-              onPress={() => Alert.alert("Apple Sign In", "Sign in with Apple is available on iOS devices. Please use the CaloriZen app on your iPhone or iPad to sign in with Apple.")}
-              style={({ pressed }) => [
-                s.authButton,
-                s.appleButton,
-                { opacity: pressed ? 0.9 : 0.6 },
-              ]}
+              onPress={() => Alert.alert("Apple Sign In", "Sign in with Apple is available on iOS devices.")}
+              style={[s.authButton, s.appleButton, { opacity: 0.5 }]}
             >
               <Ionicons name="logo-apple" size={22} color="#fff" />
-              <Text style={s.appleButtonText}>Sign in with Apple</Text>
-              <Text style={s.iosOnlyBadge}>iOS only</Text>
+              <Text style={s.appleButtonText}>Continue with Apple</Text>
+              <View style={s.iosOnlyBadge}>
+                <Text style={s.iosOnlyText}>iOS</Text>
+              </View>
             </Pressable>
           )}
 
@@ -212,7 +227,7 @@ export default function LoginScreen() {
                   <Path d="M24 46c5.4 0 10.3-1.8 14.1-5l-6.5-5.5C29.6 37.1 27 38 24 38c-6 0-11.1-3.8-12.9-9.2l-7 5.4C7.8 41.3 15.3 46 24 46z" fill="#4CAF50" />
                   <Path d="M44.5 20H24v8.5h11.8c-1 3.2-3 5.8-5.6 7.5l6.5 5.5C40.6 38 46 32 46 24c0-1.3-.2-2.7-.5-4z" fill="#1976D2" />
                 </Svg>
-                <Text style={s.googleButtonText}>Sign in with Google</Text>
+                <Text style={s.googleButtonText}>Continue with Google</Text>
               </>
             )}
           </Pressable>
@@ -223,9 +238,9 @@ export default function LoginScreen() {
         <Text style={s.footerText}>
           By continuing, you agree to our{" "}
           <Text style={s.footerLink} onPress={() => router.push("/terms")}>
-            Terms of Service
+            Terms
           </Text>
-          {" "}and{" "}
+          {" & "}
           <Text style={s.footerLink} onPress={() => router.push("/privacy")}>
             Privacy Policy
           </Text>
@@ -236,29 +251,46 @@ export default function LoginScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F0F0F" },
+  container: { flex: 1, backgroundColor: "#0A0A0F" },
   content: { flex: 1, paddingHorizontal: 32, alignItems: "center" },
+  logoGlow: {
+    marginBottom: 20,
+  },
   logoImage: {
-    width: 140,
-    height: 140,
-    marginBottom: 16,
+    width: 120,
+    height: 120,
   },
   title: {
-    fontSize: 36,
+    fontSize: 38,
     fontFamily: "Inter_700Bold",
-    color: "#2E7D32",
-    letterSpacing: -1,
+    color: "#fff",
+    letterSpacing: -1.5,
+  },
+  trademark: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: "rgba(255,255,255,0.3)",
+    marginTop: -4,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.45)",
     textAlign: "center",
     lineHeight: 24,
-    marginBottom: 64,
+    marginBottom: 24,
   },
-  buttonContainer: { width: "100%", gap: 14 },
+  featureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 48,
+  },
+  featureItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  featureText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.4)" },
+  featureDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "rgba(255,255,255,0.2)" },
+  buttonContainer: { width: "100%", gap: 12 },
   authButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -277,35 +309,33 @@ const s = StyleSheet.create({
   },
   appleButton: {
     backgroundColor: "#000",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
   },
   appleButtonText: {
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
   },
+  iosOnlyBadge: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  iosOnlyText: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "rgba(255,255,255,0.5)",
+  },
   footer: { paddingHorizontal: 40 },
   footerText: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.25)",
+    color: "rgba(255,255,255,0.2)",
     textAlign: "center",
     lineHeight: 18,
   },
   footerLink: {
-    color: "rgba(255,255,255,0.5)",
-    textDecorationLine: "underline",
-  },
-  iosOnlyBadge: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
     color: "rgba(255,255,255,0.4)",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    overflow: "hidden",
-    marginLeft: 4,
+    textDecorationLine: "underline",
   },
 });
