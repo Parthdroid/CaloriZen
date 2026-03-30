@@ -138,7 +138,7 @@ export default function ScanTab() {
   }, [barcodeInput, setPendingAnalysis, setPendingImageBase64]);
 
   if (loading && previewUri) {
-    const ty = scanLineAnim.interpolate({ inputRange: [0, 1], outputRange: [0, SH * 0.5] });
+    const ty = scanLineAnim.interpolate({ inputRange: [0, 1], outputRange: [0, SH] });
     return (
       <View style={[st.loadWrap, { backgroundColor: "#000" }]}>
         <Image source={{ uri: previewUri }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
