@@ -251,11 +251,12 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0A0A0F" },
   content: { flex: 1, paddingHorizontal: 32, alignItems: "center" },
   logoGlow: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   logoImage: {
-    width: 120,
-    height: 120,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
   },
   title: {
     fontSize: 38,
