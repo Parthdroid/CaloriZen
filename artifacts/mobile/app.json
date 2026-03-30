@@ -15,13 +15,16 @@
     },
     "ios": {
       "supportsTablet": false,
+      "bundleIdentifier": "ai.calorizen.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Used to take photos of your meals for AI nutrition analysis.",
-        "NSPhotoLibraryUsageDescription": "Used to pick meal photos for nutrition analysis.",
-        "NSPhotoLibraryAddUsageDescription": "Used to save meal photos."
+        "CFBundleDisplayName": "CaloriZen",
+        "NSCameraUsageDescription": "CaloriZen needs camera access to take photos of your meals for AI nutrition analysis.",
+        "NSPhotoLibraryUsageDescription": "CaloriZen needs photo library access to pick meal photos for nutrition analysis.",
+        "NSPhotoLibraryAddUsageDescription": "CaloriZen needs permission to save meal photos."
       }
     },
     "android": {
+      "package": "ai.calorizen.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -43,8 +46,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow CaloriZen to access your photos to analyze meals.",
-          "cameraPermission": "Allow CaloriZen to take photos of your meals."
+          "photosPermission": "CaloriZen needs access to your photos to analyze meals.",
+          "cameraPermission": "CaloriZen needs camera access to take photos of your meals."
         }
       ]
     ],
