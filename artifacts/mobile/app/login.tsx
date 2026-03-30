@@ -202,9 +202,6 @@ export default function LoginScreen() {
             >
               <Ionicons name="logo-apple" size={22} color="#fff" />
               <Text style={s.appleButtonText}>Continue with Apple</Text>
-              <View style={s.iosOnlyBadge}>
-                <Text style={s.iosOnlyText}>iOS</Text>
-              </View>
             </Pressable>
           )}
 
@@ -314,17 +311,6 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
-  },
-  iosOnlyBadge: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  iosOnlyText: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
-    color: "rgba(255,255,255,0.5)",
   },
   footer: { paddingHorizontal: 40 },
   footerText: {
