@@ -7,18 +7,18 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "GOOGLE_CLIENT_ID": "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
+        "GOOGLE_CLIENT_ID": "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "GOOGLE_CLIENT_ID": "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
+        "GOOGLE_CLIENT_ID": "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com"
       }
     },
     "production": {
       "env": {
-        "GOOGLE_CLIENT_ID": "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
+        "GOOGLE_CLIENT_ID": "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com"
       }
     }
   },
