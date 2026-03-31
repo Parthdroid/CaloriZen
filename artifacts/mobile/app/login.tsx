@@ -15,10 +15,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
-const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_ID =
+  Constants.expoConfig?.extra?.googleClientId ||
+  process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+  "";
 
 const discovery = {
   authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
