@@ -20,8 +20,8 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 const GOOGLE_CLIENT_ID =
-  Constants.expoConfig?.extra?.googleClientId ||
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+  Constants.expoConfig?.extra?.googleClientId ||
   "";
 
 const discovery = {
