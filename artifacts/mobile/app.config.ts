@@ -8,7 +8,7 @@ const GOOGLE_CLIENT_ID =
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "CaloriZen",
-  slug: "mobile",
+  slug: "calorizen",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
