@@ -41,8 +41,11 @@ export default function LoginScreen() {
   const redirectUri = AuthSession.makeRedirectUri({
     scheme: "calorizen",
     path: "auth",
-    ...(Platform.OS === "web" ? { preferLocalhost: false } : {}),
+    preferLocalhost: Platform.OS === "web" ? false : undefined,
   });
+
+  console.log("[GoogleSignIn] redirectUri:", redirectUri);
+  console.log("[GoogleSignIn] clientId:", GOOGLE_CLIENT_ID ? "set" : "MISSING");
 
   const handleGoogleSignIn = async () => {
     setLoading("google");
