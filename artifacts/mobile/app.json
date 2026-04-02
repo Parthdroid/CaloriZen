@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "ai.calorizen.app",
+      "bundleIdentifier": "com.parth.calorizen",
       "infoPlist": {
         "CFBundleDisplayName": "CaloriZen",
         "NSCameraUsageDescription": "CaloriZen needs camera access to take photos of your meals for AI nutrition analysis.",
