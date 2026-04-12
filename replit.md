@@ -74,7 +74,9 @@ A mobile calorie and macro tracking app with:
 - **Tab bar**: Translucent blur on iOS (`systemChromeMaterialLight`), hairline top border on web, orange active tint
 - **MealCard**: White rounded cards with colored meal-type icon, calorie badge in orange tint, inline macro text (P · C · F), scale animation on press
 - **StatusBar**: Light on login screen, dark everywhere else
-- **Bundle ID**: `ai.calorizen.app` (iOS + Android); `CFBundleDisplayName: "CaloriZen"` for proper permission dialogs
+- **Bundle ID**: `com.parth.calorizen` (iOS), `ai.calorizen.app` (Android); `CFBundleDisplayName: "CaloriZen"` for proper permission dialogs
+- **Google Sign-In**: Uses `expo-auth-session/providers/google` with Web Client ID + iOS Client ID; reversed iOS client ID registered as URL scheme for OAuth redirect
+- **Manual entry page**: `/manual` route for typing in food name, calories, and macros manually
 - **Images**: NOT stored in DB — base64 used only during AI analysis then discarded; DB stores text-only meal records (~500 bytes each)
 
 ## Packages

@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/landing/"
-title = "NutriSnap Landing Page"
+title = "CaloriZen Landing Page"
 version = "1.0.0"
 id = "artifacts/landing"
 router = "path"
