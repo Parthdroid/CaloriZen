@@ -11,7 +11,6 @@ import {
   Dimensions,
   Animated,
   Easing,
-  TextInput,
   KeyboardAvoidingView,
 } from "react-native";
 import { router } from "expo-router";
@@ -21,7 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/hooks/useTheme";
 import { useApp } from "@/context/AppContext";
-import { analyzePhoto, lookupBarcode } from "@workspace/api-client-react";
+import { analyzePhoto } from "@workspace/api-client-react";
 
 const { height: SH } = Dimensions.get("window");
 const TIPS = ["Identifying foods...", "Estimating portions...", "Calculating macros...", "Almost done..."];
@@ -33,9 +32,6 @@ export default function ScanTab() {
   const [loading, setLoading] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [tipIndex, setTipIndex] = useState(0);
-  const [showBarcode, setShowBarcode] = useState(false);
-  const [barcodeInput, setBarcodeInput] = useState("");
-  const [barcodeLoading, setBarcodeLoading] = useState(false);
   const scanLineAnim = useRef(new Animated.Value(0)).current;
   const tipInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -122,20 +118,6 @@ export default function ScanTab() {
     }
   }, [handleImage]);
 
-  const handleBarcode = useCallback(async () => {
-    if (!barcodeInput.trim()) return;
-    setBarcodeLoading(true);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    try {
-      const product = await lookupBarcode(barcodeInput.trim());
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setPendingAnalysis(null); setPendingImageBase64(null);
-      router.push({ pathname: "/barcode", params: { prefill: JSON.stringify(product) } });
-    } catch {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Not Found", "Couldn't find this barcode.");
-    } finally { setBarcodeLoading(false); }
-  }, [barcodeInput, setPendingAnalysis, setPendingImageBase64]);
 
   if (loading && previewUri) {
     const ty = scanLineAnim.interpolate({ inputRange: [0, 1], outputRange: [0, SH] });
@@ -199,17 +181,17 @@ export default function ScanTab() {
             <Text style={st.optionHint}>Choose photo</Text>
           </Pressable>
           <Pressable
-            onPress={() => { setShowBarcode(!showBarcode); Haptics.selectionAsync(); }}
+            onPress={() => { router.push("/barcode"); Haptics.selectionAsync(); }}
             style={({ pressed }) => [st.optionBtn, { opacity: pressed ? 0.8 : 1 }]}
           >
-            <View style={[st.optionIconWrap, { backgroundColor: showBarcode ? "#FF6B3512" : "#34C75912" }]}>
-              <Ionicons name="barcode" size={22} color={showBarcode ? "#FF6B35" : "#34C759"} />
+            <View style={[st.optionIconWrap, { backgroundColor: "#34C75912" }]}>
+              <Ionicons name="barcode" size={22} color="#34C759" />
             </View>
             <Text style={st.optionLabel}>Barcode</Text>
             <Text style={st.optionHint}>Scan package</Text>
           </Pressable>
           <Pressable
-            onPress={() => router.push("/barcode")}
+            onPress={() => { router.push("/manual"); Haptics.selectionAsync(); }}
             style={({ pressed }) => [st.optionBtn, { opacity: pressed ? 0.8 : 1 }]}
           >
             <View style={[st.optionIconWrap, { backgroundColor: "#8B5CF612" }]}>
@@ -220,24 +202,6 @@ export default function ScanTab() {
           </Pressable>
         </View>
 
-        {showBarcode && (
-          <View style={st.barcodeBox}>
-            <TextInput
-              value={barcodeInput}
-              onChangeText={setBarcodeInput}
-              placeholder="Enter barcode number"
-              placeholderTextColor="#AEAEB2"
-              style={st.barcodeInput}
-              keyboardType="numeric"
-              returnKeyType="search"
-              onSubmitEditing={handleBarcode}
-              autoFocus
-            />
-            <Pressable onPress={handleBarcode} style={st.barcodeSend}>
-              {barcodeLoading ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="search" size={18} color="#fff" />}
-            </Pressable>
-          </View>
-        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -313,38 +277,6 @@ const st = StyleSheet.create({
   },
   optionLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#000" },
   optionHint: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#AEAEB2" },
-
-  barcodeBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 6,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  barcodeInput: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: "#F2F2F7",
-    color: "#000",
-  },
-  barcodeSend: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FF6B35",
-  },
 
   loadWrap: { flex: 1 },
   scanLine: { height: 3, width: "100%", borderRadius: 2, opacity: 0.9 },

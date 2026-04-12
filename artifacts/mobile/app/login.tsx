@@ -22,7 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 const GOOGLE_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
   Constants.expoConfig?.extra?.googleClientId ||
-  "";
+  "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com";
 
 const discovery = {
   authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
