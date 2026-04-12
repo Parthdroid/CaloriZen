@@ -20,7 +20,14 @@
         "CFBundleDisplayName": "CaloriZen",
         "NSCameraUsageDescription": "CaloriZen needs camera access to take photos of your meals for AI nutrition analysis.",
         "NSPhotoLibraryUsageDescription": "CaloriZen needs photo library access to pick meal photos for nutrition analysis.",
-        "NSPhotoLibraryAddUsageDescription": "CaloriZen needs permission to save meal photos."
+        "NSPhotoLibraryAddUsageDescription": "CaloriZen needs permission to save meal photos.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.205171191979-9dme6iar28gr6dgl0bla4q189aooua8t"
+            ]
+          }
+        ]
       }
     },
     "android": {

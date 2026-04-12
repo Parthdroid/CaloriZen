@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,22 +13,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
-import * as AuthSession from "expo-auth-session";
+import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from "expo-apple-authentication";
-import Constants from "expo-constants";
+import * as WebBrowser from "expo-web-browser";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
-const GOOGLE_CLIENT_ID =
-  process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
-  Constants.expoConfig?.extra?.googleClientId ||
-  "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com";
+WebBrowser.maybeCompleteAuthSession();
 
-const discovery = {
-  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenEndpoint: "https://oauth2.googleapis.com/token",
-  revocationEndpoint: "https://oauth2.googleapis.com/revoke",
-};
+const WEB_CLIENT_ID = "205171191979-ttb55pruu8bckvlc5s5nhap70he8m6uk.apps.googleusercontent.com";
+const IOS_CLIENT_ID = "205171191979-9dme6iar28gr6dgl0bla4q189aooua8t.apps.googleusercontent.com";
 
 const API_BASE = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
@@ -38,60 +32,60 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState<"google" | "apple" | null>(null);
 
   const router = useRouter();
-  const redirectUri = AuthSession.makeRedirectUri({
-    scheme: "calorizen",
-    path: "auth",
-    preferLocalhost: Platform.OS === "web" ? false : undefined,
+
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: WEB_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
   });
 
-  console.log("[GoogleSignIn] redirectUri:", redirectUri);
-  console.log("[GoogleSignIn] clientId:", GOOGLE_CLIENT_ID ? "set" : "MISSING");
+  useEffect(() => {
+    if (!response) return;
+    if (response.type === "success") {
+      const idToken = response.params?.id_token;
+      if (idToken) {
+        handleGoogleToken(idToken);
+      } else {
+        setLoading(null);
+        Alert.alert("Sign In Failed", "No ID token received from Google.");
+      }
+    } else if (response.type === "error") {
+      setLoading(null);
+      Alert.alert("Sign In Failed", response.error?.message || "Google sign in was not completed.");
+    } else {
+      setLoading(null);
+    }
+  }, [response]);
 
-  const handleGoogleSignIn = async () => {
-    setLoading("google");
+  const handleGoogleToken = async (idToken: string) => {
     try {
-      const state = Math.random().toString(36).substring(2);
-
-      const authRequest = new AuthSession.AuthRequest({
-        clientId: GOOGLE_CLIENT_ID,
-        scopes: ["openid", "profile", "email"],
-        redirectUri,
-        responseType: AuthSession.ResponseType.IdToken,
-        usePKCE: false,
-        extraParams: {
-          nonce: state,
-        },
+      const resp = await fetch(`${API_BASE}/api/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
       });
 
-      const result = await authRequest.promptAsync(discovery);
-
-      if (result.type === "success") {
-        const idToken = result.params?.id_token;
-        if (!idToken) {
-          throw new Error("No ID token received from Google");
-        }
-
-        const resp = await fetch(`${API_BASE}/api/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken }),
-        });
-
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.error || "Server authentication failed");
-        }
-
-        const data = await resp.json();
-        await signIn(data.token, data.user);
-      } else if (result.type === "error") {
-        const msg = result.error?.message || "Google sign in was not completed.";
-        Alert.alert("Sign In Failed", msg);
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || "Server authentication failed");
       }
+
+      const data = await resp.json();
+      await signIn(data.token, data.user);
     } catch (err: any) {
       console.error("Google sign-in error:", err);
       Alert.alert("Sign In Error", err.message || "Something went wrong. Please try again.");
     } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading("google");
+    try {
+      await promptAsync();
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      Alert.alert("Sign In Error", err.message || "Something went wrong. Please try again.");
       setLoading(null);
     }
   };
