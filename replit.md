@@ -156,7 +156,8 @@ React + Vite landing page for CaloriZen, targeting deployment at calorizen.ai. C
 - Footer with Product, Legal, Connect links
 - SEO: meta description, Open Graph tags, accessible viewport
 - Responsive: mockup scales on mobile, secondary mockup hidden below md breakpoint
-- Port: 18150, preview path: `/` (root — this is what visitors see on the domain)
+- Port: 18150, preview path: `/landing/`
+- Custom domain: calorizen.in points to the landing page
 
 ### `scripts` (`@workspace/scripts`)
 
