@@ -1,0 +1,77 @@
+//
+//  ContentView.swift
+//  GoogleSignInApp
+//
+//  Created by Developer on 2026-04-22.
+//
+
+import SwiftUI
+import GoogleSignIn
+
+struct ContentView: View {
+    @State private var userName: String = ""
+    @State private var userEmail: String = ""
+    @State private var isSignedIn: Bool = false
+
+    var body: some View {
+        VStack(spacing: 20) {
+            if isSignedIn {
+                Text("Welcome, \(userName)")
+                    .font(.title)
+                Text("Email: \(userEmail)")
+                    .font(.subheadline)
+                Button(action: signOut) {
+                    Text("Sign Out")
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            } else {
+                Button(action: signIn) {
+                    HStack {
+                        Image(systemName: "globe")
+                        Text("Sign in with Google(coming soon!)")
+                    }
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+            }
+        }
+        .padding()
+    }
+
+    func signIn() {
+        guard let clientID = "YOUR_CLIENT_ID" else { return }
+
+        let signInConfig = GIDConfiguration(clientID: clientID)
+
+        GIDSignIn.sharedInstance.signIn(with: signInConfig, presenting: UIApplication.shared.windows.first!.rootViewController!) { user, error in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+
+            guard let user = user else { return }
+
+            userName = user.profile?.name ?? ""
+            userEmail = user.profile?.email ?? ""
+            isSignedIn = true
+        }
+    }
+
+    func signOut() {
+        GIDSignIn.sharedInstance.signOut()
+        userName = ""
+        userEmail = ""
+        isSignedIn = false
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
