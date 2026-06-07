@@ -1,15 +1,18 @@
-#!/bin/sh
+#!/bin/zsh
 
 set -e
 
-echo "Installing pnpm..."
-npm install -g pnpm
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
-echo "Installing JavaScript dependencies..."
-pnpm install
+echo "Node version:"
+which node || true
+node --version || true
+
+echo "NPM version:"
+which npm || true
+npm --version || true
 
 echo "Installing CocoaPods dependencies..."
 pod install
 
 echo "Finished setup."
-
