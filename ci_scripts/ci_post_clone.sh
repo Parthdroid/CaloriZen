@@ -4,7 +4,7 @@ set -e
 
 brew install node
 
-corepack enable
+npm install -g pnpm
 
 cd ..
 
