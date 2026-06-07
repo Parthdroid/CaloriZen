@@ -4,10 +4,8 @@ set -e
 
 brew install node
 
-node --version
-npm --version
+cd ..
+
+npm install
 
 pod install
-
-
-
