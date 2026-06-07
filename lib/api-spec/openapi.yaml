@@ -1,0 +1,578 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: CaloriZen API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: meals
+    description: Meal logging operations
+  - name: nutrition
+    description: Nutrition analysis operations
+  - name: goals
+    description: User goals operations
+  - name: barcode
+    description: Barcode lookup operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /meals:
+    get:
+      operationId: listMeals
+      tags: [meals]
+      summary: List meals for a date
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: ISO date string YYYY-MM-DD, defaults to today
+      responses:
+        "200":
+          description: List of meals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Meal"
+    post:
+      operationId: createMeal
+      tags: [meals]
+      summary: Create a new meal log entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMealBody"
+      responses:
+        "201":
+          description: Created meal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meal"
+
+  /meals/{id}:
+    get:
+      operationId: getMeal
+      tags: [meals]
+      summary: Get a meal by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: The meal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    put:
+      operationId: updateMeal
+      tags: [meals]
+      summary: Update a meal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMealBody"
+      responses:
+        "200":
+          description: Updated meal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteMeal
+      tags: [meals]
+      summary: Delete a meal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /nutrition/analyze-photo:
+    post:
+      operationId: analyzePhoto
+      tags: [nutrition]
+      summary: Analyze a meal photo with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzePhotoBody"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionAnalysis"
+
+  /nutrition/clarify:
+    post:
+      operationId: clarifymeal
+      tags: [nutrition]
+      summary: Clarify a low-confidence meal analysis with answers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClarifyMealBody"
+      responses:
+        "200":
+          description: Updated analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutritionAnalysis"
+
+  /barcode/{barcode}:
+    get:
+      operationId: lookupBarcode
+      tags: [barcode]
+      summary: Look up nutrition info for a barcode
+      parameters:
+        - name: barcode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product nutrition info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BarcodeProduct"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /goals:
+    get:
+      operationId: getGoals
+      tags: [goals]
+      summary: Get user nutrition goals
+      responses:
+        "200":
+          description: User goals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goals"
+    put:
+      operationId: updateGoals
+      tags: [goals]
+      summary: Update user nutrition goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalsBody"
+      responses:
+        "200":
+          description: Updated goals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goals"
+
+  /daily-summary:
+    get:
+      operationId: getDailySummary
+      tags: [meals]
+      summary: Get daily calorie and macro summary
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: ISO date string YYYY-MM-DD, defaults to today
+      responses:
+        "200":
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailySummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MealItem:
+      type: object
+      properties:
+        name:
+          type: string
+        servingDescription:
+          type: string
+        calories:
+          type: number
+        protein:
+          type: number
+        carbs:
+          type: number
+        fat:
+          type: number
+        confidence:
+          type: number
+          description: AI confidence 0-1, only for AI-detected items
+      required:
+        - name
+        - servingDescription
+        - calories
+        - protein
+        - carbs
+        - fat
+
+    Meal:
+      type: object
+      properties:
+        id:
+          type: integer
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        loggedAt:
+          type: string
+          format: date-time
+        imageUrl:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealItem"
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFat:
+          type: number
+      required:
+        - id
+        - mealType
+        - loggedAt
+        - items
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFat
+
+    CreateMealBody:
+      type: object
+      properties:
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealItem"
+        imageUrl:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        loggedAt:
+          type: string
+          format: date-time
+      required:
+        - mealType
+        - items
+
+    UpdateMealBody:
+      type: object
+      properties:
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealItem"
+        notes:
+          type: string
+          nullable: true
+
+    AnalyzePhotoBody:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64-encoded image data
+        mimeType:
+          type: string
+          description: Image MIME type (image/jpeg, image/png, etc.)
+      required:
+        - imageBase64
+        - mimeType
+
+    ClarificationQuestion:
+      type: object
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        itemIndex:
+          type: integer
+          description: Which detected item this question is about
+      required:
+        - question
+        - options
+
+    NutritionAnalysis:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealItem"
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFat:
+          type: number
+        confidence:
+          type: number
+          description: Overall confidence 0-1
+        needsClarification:
+          type: boolean
+        clarificationQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClarificationQuestion"
+        analysisNotes:
+          type: string
+          nullable: true
+      required:
+        - items
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFat
+        - confidence
+        - needsClarification
+        - clarificationQuestions
+
+    ClarifyMealBody:
+      type: object
+      properties:
+        originalAnalysis:
+          $ref: "#/components/schemas/NutritionAnalysis"
+        imageBase64:
+          type: string
+          nullable: true
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              question:
+                type: string
+              answer:
+                type: string
+            required:
+              - question
+              - answer
+      required:
+        - originalAnalysis
+        - answers
+
+    BarcodeProduct:
+      type: object
+      properties:
+        barcode:
+          type: string
+        productName:
+          type: string
+        brand:
+          type: string
+          nullable: true
+        servingSize:
+          type: string
+        servingsPerContainer:
+          type: number
+          nullable: true
+        caloriesPerServing:
+          type: number
+        proteinPerServing:
+          type: number
+        carbsPerServing:
+          type: number
+        fatPerServing:
+          type: number
+        imageUrl:
+          type: string
+          nullable: true
+      required:
+        - barcode
+        - productName
+        - servingSize
+        - caloriesPerServing
+        - proteinPerServing
+        - carbsPerServing
+        - fatPerServing
+
+    Goals:
+      type: object
+      properties:
+        dailyCalories:
+          type: integer
+        dailyProtein:
+          type: integer
+        dailyCarbs:
+          type: integer
+        dailyFat:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - dailyCalories
+        - dailyProtein
+        - dailyCarbs
+        - dailyFat
+        - updatedAt
+
+    UpdateGoalsBody:
+      type: object
+      properties:
+        dailyCalories:
+          type: integer
+        dailyProtein:
+          type: integer
+        dailyCarbs:
+          type: integer
+        dailyFat:
+          type: integer
+      required:
+        - dailyCalories
+        - dailyProtein
+        - dailyCarbs
+        - dailyFat
+
+    DailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+        totalCalories:
+          type: number
+        totalProtein:
+          type: number
+        totalCarbs:
+          type: number
+        totalFat:
+          type: number
+        goalCalories:
+          type: integer
+        goalProtein:
+          type: integer
+        goalCarbs:
+          type: integer
+        goalFat:
+          type: integer
+        meals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Meal"
+      required:
+        - date
+        - totalCalories
+        - totalProtein
+        - totalCarbs
+        - totalFat
+        - goalCalories
+        - goalProtein
+        - goalCarbs
+        - goalFat
+        - meals

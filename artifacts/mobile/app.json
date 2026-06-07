@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "CaloriZen",
+    "slug": "mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "calorizen",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.parth.calorizen",
+      "infoPlist": {
+        "CFBundleDisplayName": "CaloriZen",
+        "NSCameraUsageDescription": "CaloriZen needs camera access to take photos of your meals for AI nutrition analysis.",
+        "NSPhotoLibraryUsageDescription": "CaloriZen needs photo library access to pick meal photos for nutrition analysis.",
+        "NSPhotoLibraryAddUsageDescription": "CaloriZen needs permission to save meal photos.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.205171191979-9dme6iar28gr6dgl0bla4q189aooua8t"
+            ]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "ai.calorizen.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CaloriZen needs access to your photos to analyze meals.",
+          "cameraPermission": "CaloriZen needs camera access to take photos of your meals."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

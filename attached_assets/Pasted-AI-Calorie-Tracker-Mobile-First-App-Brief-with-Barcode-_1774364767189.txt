@@ -1,0 +1,420 @@
+AI Calorie Tracker — Mobile-First App Brief (with Barcode + Low-Confidence Questions)
+Product Vision
+
+Build a mobile-first AI calorie tracking app that helps users log meals in seconds using the fastest input method for the situation:
+
+take a photo for fresh meals
+scan a barcode for packaged foods
+answer 1–2 quick follow-up questions only when the AI is unsure
+review and save with minimal typing
+
+The app should feel like a real phone product: fast, camera-driven, thumb-friendly, and built for daily use. Desktop is optional and secondary.
+
+Core App Promise
+
+A user should be able to:
+
+Open the app on their phone
+Tap Scan Meal or Scan Barcode
+Capture a meal photo, choose one from gallery, or scan packaged food
+Get calories and macros quickly
+If AI confidence is low, answer 1–2 short questions
+Review the result
+Save the meal in seconds
+See daily calorie and macro progress immediately
+
+The app should optimize for speed first, while improving accuracy only when needed.
+
+Main Inputs
+1. Photo Scan
+
+Best for:
+
+home-cooked meals
+restaurant food
+mixed plates
+Indian meals
+fresh food without packaging
+
+Flow:
+
+take photo or choose from gallery
+AI detects foods and portions
+if confidence is high, show result directly
+if confidence is low, ask 1–2 clarifying questions
+save
+2. Barcode Scan
+
+Best for:
+
+packaged snacks
+drinks
+protein bars
+ready-to-eat items
+grocery products
+
+Flow:
+
+open barcode scanner
+detect product
+fetch nutrition data from barcode/product database
+allow serving adjustment
+save
+
+Barcode should be treated as a core feature, not a later add-on, because packaged food logging is one of the fastest and most reliable user flows.
+
+3. Manual Entry
+
+Fallback for:
+
+AI failure
+unclear photos
+homemade meals with many hidden ingredients
+user preference
+
+Flow:
+
+tap Enter Manually
+add food item(s)
+choose serving size
+save
+Smart Accuracy Flow
+
+The AI should not pretend to know everything.
+If confidence is low, it should ask 1–2 short questions before finalizing calories.
+
+Rule
+High confidence → show result immediately
+Low confidence → ask 1–2 questions, then update result
+Very low confidence / failed analysis → suggest manual entry
+Examples of clarification questions
+
+The app should ask only the most useful question(s), such as:
+
+“Was this full-fat paneer or tofu?”
+“How many rotis were there?”
+“Was this one bowl or two bowls of rice?”
+“Was the drink regular or sugar-free?”
+“Was this fried or grilled?”
+“Is this chicken or soya?”
+“Roughly how large was the serving: small, medium, or large?”
+Important constraints
+maximum 2 questions
+use buttons/chips, not long typing
+skip questions if confidence is already good
+do not make every meal feel slow
+
+This makes the app feel smart without becoming annoying.
+
+Product Principles
+1. Mobile First
+
+Everything should be designed for phone use:
+
+bottom tabs
+large buttons
+one-handed interactions
+minimal typing
+quick review flow
+2. Camera and Scanner First
+
+The app should feel centered around:
+
+meal photo capture
+barcode scan
+instant result
+3. Fast by Default
+
+Most meals should be logged in a few taps.
+
+4. Clarify Only When Necessary
+
+Questions should appear only when they meaningfully improve accuracy.
+
+5. Editable, Not Overconfident
+
+Users must always be able to:
+
+change food items
+adjust serving sizes
+edit calories/macros
+remove incorrect items
+add missing items
+Primary Mobile Screens
+1. Home
+
+The main daily screen.
+
+Show:
+calories consumed
+calories left
+macro progress
+today’s meals
+large action buttons:
+Scan Meal
+Scan Barcode
+small weekly trend preview
+
+This should feel like a quick-glance mobile home screen.
+
+2. Scan Meal
+
+The photo-based meal logging flow.
+
+Actions:
+Take Photo
+Choose from Gallery
+After image selection:
+full-screen preview
+Analyze Meal button
+loading state
+low-confidence question step if needed
+review result
+save
+3. Scan Barcode
+
+The packaged-food flow.
+
+Actions:
+open barcode camera
+detect barcode
+fetch product name and nutrition
+ask serving size if needed
+review
+save
+Extra behavior:
+
+If barcode is not found:
+
+show “product not found”
+allow manual entry
+optionally allow photo scan instead
+4. Review Meal
+
+This screen appears after photo analysis or barcode lookup.
+
+Show per item:
+item name
+serving description
+calories
+protein
+carbs
+fat
+confidence badge if AI-generated
+User can:
+edit item
+adjust quantity
+delete item
+add item
+select meal type:
+breakfast
+lunch
+dinner
+snack
+
+This should use tappable cards, chips, and simple selectors.
+
+5. Log
+
+Meal history by day.
+
+Each meal card:
+thumbnail or product icon
+meal type
+calories
+time
+short summary
+
+Tap to expand or edit.
+
+6. Goals / Profile
+
+Simple personal setup screen.
+
+Include:
+calorie goal
+protein goal
+carbs goal
+fat goal
+disclaimer
+privacy note
+Navigation Model
+
+Use bottom tab navigation as the main navigation.
+
+Suggested tabs:
+Home
+Log
+Scan
+Barcode
+Profile
+
+Or combine scanning into one central action:
+
+Home
+Log
+Scan
+Goals
+Profile
+
+In that case, the Scan screen opens options:
+
+Photo
+Barcode
+Manual
+
+That is probably the cleanest version.
+
+Low-Confidence Question Logic
+
+The AI should return:
+
+detected items
+estimated portions
+calories/macros
+confidence score
+optional clarification prompts
+Example response behavior
+
+If the AI sees a curry plate with rice and bread but is unsure:
+
+detect likely items
+assign lower confidence
+ask:
+“How many rotis were there?”
+“Was the rice one bowl or two?”
+
+Then recompute totals.
+
+Good design rule
+
+Questions should only appear if they can materially improve calorie accuracy.
+
+Do not ask vague questions like:
+
+“Can you explain your meal?”
+“Tell me more”
+
+Ask only structured, easy-answer questions.
+
+Barcode Support Requirements
+
+Barcode support should include:
+
+camera-based barcode scanning
+product lookup
+nutrition facts retrieval
+serving-size adjustment
+save to meal log
+Barcode use cases
+chips
+biscuits
+juice
+soda
+protein powder
+milk cartons
+packaged Indian foods
+supplements if supported later
+If barcode data is incomplete
+ask for serving amount
+allow manual correction
+still let the user save
+Accuracy Strategy
+High-confidence scenarios
+clear packaged products with barcode
+single packaged drinks/snacks
+obvious simple meals
+Medium-confidence scenarios
+simple plates with visible items
+common foods with recognizable portions
+Low-confidence scenarios
+curries
+mixed bowls
+gravies
+fried assortments
+hidden ingredients
+multi-item Indian thali
+foods partly covered or blurred
+
+For low-confidence meals, the app should use the question step instead of giving false certainty.
+
+UX Rules for Clarification Questions
+
+The question step must feel lightweight.
+
+Best UI patterns:
+chips
+segmented controls
+multiple-choice cards
+serving presets
+yes/no buttons
+Avoid:
+long text fields
+more than 2 questions
+asking questions for every meal
+interrupting barcode flow unnecessarily
+Example answer formats:
+Small / Medium / Large
+1 / 2 / 3 rotis
+Fried / Grilled
+Regular / Sugar-free
+Full-fat / Low-fat
+Suggested Technical Direction
+
+For a strong mobile product, this idea fits best as:
+
+Preferred
+Expo / React Native
+TypeScript
+React Navigation
+camera access
+barcode scanner support
+local storage for MVP
+backend API for AI image analysis
+product/barcode lookup service
+Fast MVP alternative
+mobile-first Next.js web app
+PWA-style feel
+camera access where possible
+barcode support through browser-compatible scanner
+
+If the goal is a real startup-style consumer app, Expo / React Native is the stronger framing.
+
+Revised One-Sentence Product Definition
+
+Build a mobile-first AI calorie tracking app where users can log meals by photo or barcode, receive editable calorie and macro estimates, and answer 1–2 quick clarification questions only when the AI is unsure.
+
+Stronger Startup Positioning
+
+A mobile AI calorie tracker that lets users snap meals, scan packaged foods, and answer quick smart prompts for better accuracy.
+
+Or more consumer-friendly:
+
+Snap it. Scan it. Answer a quick question if needed. Log your calories in seconds.
+
+Best Differentiation Angle
+
+A strong niche version would be:
+
+An AI calorie tracker built for real-life meals, packaged foods, and quick portion clarification — especially for Indian diets and mixed meals.
+
+MVP Feature List
+Must-have
+photo scan
+barcode scan
+daily calorie/macro tracking
+review/edit before save
+low-confidence 1–2 question flow
+local meal history
+goals
+Nice-to-have after MVP
+favorites
+cloud sync
+barcode fallback search
+voice entry
+weekly insights
+better Indian food database
+repeated meal suggestions
+Final app idea, rewritten cleanly
+
+Build a mobile-first AI calorie counting app designed for fast daily food logging on phones. Users can log meals by taking a photo of food or scanning a barcode on packaged products. The app should estimate calories, protein, carbs, and fat, then let users quickly review and edit results before saving. When the AI is uncertain, it should ask 1–2 short multiple-choice questions to improve accuracy, such as portion size, food type, or cooking style. The overall experience should feel fast, simple, and native to mobile, with bottom-tab navigation, large touch targets, quick scan flows, and instant daily progress tracking

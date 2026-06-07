@@ -1,0 +1,56 @@
+const accent = "#FF6B35";
+const accentLight = "#FF8A5C";
+const green = "#34C759";
+const blue = "#007AFF";
+const purple = "#8B5CF6";
+
+export default {
+  light: {
+    text: "#000000",
+    textSecondary: "#3C3C43",
+    textTertiary: "#AEAEB2",
+    background: "#F8F8FA",
+    backgroundSecondary: "#F2F2F7",
+    backgroundTertiary: "#E5E5EA",
+    card: "#FFFFFF",
+    border: "#D1D1D6",
+    borderLight: "#E5E5EA",
+    tint: accent,
+    tintLight: accentLight,
+    tabIconDefault: "#8E8E93",
+    tabIconSelected: accent,
+    success: green,
+    info: blue,
+    purple: purple,
+    protein: "#007AFF",
+    carbs: "#FF9500",
+    fat: "#FF3B30",
+    calories: accent,
+    shadow: "#000000",
+    cardShadow: "rgba(0,0,0,0.06)",
+  },
+  dark: {
+    text: "#FFFFFF",
+    textSecondary: "#98989F",
+    textTertiary: "#636366",
+    background: "#000000",
+    backgroundSecondary: "#1C1C1E",
+    backgroundTertiary: "#2C2C2E",
+    card: "#1C1C1E",
+    border: "#38383A",
+    borderLight: "#2C2C2E",
+    tint: accent,
+    tintLight: accentLight,
+    tabIconDefault: "#636366",
+    tabIconSelected: accent,
+    success: green,
+    info: blue,
+    purple: purple,
+    protein: "#64D2FF",
+    carbs: "#FFD60A",
+    fat: "#FF453A",
+    calories: accent,
+    shadow: "#000000",
+    cardShadow: "rgba(0,0,0,0.3)",
+  },
+};
