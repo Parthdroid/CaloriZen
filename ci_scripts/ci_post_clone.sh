@@ -4,8 +4,10 @@ set -e
 
 brew install node
 
+corepack enable
+
 cd ..
 
-npm install
+pnpm install
 
 pod install
