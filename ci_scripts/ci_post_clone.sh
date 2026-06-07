@@ -2,10 +2,12 @@
 
 set -e
 
-echo "PATH=$PATH"
+brew install node
 
-which node || true
-which npm || true
+node --version
+npm --version
 
-echo "Skipping pod install in post-clone"
+pod install
+
+
 
