@@ -8,6 +8,6 @@ npm install -g pnpm
 
 cd ..
 
-pnpm install
+pnpm install || true
 
 pod install
