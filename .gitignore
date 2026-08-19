@@ -27,6 +27,7 @@ tmp/
 # Xcode
 
 DerivedData/
+.xcode.env.local
 *.hmap
 *.ipa
 *.xcuserstate

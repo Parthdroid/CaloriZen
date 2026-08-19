@@ -27,9 +27,11 @@
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
+        <key>CFBundleURLName</key>
+        <string>com.parth.calorizen</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.googleusercontent.apps.205171191979-9dme6iar28gr6dgl0bla4q189aooua8t</string>
+          <string>calorizen</string>
         </array>
       </dict>
     </array>
@@ -48,16 +50,6 @@
     </dict>
     <key>NSCameraUsageDescription</key>
     <string>CaloriZen needs camera access to take photos of your meals.</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>CaloriZen needs permission to save meal photos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>CaloriZen needs access to your photos to analyze meals.</string>
     <key>NSUserActivityTypes</key>

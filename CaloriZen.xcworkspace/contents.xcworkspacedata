@@ -11,9 +11,6 @@
       location = "group:(no-op)">
    </FileRef>
    <FileRef
-      location = "group:(explanation)">
-   </FileRef>
-   <FileRef
       location = "group:(note)">
    </FileRef>
    <FileRef

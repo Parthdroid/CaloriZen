@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Meal, NutritionAnalysis } from "@workspace/api-client-react";
 
 type AppContextType = {
@@ -16,8 +21,11 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const today = new Date().toISOString().split("T")[0];
-  const [pendingAnalysis, setPendingAnalysis] = useState<NutritionAnalysis | null>(null);
-  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
+  const [pendingAnalysis, setPendingAnalysis] =
+    useState<NutritionAnalysis | null>(null);
+  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(
+    null,
+  );
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
 

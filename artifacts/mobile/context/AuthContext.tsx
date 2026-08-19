@@ -1,9 +1,18 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
-
-const AUTH_TOKEN_KEY = "@auth_token";
-const AUTH_USER_KEY = "@auth_user";
+import { AuthApiError, authApiRequest } from "@/lib/api";
+import {
+  clearStoredSession,
+  loadStoredSession,
+  storeSession,
+} from "@/lib/auth-storage";
 
 export interface AuthUser {
   id: number;
@@ -11,6 +20,10 @@ export interface AuthUser {
   name: string | null;
   avatarUrl: string | null;
   provider: string;
+  authMethods: {
+    password: boolean;
+    apple: boolean;
+  };
 }
 
 interface AuthContextType {
@@ -31,17 +44,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [savedToken, savedUser] = await Promise.all([
-          AsyncStorage.getItem(AUTH_TOKEN_KEY),
-          AsyncStorage.getItem(AUTH_USER_KEY),
-        ]);
+        const { token: savedToken, user: savedUser } =
+          await loadStoredSession();
 
         if (savedToken && savedUser) {
+          const parsedUser = JSON.parse(savedUser) as AuthUser;
+          parsedUser.authMethods ??= { password: false, apple: false };
           setToken(savedToken);
-          setUser(JSON.parse(savedUser));
+          setUser(parsedUser);
           setAuthTokenGetter(() => savedToken);
+
+          try {
+            const currentUser = await authApiRequest<AuthUser>(
+              "/api/auth/me",
+              {},
+              savedToken,
+            );
+            setUser(currentUser);
+            await storeSession(savedToken, currentUser);
+          } catch (error) {
+            if (error instanceof AuthApiError && error.status === 401) {
+              setToken(null);
+              setUser(null);
+              setAuthTokenGetter(null);
+              await clearStoredSession();
+            }
+          }
         }
       } catch {
+        await clearStoredSession().catch(() => undefined);
       } finally {
         setIsLoading(false);
       }
@@ -52,20 +83,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(newToken);
     setUser(newUser);
     setAuthTokenGetter(() => newToken);
-    await Promise.all([
-      AsyncStorage.setItem(AUTH_TOKEN_KEY, newToken),
-      AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(newUser)),
-    ]);
+    await storeSession(newToken, newUser);
   }, []);
 
   const signOut = useCallback(async () => {
     setToken(null);
     setUser(null);
     setAuthTokenGetter(null);
-    await Promise.all([
-      AsyncStorage.removeItem(AUTH_TOKEN_KEY),
-      AsyncStorage.removeItem(AUTH_USER_KEY),
-    ]);
+    await clearStoredSession();
   }, []);
 
   return (

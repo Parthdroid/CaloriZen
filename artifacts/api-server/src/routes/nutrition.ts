@@ -1,8 +1,10 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
+router.use(requireAuth);
 
 const analyzePhotoSchema = z.object({
   imageBase64: z.string(),
@@ -26,7 +28,7 @@ const clarifySchema = z.object({
     z.object({
       question: z.string(),
       answer: z.string(),
-    })
+    }),
   ),
 });
 
@@ -145,40 +147,65 @@ Set needsClarification to false and clarificationQuestions to [].`;
 
 function normalizeItem(item: Record<string, unknown>) {
   const nutrition = (item.nutrition ?? {}) as Record<string, unknown>;
-  const macros = (nutrition.macros ?? item.macros ?? {}) as Record<string, unknown>;
-  const estimatedServing = (item.estimatedServing ?? item.estimatedPortion ?? item.estimated_serving ?? {}) as Record<string, unknown>;
+  const macros = (nutrition.macros ?? item.macros ?? {}) as Record<
+    string,
+    unknown
+  >;
+  const estimatedServing = (item.estimatedServing ??
+    item.estimatedPortion ??
+    item.estimated_serving ??
+    {}) as Record<string, unknown>;
 
   const servingDesc =
     item.servingDescription ??
     item.serving_description ??
     item.serving ??
     estimatedServing.description ??
-    (estimatedServing.amount ? `${estimatedServing.amount}${estimatedServing.unit ? " " + estimatedServing.unit : ""}` : null) ??
+    (estimatedServing.amount
+      ? `${estimatedServing.amount}${estimatedServing.unit ? " " + estimatedServing.unit : ""}`
+      : null) ??
     "1 serving";
 
   const cal =
-    item.calories ?? item.kcal ?? item.cal ??
-    nutrition.calories ?? nutrition.kcal ??
-    macros.calories ?? macros.kcal ??
+    item.calories ??
+    item.kcal ??
+    item.cal ??
+    nutrition.calories ??
+    nutrition.kcal ??
+    macros.calories ??
+    macros.kcal ??
     0;
 
   const prot =
-    item.protein ?? item.proteins ??
-    nutrition.protein ?? nutrition.proteins ??
-    macros.protein ?? macros.proteins ??
+    item.protein ??
+    item.proteins ??
+    nutrition.protein ??
+    nutrition.proteins ??
+    macros.protein ??
+    macros.proteins ??
     macros.protein_g ??
     0;
 
   const carb =
-    item.carbs ?? item.carbohydrates ?? item.carb ??
-    nutrition.carbs ?? nutrition.carbohydrates ??
-    macros.carbs ?? macros.carbohydrates ?? macros.carbs_g ??
+    item.carbs ??
+    item.carbohydrates ??
+    item.carb ??
+    nutrition.carbs ??
+    nutrition.carbohydrates ??
+    macros.carbs ??
+    macros.carbohydrates ??
+    macros.carbs_g ??
     0;
 
   const fatVal =
-    item.fat ?? item.fats ?? item.totalFat ??
-    nutrition.fat ?? nutrition.fats ??
-    macros.fat ?? macros.fats ?? macros.fat_g ??
+    item.fat ??
+    item.fats ??
+    item.totalFat ??
+    nutrition.fat ??
+    nutrition.fats ??
+    macros.fat ??
+    macros.fats ??
+    macros.fat_g ??
     0;
 
   return {
@@ -192,7 +219,14 @@ function normalizeItem(item: Record<string, unknown>) {
   };
 }
 
-function computeTotals(items: Array<{ calories: number; protein: number; carbs: number; fat: number }>) {
+function computeTotals(
+  items: Array<{
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }>,
+) {
   return {
     totalCalories: items.reduce((s, i) => s + (Number(i.calories) || 0), 0),
     totalProtein: items.reduce((s, i) => s + (Number(i.protein) || 0), 0),
@@ -239,10 +273,10 @@ router.post("/nutrition/analyze-photo", async (req: Request, res: Response) => {
     });
 
     const rawContent = response.choices[0]?.message?.content ?? "";
-    
+
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      req.log.error({ rawContent }, "Failed to extract JSON from AI response");
+      req.log.error("Failed to extract JSON from AI response");
       res.status(500).json({ error: "Failed to parse AI response" });
       return;
     }
@@ -250,9 +284,12 @@ router.post("/nutrition/analyze-photo", async (req: Request, res: Response) => {
     const analysis = JSON.parse(jsonMatch[0]);
     const normalizedItems = (analysis.items ?? []).map(normalizeItem);
     const totals = computeTotals(normalizedItems);
-    
-    req.log.info({ rawItems: analysis.items, normalizedItems, totals }, "Photo analysis result");
-    
+
+    req.log.info(
+      { itemCount: normalizedItems.length },
+      "Photo analysis completed",
+    );
+
     res.json({
       ...analysis,
       items: normalizedItems,
@@ -279,10 +316,15 @@ router.post("/nutrition/clarify", async (req: Request, res: Response) => {
     .join("\n\n");
 
   const itemsSummary = originalAnalysis.items
-    .map((item: { name: string; calories: number; servingDescription: string }) => `- ${item.name}: ${item.calories} cal (${item.servingDescription})`)
+    .map(
+      (item: { name: string; calories: number; servingDescription: string }) =>
+        `- ${item.name}: ${item.calories} cal (${item.servingDescription})`,
+    )
     .join("\n");
 
-  const messages: Parameters<typeof openai.chat.completions.create>[0]["messages"] = [
+  const messages: Parameters<
+    typeof openai.chat.completions.create
+  >[0]["messages"] = [
     {
       role: "system",
       content: CLARIFY_SYSTEM_PROMPT,
@@ -330,9 +372,12 @@ router.post("/nutrition/clarify", async (req: Request, res: Response) => {
     const analysis = JSON.parse(jsonMatch[0]);
     const normalizedItems = (analysis.items ?? []).map(normalizeItem);
     const totals = computeTotals(normalizedItems);
-    
-    req.log.info({ rawItems: analysis.items, normalizedItems, totals }, "Clarification result");
-    
+
+    req.log.info(
+      { itemCount: normalizedItems.length },
+      "Meal clarification completed",
+    );
+
     res.json({
       ...analysis,
       items: normalizedItems,

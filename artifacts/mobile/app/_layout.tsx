@@ -18,9 +18,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { API_BASE_URL } from "@/lib/api";
 import { setBaseUrl } from "@workspace/api-client-react";
 
-setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
+setBaseUrl(API_BASE_URL);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,35 +40,68 @@ function RootLayoutNav() {
   const [onboardingDone, setOnboardingDone] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
-      setOnboardingDone(val === "true");
-      setOnboardingChecked(true);
-    }).catch(() => {
-      setOnboardingChecked(true);
-    });
+    AsyncStorage.getItem(ONBOARDING_KEY)
+      .then((val) => {
+        setOnboardingDone(val === "true");
+        setOnboardingChecked(true);
+      })
+      .catch(() => {
+        setOnboardingChecked(true);
+      });
   }, [segments]);
 
   if (authLoading || !onboardingChecked) return null;
 
   const isLoggedIn = !!user;
   const needsOnboarding = isLoggedIn && !onboardingDone;
-  const publicRoutes = ["login", "terms", "privacy"];
+  const publicRoutes = [
+    "login",
+    "forgot-password",
+    "reset-password",
+    "terms",
+    "privacy",
+  ];
   const isPublicRoute = publicRoutes.includes(segments[0] as string);
-  const isLoginRoute = segments[0] === "login";
+  const isAuthRoute = ["login", "forgot-password", "reset-password"].includes(
+    segments[0] as string,
+  );
 
   return (
     <>
-      <StatusBar style={isLoginRoute ? "light" : "dark"} />
+      <StatusBar style={isAuthRoute ? "light" : "dark"} />
       {!isLoggedIn && !isPublicRoute && <Redirect href="/login" />}
       {isLoggedIn && needsOnboarding && <Redirect href="/onboarding" />}
-      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#F8F8FA" } }}>
+      <Stack
+        screenOptions={{
+          headerBackTitle: "Back",
+          contentStyle: { backgroundColor: "#F8F8FA" },
+        }}
+      >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false, animation: "fade" }} />
+        <Stack.Screen
+          name="login"
+          options={{ headerShown: false, animation: "fade" }}
+        />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen name="reset-password" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="delete-account"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
         <Stack.Screen name="terms" options={{ headerShown: false }} />
         <Stack.Screen name="privacy" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
-        <Stack.Screen name="barcode" options={{ headerShown: false, presentation: "modal" }} />
-        <Stack.Screen name="review" options={{ headerShown: false, presentation: "modal" }} />
+        <Stack.Screen
+          name="onboarding"
+          options={{ headerShown: false, animation: "fade" }}
+        />
+        <Stack.Screen
+          name="barcode"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="review"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
       </Stack>
     </>
   );
@@ -95,7 +129,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <AppProvider>
-              <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#F8F8FA" }}>
+              <GestureHandlerRootView
+                style={{ flex: 1, backgroundColor: "#F8F8FA" }}
+              >
                 <KeyboardProvider>
                   <RootLayoutNav />
                 </KeyboardProvider>
