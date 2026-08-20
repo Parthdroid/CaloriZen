@@ -98,7 +98,8 @@ Expo React Native app (iOS/Android/Web). Key files:
 - `app/(tabs)/goals.tsx` — goals CRUD with edit mode + sign-out button
 - `app/barcode.tsx` — barcode lookup modal
 - `app/review.tsx` — AI analysis review with clarification Q&A, editable items
-- `context/AuthContext.tsx` — auth state management (user, token, signIn, signOut); stores JWT in AsyncStorage; wires `setAuthTokenGetter` for API client
+- `context/AuthContext.tsx` — auth state management (user, token, signIn, signOut); validates restored sessions with `/api/auth/me` and wires `setAuthTokenGetter` for the API client
+- `lib/auth-storage.ts` — stores native JWTs in iOS/Android SecureStore (with one-time AsyncStorage migration); web sessions use AsyncStorage
 - `context/AppContext.tsx` — shared state (pendingAnalysis, selectedDate)
 - `constants/colors.ts` — theme tokens for light/dark mode
 - `components/MacroRing.tsx` — SVG ring for macros
@@ -110,12 +111,12 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
 - App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Auth: `src/lib/auth.ts` — JWT sign/verify, `requireAuth` and `optionalAuth` middleware
+- Auth: `src/lib/auth.ts` — JWT sign/verify plus the database-backed `requireAuth` middleware
 - Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/auth.ts` handles email registration/login/recovery, verified Apple sign-in, session lookup, and account deletion
-- All meal/goal routes use `optionalAuth` to associate data with users when logged in
+- Meal, goal, nutrition-analysis, and barcode routes require authentication; record queries are scoped to the authenticated user
 - Depends on: `@workspace/db`, `@workspace/api-zod`, `argon2`, `jose`, `jsonwebtoken`
 - `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
+- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.mjs`)
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
 
 ### `lib/db` (`@workspace/db`)
@@ -131,7 +132,7 @@ Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client insta
 - `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
 - Exports: `.` (pool, db, schema), `./schema` (schema only)
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+Production migrations are explicit and versioned in `lib/db/migrations/`. Run `pnpm --filter @workspace/db run migrate` against a backed-up target database before deploying API code that depends on a new migration. Do not use destructive schema-push commands against production.
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 
