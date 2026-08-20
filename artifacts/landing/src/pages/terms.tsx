@@ -271,18 +271,18 @@ export default function TermsPage() {
             <br />
             Email:{" "}
             <a
-              href="mailto:legal@calorizen.ai"
+              href="mailto:legal@calorizen.in"
               className="text-[#FF6B35] hover:underline"
             >
-              legal@calorizen.ai
+              legal@calorizen.in
             </a>
             <br />
             Website:{" "}
             <a
-              href="https://calorizen.ai"
+              href="https://calorizen.in/terms"
               className="text-[#FF6B35] hover:underline"
             >
-              calorizen.ai
+              calorizen.in/terms
             </a>
           </p>
 

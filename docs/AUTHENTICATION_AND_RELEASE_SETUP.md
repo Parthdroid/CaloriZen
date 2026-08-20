@@ -106,7 +106,7 @@ In the Xcode Cloud workflow:
 ## App Store Connect release checks
 
 - Verify that `com.parth.calorizen` is the intended registered bundle ID and that version/build numbers are unused.
-- Publish working HTTPS Terms of Service, Privacy Policy, and support URLs. The repository currently names `calorizen.ai`; confirm ownership, mailbox delivery, and the legal operator identity before submission.
+- Publish working HTTPS Terms of Service, Privacy Policy, and support URLs at `https://calorizen.in/terms`, `https://calorizen.in/privacy`, and `https://calorizen.in/support`. Confirm ownership, mailbox delivery, and the legal operator identity before submission.
 - Complete App Privacy answers from the shipped behavior and `PrivacyInfo.xcprivacy`: contact info, user ID, meal/fitness data, and photos sent for app functionality; no tracking unless the shipped SDK set changes.
 - Disclose OpenAI/AI image processing, Open Food Facts barcode lookup, hosting, Apple, and the transactional email provider accurately.
 - Give App Review a test account that does not depend on receiving email, plus instructions for photo analysis and account deletion. Never place production credentials in repository files.

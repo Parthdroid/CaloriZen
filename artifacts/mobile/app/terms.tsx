@@ -184,8 +184,8 @@ export default function TermsScreen() {
           If you have questions or concerns about these Terms, please contact us
           at:{"\n\n"}
           CaloriZen™{"\n"}
-          Email: legal@calorizen.ai{"\n"}
-          Website: https://calorizen.ai
+          Email: legal@calorizen.in{"\n"}
+          Website: https://calorizen.in/terms
         </Text>
 
         <Text

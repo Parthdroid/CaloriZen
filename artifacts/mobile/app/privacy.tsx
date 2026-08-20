@@ -123,7 +123,7 @@ export default function PrivacyScreen() {
           non-essential data collection and marketing communications.{"\n"}•
           Withdraw Consent: Withdraw consent for data processing where consent
           is the legal basis.{"\n\n"}
-          To exercise these rights, contact us at privacy@calorizen.ai. We will
+          To exercise these rights, contact us at privacy@calorizen.in. We will
           respond within 30 days.
         </Text>
 
@@ -142,7 +142,7 @@ export default function PrivacyScreen() {
           knowingly collect personal information from children under 13. If we
           discover that a child under 13 has provided personal information, we
           will promptly delete it. If you believe a child under 13 has provided
-          us with personal data, please contact us at privacy@calorizen.ai.
+          us with personal data, please contact us at privacy@calorizen.in.
         </Text>
 
         <Text style={s.sectionTitle}>8. Data Retention</Text>
@@ -209,8 +209,8 @@ export default function PrivacyScreen() {
           Policy or your personal data, please contact us at:{"\n\n"}
           CaloriZen™{"\n"}
           Privacy Team{"\n"}
-          Email: privacy@calorizen.ai{"\n"}
-          Website: https://calorizen.ai
+          Email: privacy@calorizen.in{"\n"}
+          Website: https://calorizen.in/privacy
         </Text>
 
         <Text

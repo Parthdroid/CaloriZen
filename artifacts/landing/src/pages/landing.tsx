@@ -652,10 +652,18 @@ function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <a
-                  href="mailto:support@calorizen.ai"
+                  href="https://calorizen.in/support"
                   className="hover:text-white transition-colors"
                 >
-                  support@calorizen.ai
+                  Support
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:support@calorizen.in"
+                  className="hover:text-white transition-colors"
+                >
+                  support@calorizen.in
                 </a>
               </li>
             </ul>
@@ -665,7 +673,7 @@ function Footer() {
           <p className="text-xs">
             &copy; 2026 CaloriZen™. All rights reserved.
           </p>
-          <p className="text-xs">calorizen.ai</p>
+          <p className="text-xs">calorizen.in</p>
         </div>
       </div>
     </footer>

@@ -242,10 +242,10 @@ export default function PrivacyPage() {
           <p className="text-gray-600 leading-relaxed mb-6">
             To exercise these rights, contact us at{" "}
             <a
-              href="mailto:privacy@calorizen.ai"
+              href="mailto:privacy@calorizen.in"
               className="text-[#FF6B35] hover:underline"
             >
-              privacy@calorizen.ai
+              privacy@calorizen.in
             </a>
             . We will respond within 30 days.
           </p>
@@ -271,10 +271,10 @@ export default function PrivacyPage() {
             information, we will promptly delete it. If you believe a child
             under 13 has provided us with personal data, please contact us at{" "}
             <a
-              href="mailto:privacy@calorizen.ai"
+              href="mailto:privacy@calorizen.in"
               className="text-[#FF6B35] hover:underline"
             >
-              privacy@calorizen.ai
+              privacy@calorizen.in
             </a>
             .
           </p>
@@ -384,18 +384,18 @@ export default function PrivacyPage() {
             <br />
             Email:{" "}
             <a
-              href="mailto:privacy@calorizen.ai"
+              href="mailto:privacy@calorizen.in"
               className="text-[#FF6B35] hover:underline"
             >
-              privacy@calorizen.ai
+              privacy@calorizen.in
             </a>
             <br />
             Website:{" "}
             <a
-              href="https://calorizen.ai"
+              href="https://calorizen.in/privacy"
               className="text-[#FF6B35] hover:underline"
             >
-              calorizen.ai
+              calorizen.in/privacy
             </a>
           </p>
           <p className="text-gray-600 leading-relaxed mb-6"></p>

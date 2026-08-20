@@ -153,7 +153,7 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/landing` (`@workspace/landing`)
 
-React + Vite landing page for CaloriZen, targeting deployment at calorizen.ai. Cal AI-inspired premium design with:
+React + Vite landing page for CaloriZen, targeting deployment at calorizen.in. Cal AI-inspired premium design with:
 
 - Sticky header with logo, nav links, App Store/Google Play buttons
 - Hero section with bold headline, social proof, dual phone mockup, download CTAs
