@@ -17,7 +17,6 @@ import { useGetGoals, useUpdateGoals } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type GoalInput = {
   dailyCalories: string;
@@ -229,7 +228,6 @@ export default function GoalsScreen() {
                   style: "destructive",
                   onPress: async () => {
                     await signOut();
-                    await AsyncStorage.removeItem("@onboarding_complete");
                     qc.clear();
                     router.replace("/login");
                   },

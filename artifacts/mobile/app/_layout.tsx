@@ -13,12 +13,12 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { API_BASE_URL } from "@/lib/api";
+import { loadOnboardingComplete } from "@/lib/onboarding-storage";
 import { setBaseUrl } from "@workspace/api-client-react";
 
 setBaseUrl(API_BASE_URL);
@@ -31,28 +31,47 @@ const queryClient = new QueryClient({
   },
 });
 
-const ONBOARDING_KEY = "@onboarding_complete";
+type OnboardingStatus = {
+  userId: number;
+  routeKey: string;
+  done: boolean;
+};
 
 function RootLayoutNav() {
   const { user, isLoading: authLoading } = useAuth();
   const segments = useSegments();
-  const [onboardingChecked, setOnboardingChecked] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState(true);
+  const userId = user?.id;
+  const routeKey = String(segments[0] ?? "");
+  const [onboardingStatus, setOnboardingStatus] =
+    useState<OnboardingStatus | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_KEY)
-      .then((val) => {
-        setOnboardingDone(val === "true");
-        setOnboardingChecked(true);
+    if (userId === undefined) {
+      setOnboardingStatus(null);
+      return;
+    }
+
+    let active = true;
+    loadOnboardingComplete(userId)
+      .then((done) => {
+        if (active) setOnboardingStatus({ userId, routeKey, done });
       })
       .catch(() => {
-        setOnboardingChecked(true);
+        if (active) setOnboardingStatus({ userId, routeKey, done: false });
       });
-  }, [segments]);
+    return () => {
+      active = false;
+    };
+  }, [routeKey, userId]);
 
-  if (authLoading || !onboardingChecked) return null;
+  const onboardingReady =
+    userId === undefined ||
+    (onboardingStatus?.userId === userId &&
+      onboardingStatus.routeKey === routeKey);
+  if (authLoading || !onboardingReady) return null;
 
   const isLoggedIn = !!user;
+  const onboardingDone = onboardingStatus?.done ?? false;
   const needsOnboarding = isLoggedIn && !onboardingDone;
   const publicRoutes = [
     "login",
@@ -61,16 +80,22 @@ function RootLayoutNav() {
     "terms",
     "privacy",
   ];
-  const isPublicRoute = publicRoutes.includes(segments[0] as string);
+  const isPublicRoute = publicRoutes.includes(routeKey);
   const isAuthRoute = ["login", "forgot-password", "reset-password"].includes(
-    segments[0] as string,
+    routeKey,
   );
+  const isLoginRoute = routeKey === "login";
+  const isOnboardingRoute = routeKey === "onboarding";
+  let redirectPath: "/login" | "/onboarding" | "/(tabs)" | null = null;
+  if (!isLoggedIn && !isPublicRoute) redirectPath = "/login";
+  else if (needsOnboarding && !isOnboardingRoute) redirectPath = "/onboarding";
+  else if (isLoggedIn && onboardingDone && (isLoginRoute || isOnboardingRoute))
+    redirectPath = "/(tabs)";
 
   return (
     <>
       <StatusBar style={isAuthRoute ? "light" : "dark"} />
-      {!isLoggedIn && !isPublicRoute && <Redirect href="/login" />}
-      {isLoggedIn && needsOnboarding && <Redirect href="/onboarding" />}
+      {redirectPath && <Redirect href={redirectPath} />}
       <Stack
         screenOptions={{
           headerBackTitle: "Back",

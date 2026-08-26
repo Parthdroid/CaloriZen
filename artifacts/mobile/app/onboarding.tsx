@@ -15,12 +15,11 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { updateGoals } from "@workspace/api-client-react";
 import { LinearGradient as ExpoLinearGradient } from "expo-linear-gradient";
-
-const ONBOARDING_KEY = "@onboarding_complete";
+import { useAuth } from "@/context/AuthContext";
+import { setOnboardingComplete } from "@/lib/onboarding-storage";
 
 const GOALS = [
   { id: "lose", label: "Lose Weight", icon: "trending-down-outline" as const, emoji: "🔥", desc: "Calorie deficit to burn fat", cal: 1600, p: 130, c: 160, f: 55 },
@@ -34,6 +33,7 @@ const STEPS: Step[] = ["welcome", "height", "weight", "goal", "complete"];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("welcome");
   const [heightFt, setHeightFt] = useState("5");
   const [heightIn, setHeightIn] = useState("8");
@@ -75,15 +75,19 @@ export default function OnboardingScreen() {
   }, [step, animateTransition]);
 
   const handleComplete = useCallback(async () => {
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
     setSaving(true);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     try {
       const goal = GOALS.find(g => g.id === selectedGoal) ?? GOALS[1];
       await updateGoals({ dailyCalories: goal.cal, dailyProtein: goal.p, dailyCarbs: goal.c, dailyFat: goal.f });
     } catch {}
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    await setOnboardingComplete(user.id);
     router.replace("/(tabs)");
-  }, [selectedGoal]);
+  }, [selectedGoal, user]);
 
   const canProceed = () => {
     switch (step) {

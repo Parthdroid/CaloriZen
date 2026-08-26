@@ -15,10 +15,10 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { authApiRequest } from "@/lib/api";
+import { clearOnboardingComplete } from "@/lib/onboarding-storage";
 
 export default function DeleteAccountScreen() {
   const insets = useSafeAreaInsets();
@@ -73,7 +73,7 @@ export default function DeleteAccountScreen() {
       );
 
       await signOut();
-      await AsyncStorage.removeItem("@onboarding_complete");
+      await clearOnboardingComplete(user.id).catch(() => undefined);
       queryClient.clear();
       Alert.alert(
         "Account Deleted",
