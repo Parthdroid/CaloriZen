@@ -59,6 +59,7 @@ Pods/
 
 .cache/
 .local/
+/attached_assets/logoHref.html
 
 # Coverage
 
