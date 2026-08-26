@@ -51,6 +51,7 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 ## Project: CaloriZen
 
 A mobile calorie and macro tracking app with:
+
 - **AI photo analysis**: Take a photo of a meal; GPT-4 vision estimates calories and macros
 - **Barcode scanner**: Look up packaged food nutrition by barcode (Open Food Facts + AI fallback)
 - **Clarification Q&A**: If AI is unsure, it asks follow-up questions to improve accuracy
@@ -59,6 +60,7 @@ A mobile calorie and macro tracking app with:
 - **Calorie ring**: Animated SVG ring showing remaining calories for the day
 
 ### Design System (Studio-grade, Cal AI-inspired premium)
+
 - **Forced light mode**: `userInterfaceStyle: "light"` in app.json; `useTheme.ts` always returns light colors; no dark mode anywhere in the app interior
 - **Background**: Off-white `#F8F8FA` for root, pure `#FFFFFF` for cards with soft box shadows (0.04 opacity, 10px radius)
 - **Accent**: Orange `#FF6B35` throughout; FAB has matching orange glow shadow
@@ -69,13 +71,13 @@ A mobile calorie and macro tracking app with:
 - **Scan**: "Scan Food" title + subtitle, premium camera viewfinder box with corner brackets, camera icon circle, three option buttons (Gallery/Barcode/Manual) with colored icon backgrounds and hint text, expandable barcode input; animated scan line overlay with dark pill status during analysis; 90s timeout
 - **Log**: Horizontal scrollable date picker with white/black pill states, summary strip with dividers, meal cards grouped by type with section headers including icons
 - **Goals**: White cards with colored icon backgrounds, 32px bold values, orange edit pill button, sign out with red tint
-- **Login**: Dark gradient `#0A0A0F` → `#111128`, CaloriZen™ branding, feature row (Photo scan · Barcode · AI macros), black Apple + white Google buttons, footer with Terms/Privacy
+- **Login**: Dark gradient email sign-in/create-account experience with password recovery, Sign in with Apple, and Terms/Privacy links
 - **Onboarding**: Dark theme with 5-step flow (welcome/height/weight/goal/complete), gradient buttons, animated slide transitions, emoji goal cards; `@onboarding_complete` gates app entry; goals saved via API
 - **Tab bar**: Translucent blur on iOS (`systemChromeMaterialLight`), hairline top border on web, orange active tint
 - **MealCard**: White rounded cards with colored meal-type icon, calorie badge in orange tint, inline macro text (P · C · F), scale animation on press
 - **StatusBar**: Light on login screen, dark everywhere else
 - **Bundle ID**: `com.parth.calorizen` (iOS), `ai.calorizen.app` (Android); `CFBundleDisplayName: "CaloriZen"` for proper permission dialogs
-- **Google Sign-In**: Uses `expo-auth-session/providers/google` with Web Client ID + iOS Client ID; reversed iOS client ID registered as URL scheme for OAuth redirect
+- **Authentication**: Email/password credentials use Argon2id; password recovery uses one-time hashed tokens; Apple identity tokens are verified by the API
 - **Manual entry page**: `/manual` route for typing in food name, calories, and macros manually
 - **Images**: NOT stored in DB — base64 used only during AI analysis then discarded; DB stores text-only meal records (~500 bytes each)
 
@@ -84,8 +86,11 @@ A mobile calorie and macro tracking app with:
 ### `artifacts/mobile` (`@workspace/mobile`)
 
 Expo React Native app (iOS/Android/Web). Key files:
+
 - `app/_layout.tsx` — root stack with providers (QueryClient, AuthProvider, AppProvider); redirects to login if unauthenticated
-- `app/login.tsx` — login screen with Google and Apple sign-in buttons, dark gradient theme
+- `app/login.tsx` — email registration/login plus Sign in with Apple
+- `app/forgot-password.tsx` and `app/reset-password.tsx` — password recovery flow
+- `app/delete-account.tsx` — in-app account deletion with reauthentication
 - `app/(tabs)/_layout.tsx` — 4-tab layout (Home/Log/Scan/Goals)
 - `app/(tabs)/index.tsx` — home screen: calorie ring, macro bars, quick actions
 - `app/(tabs)/log.tsx` — food log with date picker
@@ -93,7 +98,8 @@ Expo React Native app (iOS/Android/Web). Key files:
 - `app/(tabs)/goals.tsx` — goals CRUD with edit mode + sign-out button
 - `app/barcode.tsx` — barcode lookup modal
 - `app/review.tsx` — AI analysis review with clarification Q&A, editable items
-- `context/AuthContext.tsx` — auth state management (user, token, signIn, signOut); stores JWT in AsyncStorage; wires `setAuthTokenGetter` for API client
+- `context/AuthContext.tsx` — auth state management (user, token, signIn, signOut); validates restored sessions with `/api/auth/me` and wires `setAuthTokenGetter` for the API client
+- `lib/auth-storage.ts` — stores native JWTs in iOS/Android SecureStore (with one-time AsyncStorage migration); web sessions use AsyncStorage
 - `context/AppContext.tsx` — shared state (pendingAnalysis, selectedDate)
 - `constants/colors.ts` — theme tokens for light/dark mode
 - `components/MacroRing.tsx` — SVG ring for macros
@@ -105,12 +111,12 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
 - App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Auth: `src/lib/auth.ts` — JWT sign/verify, `requireAuth` and `optionalAuth` middleware
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/auth.ts` handles Google/Apple sign-in (POST /api/auth/google, POST /api/auth/apple, GET /api/auth/me)
-- All meal/goal routes use `optionalAuth` to associate data with users when logged in
-- Depends on: `@workspace/db`, `@workspace/api-zod`, `google-auth-library`, `jsonwebtoken`
+- Auth: `src/lib/auth.ts` — JWT sign/verify plus the database-backed `requireAuth` middleware
+- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/auth.ts` handles email registration/login/recovery, verified Apple sign-in, session lookup, and account deletion
+- Meal, goal, nutrition-analysis, and barcode routes require authentication; record queries are scoped to the authenticated user
+- Depends on: `@workspace/db`, `@workspace/api-zod`, `argon2`, `jose`, `jsonwebtoken`
 - `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
+- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.mjs`)
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
 
 ### `lib/db` (`@workspace/db`)
@@ -126,7 +132,7 @@ Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client insta
 - `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
 - Exports: `.` (pool, db, schema), `./schema` (schema only)
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+Production migrations are explicit and versioned in `lib/db/migrations/`. Run `pnpm --filter @workspace/db run migrate` against a backed-up target database before deploying API code that depends on a new migration. Do not use destructive schema-push commands against production.
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 
@@ -147,7 +153,8 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/landing` (`@workspace/landing`)
 
-React + Vite landing page for CaloriZen, targeting deployment at calorizen.ai. Cal AI-inspired premium design with:
+React + Vite landing page for CaloriZen, targeting deployment at calorizen.in. Cal AI-inspired premium design with:
+
 - Sticky header with logo, nav links, App Store/Google Play buttons
 - Hero section with bold headline, social proof, dual phone mockup, download CTAs
 - 6-card feature grid (Snap & Track, Smart Macro Tracking, Personalized Goals, Barcode Scanner, Daily Food Log, Private & Secure)

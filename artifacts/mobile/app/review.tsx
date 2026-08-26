@@ -27,7 +27,17 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 type ClarificationAnswers = Record<number, string>;
 
-function MiniRing({ value, goal, color, size = 40 }: { value: number; goal: number; color: string; size?: number }) {
+function MiniRing({
+  value,
+  goal,
+  color,
+  size = 40,
+}: {
+  value: number;
+  goal: number;
+  color: string;
+  size?: number;
+}) {
   const { colors } = useTheme();
   const radius = (size - 5) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -35,41 +45,80 @@ function MiniRing({ value, goal, color, size = 40 }: { value: number; goal: numb
   const offset = circumference * (1 - progress);
 
   return (
-    <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
-      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={colors.backgroundTertiary} strokeWidth={3.5} fill="none" />
-      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={3.5} fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+    <Svg
+      width={size}
+      height={size}
+      style={{ transform: [{ rotate: "-90deg" }] }}
+    >
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={colors.backgroundTertiary}
+        strokeWidth={3.5}
+        fill="none"
+      />
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth={3.5}
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }
 
-function MacroChip({ label, value, unit, color }: { label: string; value: number; unit: string; color: string }) {
+function MacroChip({
+  label,
+  value,
+  unit,
+  color,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  color: string;
+}) {
   const { colors } = useTheme();
   return (
     <View style={[styles.macroChip, { backgroundColor: color + "12" }]}>
-      <Text style={[styles.macroChipValue, { color }]}>{Math.round(value)}{unit}</Text>
-      <Text style={[styles.macroChipLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <Text style={[styles.macroChipValue, { color }]}>
+        {Math.round(value)}
+        {unit}
+      </Text>
+      <Text style={[styles.macroChipLabel, { color: colors.textSecondary }]}>
+        {label}
+      </Text>
     </View>
   );
 }
-
-const MEAL_ICONS: Record<string, string> = {
-  breakfast: "sunny-outline",
-  lunch: "partly-sunny-outline",
-  dinner: "moon-outline",
-  snack: "cafe-outline",
-};
 
 export default function ReviewScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const { pendingAnalysis, setPendingAnalysis, pendingImageBase64, setPendingImageBase64 } = useApp();
+  const {
+    pendingAnalysis,
+    setPendingAnalysis,
+    pendingImageBase64,
+    setPendingImageBase64,
+  } = useApp();
 
-  const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(pendingAnalysis);
-  const [clarificationAnswers, setClarificationAnswers] = useState<ClarificationAnswers>({});
+  const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(
+    pendingAnalysis,
+  );
+  const [clarificationAnswers, setClarificationAnswers] =
+    useState<ClarificationAnswers>({});
   const [clarifying, setClarifying] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">(() => {
+  const [mealType, setMealType] = useState<
+    "breakfast" | "lunch" | "dinner" | "snack"
+  >(() => {
     const hour = new Date().getHours();
     if (hour < 11) return "breakfast";
     if (hour < 15) return "lunch";
@@ -78,7 +127,7 @@ export default function ReviewScreen() {
   });
   const [editingItem, setEditingItem] = useState<number | null>(null);
   const [editedItems, setEditedItems] = useState<MealItem[]>(
-    (pendingAnalysis?.items ?? []) as MealItem[]
+    (pendingAnalysis?.items ?? []) as MealItem[],
   );
 
   const topPad = Platform.OS === "web" ? 20 : insets.top;
@@ -133,11 +182,27 @@ export default function ReviewScreen() {
       Alert.alert("Error", "Failed to save meal. Please try again.");
       setSaving(false);
     }
-  }, [analysis, editedItems, mealType, queryClient, setPendingAnalysis, setPendingImageBase64]);
+  }, [
+    analysis,
+    editedItems,
+    mealType,
+    queryClient,
+    setPendingAnalysis,
+    setPendingImageBase64,
+  ]);
 
-  const totalCalories = editedItems.reduce((s, i) => s + (Number(i.calories) || 0), 0);
-  const totalProtein = editedItems.reduce((s, i) => s + (Number(i.protein) || 0), 0);
-  const totalCarbs = editedItems.reduce((s, i) => s + (Number(i.carbs) || 0), 0);
+  const totalCalories = editedItems.reduce(
+    (s, i) => s + (Number(i.calories) || 0),
+    0,
+  );
+  const totalProtein = editedItems.reduce(
+    (s, i) => s + (Number(i.protein) || 0),
+    0,
+  );
+  const totalCarbs = editedItems.reduce(
+    (s, i) => s + (Number(i.carbs) || 0),
+    0,
+  );
   const totalFat = editedItems.reduce((s, i) => s + (Number(i.fat) || 0), 0);
 
   const updateItem = (index: number, updates: Partial<MealItem>) => {
@@ -154,10 +219,29 @@ export default function ReviewScreen() {
 
   if (!analysis) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }]}>
-        <Text style={{ color: colors.textSecondary, fontFamily: "Inter_400Regular", fontSize: 16 }}>No analysis found.</Text>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <Text
+          style={{
+            color: colors.textSecondary,
+            fontFamily: "Inter_400Regular",
+            fontSize: 16,
+          }}
+        >
+          No analysis found.
+        </Text>
         <Pressable onPress={() => router.back()} style={{ marginTop: 16 }}>
-          <Text style={{ color: colors.tint, fontFamily: "Inter_600SemiBold" }}>Go back</Text>
+          <Text style={{ color: colors.tint, fontFamily: "Inter_600SemiBold" }}>
+            Go back
+          </Text>
         </Pressable>
       </View>
     );
@@ -166,7 +250,11 @@ export default function ReviewScreen() {
   const questions = analysis.clarificationQuestions ?? [];
   const allAnswered = questions.every((_, i) => clarificationAnswers[i]);
 
-  const MEAL_TYPES: Array<{ value: "breakfast" | "lunch" | "dinner" | "snack"; label: string; icon: string }> = [
+  const MEAL_TYPES: Array<{
+    value: "breakfast" | "lunch" | "dinner" | "snack";
+    label: string;
+    icon: string;
+  }> = [
     { value: "breakfast", label: "Breakfast", icon: "sunny-outline" },
     { value: "lunch", label: "Lunch", icon: "partly-sunny-outline" },
     { value: "dinner", label: "Dinner", icon: "moon-outline" },
@@ -190,16 +278,39 @@ export default function ReviewScreen() {
             />
             <View style={[styles.heroOverlay, { paddingTop: topPad + 8 }]}>
               <Pressable
-                onPress={() => { setPendingAnalysis(null); router.back(); }}
+                onPress={() => {
+                  setPendingAnalysis(null);
+                  router.back();
+                }}
                 style={styles.heroBtn}
               >
                 <Ionicons name="chevron-back" size={22} color="#fff" />
               </Pressable>
               <View style={{ flex: 1 }} />
               {analysis.confidence !== undefined && (
-                <View style={[styles.confidencePill, { backgroundColor: analysis.confidence >= 0.8 ? "rgba(34,197,94,0.85)" : "rgba(251,191,36,0.85)" }]}>
-                  <Ionicons name={analysis.confidence >= 0.8 ? "checkmark-circle" : "alert-circle"} size={14} color="#fff" />
-                  <Text style={styles.confidenceText}>{Math.round(analysis.confidence * 100)}% match</Text>
+                <View
+                  style={[
+                    styles.confidencePill,
+                    {
+                      backgroundColor:
+                        analysis.confidence >= 0.8
+                          ? "rgba(34,197,94,0.85)"
+                          : "rgba(251,191,36,0.85)",
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={
+                      analysis.confidence >= 0.8
+                        ? "checkmark-circle"
+                        : "alert-circle"
+                    }
+                    size={14}
+                    color="#fff"
+                  />
+                  <Text style={styles.confidenceText}>
+                    {Math.round(analysis.confidence * 100)}% match
+                  </Text>
                 </View>
               )}
             </View>
@@ -207,34 +318,81 @@ export default function ReviewScreen() {
         ) : (
           <View style={[styles.noImageHeader, { paddingTop: topPad + 12 }]}>
             <Pressable
-              onPress={() => { setPendingAnalysis(null); router.back(); }}
-              style={[styles.backBtnFlat, { backgroundColor: colors.backgroundTertiary }]}
+              onPress={() => {
+                setPendingAnalysis(null);
+                router.back();
+              }}
+              style={[
+                styles.backBtnFlat,
+                { backgroundColor: colors.backgroundTertiary },
+              ]}
             >
               <Ionicons name="chevron-back" size={20} color={colors.text} />
             </Pressable>
-            <Text style={[styles.noImageTitle, { color: colors.text }]}>Meal Analysis</Text>
+            <Text style={[styles.noImageTitle, { color: colors.text }]}>
+              Meal Analysis
+            </Text>
             <View style={{ width: 40 }} />
           </View>
         )}
 
         {/* Calories hero card */}
-        <View style={[styles.calorieCard, { backgroundColor: colors.card, marginTop: pendingImageBase64 ? -28 : 16 }]}>
+        <View
+          style={[
+            styles.calorieCard,
+            {
+              backgroundColor: colors.card,
+              marginTop: pendingImageBase64 ? -28 : 16,
+            },
+          ]}
+        >
           <View style={styles.calorieCenter}>
             <View style={styles.calorieRingWrap}>
-              <MiniRing value={totalCalories} goal={2000} color={colors.tint} size={72} />
-              <View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}>
+              <MiniRing
+                value={totalCalories}
+                goal={2000}
+                color={colors.tint}
+                size={72}
+              />
+              <View
+                style={[
+                  StyleSheet.absoluteFill,
+                  { alignItems: "center", justifyContent: "center" },
+                ]}
+              >
                 <Ionicons name="flame" size={20} color={colors.tint} />
               </View>
             </View>
             <View style={styles.calorieText}>
-              <Text style={[styles.calorieBig, { color: colors.text }]}>{Math.round(totalCalories)}</Text>
-              <Text style={[styles.calorieUnit, { color: colors.textSecondary }]}>calories</Text>
+              <Text style={[styles.calorieBig, { color: colors.text }]}>
+                {Math.round(totalCalories)}
+              </Text>
+              <Text
+                style={[styles.calorieUnit, { color: colors.textSecondary }]}
+              >
+                calories
+              </Text>
             </View>
           </View>
           <View style={styles.macroChips}>
-            <MacroChip label="Protein" value={totalProtein} unit="g" color={colors.protein} />
-            <MacroChip label="Carbs" value={totalCarbs} unit="g" color={colors.carbs} />
-            <MacroChip label="Fat" value={totalFat} unit="g" color={colors.fat} />
+            <MacroChip
+              label="Protein"
+              value={totalProtein}
+              unit="g"
+              color={colors.protein}
+            />
+            <MacroChip
+              label="Carbs"
+              value={totalCarbs}
+              unit="g"
+              color={colors.carbs}
+            />
+            <MacroChip
+              label="Fat"
+              value={totalFat}
+              unit="g"
+              color={colors.fat}
+            />
           </View>
         </View>
 
@@ -242,34 +400,70 @@ export default function ReviewScreen() {
         {analysis.needsClarification && questions.length > 0 && (
           <View style={[styles.clarifyCard, { backgroundColor: colors.card }]}>
             <View style={styles.clarifyHeaderRow}>
-              <View style={[styles.clarifyIconBg, { backgroundColor: colors.tint + "18" }]}>
-                <Ionicons name="chatbubble-ellipses" size={18} color={colors.tint} />
+              <View
+                style={[
+                  styles.clarifyIconBg,
+                  { backgroundColor: colors.tint + "18" },
+                ]}
+              >
+                <Ionicons
+                  name="chatbubble-ellipses"
+                  size={18}
+                  color={colors.tint}
+                />
               </View>
               <View>
-                <Text style={[styles.clarifyTitle, { color: colors.text }]}>Help us be more accurate</Text>
-                <Text style={[styles.clarifySubtitle, { color: colors.textSecondary }]}>Answer to refine estimates</Text>
+                <Text style={[styles.clarifyTitle, { color: colors.text }]}>
+                  Help us be more accurate
+                </Text>
+                <Text
+                  style={[
+                    styles.clarifySubtitle,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  Answer to refine estimates
+                </Text>
               </View>
             </View>
 
             {questions.map((q, qi) => (
               <View key={qi} style={styles.questionBlock}>
-                <Text style={[styles.question, { color: colors.text }]}>{q.question}</Text>
+                <Text style={[styles.question, { color: colors.text }]}>
+                  {q.question}
+                </Text>
                 <View style={styles.optionsRow}>
                   {q.options.map((opt) => (
                     <Pressable
                       key={opt}
                       onPress={() => {
-                        setClarificationAnswers((prev) => ({ ...prev, [qi]: opt }));
+                        setClarificationAnswers((prev) => ({
+                          ...prev,
+                          [qi]: opt,
+                        }));
                         Haptics.selectionAsync();
                       }}
                       style={[
                         styles.optionChip,
                         {
-                          backgroundColor: clarificationAnswers[qi] === opt ? colors.tint : colors.backgroundTertiary,
+                          backgroundColor:
+                            clarificationAnswers[qi] === opt
+                              ? colors.tint
+                              : colors.backgroundTertiary,
                         },
                       ]}
                     >
-                      <Text style={[styles.optionText, { color: clarificationAnswers[qi] === opt ? "#fff" : colors.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          {
+                            color:
+                              clarificationAnswers[qi] === opt
+                                ? "#fff"
+                                : colors.textSecondary,
+                          },
+                        ]}
+                      >
                         {opt}
                       </Text>
                     </Pressable>
@@ -281,14 +475,31 @@ export default function ReviewScreen() {
             <Pressable
               onPress={handleClarify}
               disabled={!allAnswered || clarifying}
-              style={[styles.updateBtn, { backgroundColor: allAnswered ? colors.tint : colors.backgroundTertiary, opacity: clarifying ? 0.7 : 1 }]}
+              style={[
+                styles.updateBtn,
+                {
+                  backgroundColor: allAnswered
+                    ? colors.tint
+                    : colors.backgroundTertiary,
+                  opacity: clarifying ? 0.7 : 1,
+                },
+              ]}
             >
               {clarifying ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <>
-                  <Ionicons name="sparkles" size={16} color={allAnswered ? "#fff" : colors.textTertiary} />
-                  <Text style={[styles.updateBtnText, { color: allAnswered ? "#fff" : colors.textTertiary }]}>
+                  <Ionicons
+                    name="sparkles"
+                    size={16}
+                    color={allAnswered ? "#fff" : colors.textTertiary}
+                  />
+                  <Text
+                    style={[
+                      styles.updateBtnText,
+                      { color: allAnswered ? "#fff" : colors.textTertiary },
+                    ]}
+                  >
                     Update Estimates
                   </Text>
                 </>
@@ -299,44 +510,92 @@ export default function ReviewScreen() {
 
         {/* Food Items — Cal AI style */}
         <View style={styles.sectionWrap}>
-          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Detected Items</Text>
+          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+            Detected Items
+          </Text>
           {editedItems.map((item, index) => (
-            <View key={index} style={[styles.foodCard, { backgroundColor: colors.card }]}>
+            <View
+              key={index}
+              style={[styles.foodCard, { backgroundColor: colors.card }]}
+            >
               {editingItem === index ? (
                 <View style={styles.editForm}>
                   <TextInput
                     value={item.name}
                     onChangeText={(v) => updateItem(index, { name: v })}
-                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
+                    style={[
+                      styles.editInput,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.backgroundTertiary,
+                      },
+                    ]}
                     placeholder="Food name"
                     placeholderTextColor={colors.textTertiary}
                   />
                   <TextInput
                     value={item.servingDescription}
-                    onChangeText={(v) => updateItem(index, { servingDescription: v })}
-                    style={[styles.editInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
+                    onChangeText={(v) =>
+                      updateItem(index, { servingDescription: v })
+                    }
+                    style={[
+                      styles.editInput,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.backgroundTertiary,
+                      },
+                    ]}
                     placeholder="Serving (e.g. 1 cup)"
                     placeholderTextColor={colors.textTertiary}
                   />
                   <View style={styles.macroEditRow}>
-                    {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
-                      <View key={field} style={styles.macroEditBlock}>
-                        <Text style={[styles.macroEditLabel, { color: field === "calories" ? colors.tint : field === "protein" ? colors.protein : field === "carbs" ? colors.carbs : colors.fat }]}>
-                          {field === "calories" ? "Cal" : field.charAt(0).toUpperCase()}
-                        </Text>
-                        <TextInput
-                          value={String(item[field])}
-                          onChangeText={(v) => updateItem(index, { [field]: parseFloat(v) || 0 })}
-                          keyboardType="decimal-pad"
-                          style={[styles.macroEditInput, { color: colors.text, backgroundColor: colors.backgroundTertiary }]}
-                          selectTextOnFocus
-                        />
-                      </View>
-                    ))}
+                    {(["calories", "protein", "carbs", "fat"] as const).map(
+                      (field) => (
+                        <View key={field} style={styles.macroEditBlock}>
+                          <Text
+                            style={[
+                              styles.macroEditLabel,
+                              {
+                                color:
+                                  field === "calories"
+                                    ? colors.tint
+                                    : field === "protein"
+                                      ? colors.protein
+                                      : field === "carbs"
+                                        ? colors.carbs
+                                        : colors.fat,
+                              },
+                            ]}
+                          >
+                            {field === "calories"
+                              ? "Cal"
+                              : field.charAt(0).toUpperCase()}
+                          </Text>
+                          <TextInput
+                            value={String(item[field])}
+                            onChangeText={(v) =>
+                              updateItem(index, { [field]: parseFloat(v) || 0 })
+                            }
+                            keyboardType="decimal-pad"
+                            style={[
+                              styles.macroEditInput,
+                              {
+                                color: colors.text,
+                                backgroundColor: colors.backgroundTertiary,
+                              },
+                            ]}
+                            selectTextOnFocus
+                          />
+                        </View>
+                      ),
+                    )}
                   </View>
                   <Pressable
                     onPress={() => setEditingItem(null)}
-                    style={[styles.doneEditBtn, { backgroundColor: colors.tint }]}
+                    style={[
+                      styles.doneEditBtn,
+                      { backgroundColor: colors.tint },
+                    ]}
                   >
                     <Text style={styles.doneEditBtnText}>Done</Text>
                   </Pressable>
@@ -345,45 +604,127 @@ export default function ReviewScreen() {
                 <>
                   <View style={styles.foodCardTop}>
                     <View style={styles.foodInfo}>
-                      <Text style={[styles.foodName, { color: colors.text }]} numberOfLines={2}>{item.name}</Text>
-                      <Text style={[styles.foodServing, { color: colors.textTertiary }]}>{item.servingDescription}</Text>
+                      <Text
+                        style={[styles.foodName, { color: colors.text }]}
+                        numberOfLines={2}
+                      >
+                        {item.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.foodServing,
+                          { color: colors.textTertiary },
+                        ]}
+                      >
+                        {item.servingDescription}
+                      </Text>
                     </View>
                     <View style={styles.foodActions}>
                       <Pressable
                         onPress={() => setEditingItem(index)}
                         hitSlop={8}
-                        style={[styles.foodActionBtn, { backgroundColor: colors.backgroundTertiary }]}
+                        style={[
+                          styles.foodActionBtn,
+                          { backgroundColor: colors.backgroundTertiary },
+                        ]}
                       >
-                        <Ionicons name="pencil-outline" size={14} color={colors.textSecondary} />
+                        <Ionicons
+                          name="pencil-outline"
+                          size={14}
+                          color={colors.textSecondary}
+                        />
                       </Pressable>
                       <Pressable
                         onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
                           removeItem(index);
                         }}
                         hitSlop={8}
-                        style={[styles.foodActionBtn, { backgroundColor: colors.fat + "15" }]}
+                        style={[
+                          styles.foodActionBtn,
+                          { backgroundColor: colors.fat + "15" },
+                        ]}
                       >
                         <Ionicons name="close" size={14} color={colors.fat} />
                       </Pressable>
                     </View>
                   </View>
                   <View style={styles.foodMacroRow}>
-                    <View style={[styles.foodMacroPill, { backgroundColor: colors.tint + "12" }]}>
-                      <Text style={[styles.foodMacroValue, { color: colors.tint }]}>{Math.round(Number(item.calories))}</Text>
-                      <Text style={[styles.foodMacroUnit, { color: colors.tint }]}>cal</Text>
+                    <View
+                      style={[
+                        styles.foodMacroPill,
+                        { backgroundColor: colors.tint + "12" },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.foodMacroValue, { color: colors.tint }]}
+                      >
+                        {Math.round(Number(item.calories))}
+                      </Text>
+                      <Text
+                        style={[styles.foodMacroUnit, { color: colors.tint }]}
+                      >
+                        cal
+                      </Text>
                     </View>
-                    <View style={[styles.foodMacroPill, { backgroundColor: colors.protein + "12" }]}>
-                      <Text style={[styles.foodMacroValue, { color: colors.protein }]}>{Math.round(Number(item.protein))}</Text>
-                      <Text style={[styles.foodMacroUnit, { color: colors.protein }]}>P</Text>
+                    <View
+                      style={[
+                        styles.foodMacroPill,
+                        { backgroundColor: colors.protein + "12" },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.foodMacroValue,
+                          { color: colors.protein },
+                        ]}
+                      >
+                        {Math.round(Number(item.protein))}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.foodMacroUnit,
+                          { color: colors.protein },
+                        ]}
+                      >
+                        P
+                      </Text>
                     </View>
-                    <View style={[styles.foodMacroPill, { backgroundColor: colors.carbs + "12" }]}>
-                      <Text style={[styles.foodMacroValue, { color: colors.carbs }]}>{Math.round(Number(item.carbs))}</Text>
-                      <Text style={[styles.foodMacroUnit, { color: colors.carbs }]}>C</Text>
+                    <View
+                      style={[
+                        styles.foodMacroPill,
+                        { backgroundColor: colors.carbs + "12" },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.foodMacroValue, { color: colors.carbs }]}
+                      >
+                        {Math.round(Number(item.carbs))}
+                      </Text>
+                      <Text
+                        style={[styles.foodMacroUnit, { color: colors.carbs }]}
+                      >
+                        C
+                      </Text>
                     </View>
-                    <View style={[styles.foodMacroPill, { backgroundColor: colors.fat + "12" }]}>
-                      <Text style={[styles.foodMacroValue, { color: colors.fat }]}>{Math.round(Number(item.fat))}</Text>
-                      <Text style={[styles.foodMacroUnit, { color: colors.fat }]}>F</Text>
+                    <View
+                      style={[
+                        styles.foodMacroPill,
+                        { backgroundColor: colors.fat + "12" },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.foodMacroValue, { color: colors.fat }]}
+                      >
+                        {Math.round(Number(item.fat))}
+                      </Text>
+                      <Text
+                        style={[styles.foodMacroUnit, { color: colors.fat }]}
+                      >
+                        F
+                      </Text>
                     </View>
                   </View>
                 </>
@@ -394,19 +735,43 @@ export default function ReviewScreen() {
 
         {/* Meal type selector — pill style */}
         <View style={styles.sectionWrap}>
-          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Log as</Text>
-          <View style={[styles.mealTypeRow, { backgroundColor: colors.backgroundTertiary }]}>
+          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+            Log as
+          </Text>
+          <View
+            style={[
+              styles.mealTypeRow,
+              { backgroundColor: colors.backgroundTertiary },
+            ]}
+          >
             {MEAL_TYPES.map(({ value, label, icon }) => (
               <Pressable
                 key={value}
-                onPress={() => { setMealType(value); Haptics.selectionAsync(); }}
+                onPress={() => {
+                  setMealType(value);
+                  Haptics.selectionAsync();
+                }}
                 style={[
                   styles.mealTypeItem,
-                  { backgroundColor: mealType === value ? colors.tint : "transparent" },
+                  {
+                    backgroundColor:
+                      mealType === value ? colors.tint : "transparent",
+                  },
                 ]}
               >
-                <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={16} color={mealType === value ? "#fff" : colors.textSecondary} />
-                <Text style={[styles.mealTypeLabel, { color: mealType === value ? "#fff" : colors.textSecondary }]}>
+                <Ionicons
+                  name={icon as keyof typeof Ionicons.glyphMap}
+                  size={16}
+                  color={mealType === value ? "#fff" : colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.mealTypeLabel,
+                    {
+                      color: mealType === value ? "#fff" : colors.textSecondary,
+                    },
+                  ]}
+                >
                   {label}
                 </Text>
               </Pressable>
@@ -416,7 +781,16 @@ export default function ReviewScreen() {
       </ScrollView>
 
       {/* Bottom save bar */}
-      <View style={[styles.bottomBar, { backgroundColor: colors.background, borderTopColor: colors.border, paddingBottom: Platform.OS === "web" ? 16 : insets.bottom + 8 }]}>
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+            paddingBottom: Platform.OS === "web" ? 16 : insets.bottom + 8,
+          },
+        ]}
+      >
         <Pressable
           onPress={handleSave}
           disabled={saving || editedItems.length === 0}
@@ -436,7 +810,9 @@ export default function ReviewScreen() {
               <Ionicons name="add-circle" size={20} color="#fff" />
               <Text style={styles.saveBtnText}>Add to Log</Text>
               <View style={styles.saveBtnCalBadge}>
-                <Text style={styles.saveBtnCalText}>{Math.round(totalCalories)} cal</Text>
+                <Text style={styles.saveBtnCalText}>
+                  {Math.round(totalCalories)} cal
+                </Text>
               </View>
             </>
           )}

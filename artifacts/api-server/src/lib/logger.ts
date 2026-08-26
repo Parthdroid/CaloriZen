@@ -7,6 +7,12 @@ export const logger = pino({
   redact: [
     "req.headers.authorization",
     "req.headers.cookie",
+    "req.body.password",
+    "req.body.confirmPassword",
+    "req.body.token",
+    "req.body.identityToken",
+    "req.body.appleIdentityToken",
+    "req.body.appleAuthorizationCode",
     "res.headers['set-cookie']",
   ],
   ...(isProduction

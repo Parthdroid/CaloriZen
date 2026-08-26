@@ -1,7 +1,9 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
+router.use(requireAuth);
 
 async function fetchOpenFoodFacts(barcode: string): Promise<null | {
   productName: string;
@@ -18,8 +20,8 @@ async function fetchOpenFoodFacts(barcode: string): Promise<null | {
     const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=product_name,brands,serving_size,nutriments,image_url,nutriment_energy_kcal_serving`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!resp.ok) return null;
-    
-    const data = await resp.json() as {
+
+    const data = (await resp.json()) as {
       status: number;
       product?: {
         product_name?: string;
@@ -42,7 +44,7 @@ async function fetchOpenFoodFacts(barcode: string): Promise<null | {
 
     const p = data.product;
     const n = p.nutriments ?? {};
-    
+
     const calories = n["energy-kcal_serving"] ?? n["energy-kcal_100g"] ?? 0;
     const protein = n.proteins_serving ?? n.proteins_100g ?? 0;
     const carbs = n.carbohydrates_serving ?? n.carbohydrates_100g ?? 0;
@@ -67,7 +69,12 @@ async function fetchOpenFoodFacts(barcode: string): Promise<null | {
 }
 
 router.get("/barcode/:barcode", async (req: Request, res: Response) => {
-  const { barcode } = req.params;
+  const barcodeParam = req.params.barcode;
+  const barcode = Array.isArray(barcodeParam) ? barcodeParam[0] : barcodeParam;
+  if (!barcode || !/^\d{6,18}$/.test(barcode)) {
+    res.status(400).json({ error: "Invalid barcode" });
+    return;
+  }
 
   const offResult = await fetchOpenFoodFacts(barcode);
   if (offResult) {

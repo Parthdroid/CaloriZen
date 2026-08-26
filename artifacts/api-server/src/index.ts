@@ -1,5 +1,8 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { assertAuthConfiguration } from "./lib/auth";
+
+assertAuthConfiguration();
 
 const rawPort = process.env["PORT"];
 

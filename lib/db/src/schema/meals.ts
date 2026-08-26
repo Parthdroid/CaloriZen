@@ -1,6 +1,15 @@
-import { pgTable, serial, text, timestamp, real, integer, jsonb, varchar } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  real,
+  integer,
+  jsonb,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { usersTable } from "./users";
 
 export const mealItemSchema = z.object({
   name: z.string(),
@@ -16,7 +25,9 @@ export type MealItem = z.infer<typeof mealItemSchema>;
 
 export const mealsTable = pgTable("meals", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id"),
+  userId: integer("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
   mealType: text("meal_type").notNull().default("snack"),
   loggedAt: timestamp("logged_at").notNull().defaultNow(),
   imageUrl: text("image_url"),
@@ -28,6 +39,8 @@ export const mealsTable = pgTable("meals", {
   totalFat: real("total_fat").notNull().default(0),
 });
 
-export const insertMealSchema = createInsertSchema(mealsTable).omit({ id: true });
+export const insertMealSchema = createInsertSchema(mealsTable).omit({
+  id: true,
+});
 export type InsertMeal = z.infer<typeof insertMealSchema>;
 export type Meal = typeof mealsTable.$inferSelect;

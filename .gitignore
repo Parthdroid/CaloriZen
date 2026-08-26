@@ -27,6 +27,7 @@ tmp/
 # Xcode
 
 DerivedData/
+.xcode.env.local
 *.hmap
 *.ipa
 *.xcuserstate
@@ -58,6 +59,7 @@ Pods/
 
 .cache/
 .local/
+/attached_assets/logoHref.html
 
 # Coverage
 

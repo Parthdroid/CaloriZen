@@ -1,7 +1,22 @@
-require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
-
 require 'json'
+app_root = File.expand_path(File.join(__dir__, 'artifacts', 'mobile'))
+app_node_modules = File.join(app_root, 'node_modules')
+ENV['NODE_PATH'] = [app_node_modules, ENV['NODE_PATH']].compact.join(File::PATH_SEPARATOR)
+# Expo Constants reads PROJECT_ROOT while generating its CocoaPods script phase.
+# The native project lives at the workspace root, while the Expo app does not.
+ENV['PROJECT_ROOT'] = app_root
+
+def node_resolve(package_path, app_root)
+  Pod::Executable.execute_command(
+    'node',
+    ['--print', "require.resolve('#{package_path}', { paths: [process.argv[1]] })", app_root]
+  ).strip
+end
+
+expo_package = node_resolve('expo/package.json', app_root)
+require File.join(File.dirname(expo_package), 'scripts/autolinking')
+require File.join(File.dirname(node_resolve('react-native/package.json', app_root)), 'scripts/react_native_pods')
+
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 def ccache_enabled?(podfile_properties)
@@ -21,7 +36,11 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 prepare_react_native_project!
 
 target 'CaloriZen' do
-  use_expo_modules!
+  use_expo_modules!(
+    :appRoot => app_root,
+    :projectRoot => app_root,
+    :searchPaths => [app_node_modules]
+  )
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
@@ -30,12 +49,16 @@ target 'CaloriZen' do
       'node',
       '--no-warnings',
       '--eval',
-      'require(\'expo/bin/autolinking\')',
+      "require('#{File.join(File.dirname(expo_package), 'bin/autolinking')}')",
       'expo-modules-autolinking',
       'react-native-config',
       '--json',
       '--platform',
-      'ios'
+      'ios',
+      '--project-root',
+      app_root,
+      '--source-dir',
+      __dir__
     ]
   end
 
@@ -48,7 +71,7 @@ target 'CaloriZen' do
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :app_path => app_root,
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
   )
 

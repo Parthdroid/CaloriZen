@@ -1,8 +1,8 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Response } from "express";
 import { db, mealsTable, mealItemSchema } from "@workspace/db";
-import { eq, sql, and, isNull } from "drizzle-orm";
-import { z } from "zod";
-import { optionalAuth, type AuthRequest } from "../lib/auth";
+import { eq, sql, and } from "drizzle-orm";
+import { z } from "zod/v4";
+import { requireAuth, type AuthRequest } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -37,7 +37,7 @@ function formatMeal(meal: typeof mealsTable.$inferSelect) {
   };
 }
 
-router.get("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
+router.get("/meals", requireAuth, async (req: AuthRequest, res: Response) => {
   const dateStr = req.query.date as string | undefined;
   let start: Date;
   let end: Date;
@@ -51,8 +51,7 @@ router.get("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
     end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   }
 
-  const userId = req.user?.userId ?? null;
-  const userFilter = userId ? eq(mealsTable.userId, userId) : isNull(mealsTable.userId);
+  const userFilter = eq(mealsTable.userId, req.user!.userId);
 
   const meals = await db
     .select()
@@ -60,15 +59,15 @@ router.get("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
     .where(
       and(
         userFilter,
-        sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
-      )
+        sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`,
+      ),
     )
     .orderBy(mealsTable.loggedAt);
 
   res.json(meals.map(formatMeal));
 });
 
-router.post("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
+router.post("/meals", requireAuth, async (req: AuthRequest, res: Response) => {
   const parsed = createMealBodySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -81,7 +80,7 @@ router.post("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
   const [meal] = await db
     .insert(mealsTable)
     .values({
-      userId: req.user?.userId ?? null,
+      userId: req.user!.userId,
       mealType,
       items,
       imageUrl: imageUrl ?? null,
@@ -94,133 +93,170 @@ router.post("/meals", optionalAuth, async (req: AuthRequest, res: Response) => {
   res.status(201).json(formatMeal(meal));
 });
 
-router.get("/meals/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid ID" });
-    return;
-  }
+router.get(
+  "/meals/:id",
+  requireAuth,
+  async (req: AuthRequest, res: Response) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid ID" });
+      return;
+    }
 
-  const [meal] = await db.select().from(mealsTable).where(eq(mealsTable.id, id));
-  if (!meal) {
-    res.status(404).json({ error: "Meal not found" });
-    return;
-  }
+    const [meal] = await db
+      .select()
+      .from(mealsTable)
+      .where(
+        and(eq(mealsTable.id, id), eq(mealsTable.userId, req.user!.userId)),
+      );
+    if (!meal) {
+      res.status(404).json({ error: "Meal not found" });
+      return;
+    }
 
-  res.json(formatMeal(meal));
-});
+    res.json(formatMeal(meal));
+  },
+);
 
-router.put("/meals/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid ID" });
-    return;
-  }
+router.put(
+  "/meals/:id",
+  requireAuth,
+  async (req: AuthRequest, res: Response) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid ID" });
+      return;
+    }
 
-  const parsed = updateMealBodySchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
-    return;
-  }
+    const parsed = updateMealBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid request body" });
+      return;
+    }
 
-  const existing = await db.select().from(mealsTable).where(eq(mealsTable.id, id));
-  if (!existing.length) {
-    res.status(404).json({ error: "Meal not found" });
-    return;
-  }
+    const ownershipFilter = and(
+      eq(mealsTable.id, id),
+      eq(mealsTable.userId, req.user!.userId),
+    );
+    const existing = await db.select().from(mealsTable).where(ownershipFilter);
+    if (!existing.length) {
+      res.status(404).json({ error: "Meal not found" });
+      return;
+    }
 
-  const updates: Partial<typeof mealsTable.$inferInsert> = {};
-  if (parsed.data.mealType !== undefined) updates.mealType = parsed.data.mealType;
-  if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes;
-  if (parsed.data.items !== undefined) {
-    updates.items = parsed.data.items;
-    const totals = computeTotals(parsed.data.items);
-    updates.totalCalories = totals.totalCalories;
-    updates.totalProtein = totals.totalProtein;
-    updates.totalCarbs = totals.totalCarbs;
-    updates.totalFat = totals.totalFat;
-  }
+    const updates: Partial<typeof mealsTable.$inferInsert> = {};
+    if (parsed.data.mealType !== undefined)
+      updates.mealType = parsed.data.mealType;
+    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes;
+    if (parsed.data.items !== undefined) {
+      updates.items = parsed.data.items;
+      const totals = computeTotals(parsed.data.items);
+      updates.totalCalories = totals.totalCalories;
+      updates.totalProtein = totals.totalProtein;
+      updates.totalCarbs = totals.totalCarbs;
+      updates.totalFat = totals.totalFat;
+    }
 
-  const [meal] = await db.update(mealsTable).set(updates).where(eq(mealsTable.id, id)).returning();
-  res.json(formatMeal(meal));
-});
+    const [meal] = await db
+      .update(mealsTable)
+      .set(updates)
+      .where(ownershipFilter)
+      .returning();
+    res.json(formatMeal(meal));
+  },
+);
 
-router.delete("/meals/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid ID" });
-    return;
-  }
+router.delete(
+  "/meals/:id",
+  requireAuth,
+  async (req: AuthRequest, res: Response) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid ID" });
+      return;
+    }
 
-  const existing = await db.select().from(mealsTable).where(eq(mealsTable.id, id));
-  if (!existing.length) {
-    res.status(404).json({ error: "Meal not found" });
-    return;
-  }
+    const ownershipFilter = and(
+      eq(mealsTable.id, id),
+      eq(mealsTable.userId, req.user!.userId),
+    );
+    const existing = await db.select().from(mealsTable).where(ownershipFilter);
+    if (!existing.length) {
+      res.status(404).json({ error: "Meal not found" });
+      return;
+    }
 
-  await db.delete(mealsTable).where(eq(mealsTable.id, id));
-  res.status(204).send();
-});
+    await db.delete(mealsTable).where(ownershipFilter);
+    res.status(204).send();
+  },
+);
 
-router.get("/daily-summary", optionalAuth, async (req: AuthRequest, res: Response) => {
-  const dateStr = req.query.date as string | undefined;
-  let start: Date;
-  let end: Date;
-  let dateLabel: string;
+router.get(
+  "/daily-summary",
+  requireAuth,
+  async (req: AuthRequest, res: Response) => {
+    const dateStr = req.query.date as string | undefined;
+    let start: Date;
+    let end: Date;
+    let dateLabel: string;
 
-  if (dateStr) {
-    start = new Date(dateStr + "T00:00:00.000Z");
-    end = new Date(dateStr + "T23:59:59.999Z");
-    dateLabel = dateStr;
-  } else {
-    const now = new Date();
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    dateLabel = now.toISOString().split("T")[0];
-  }
+    if (dateStr) {
+      start = new Date(dateStr + "T00:00:00.000Z");
+      end = new Date(dateStr + "T23:59:59.999Z");
+      dateLabel = dateStr;
+    } else {
+      const now = new Date();
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      dateLabel = now.toISOString().split("T")[0];
+    }
 
-  const { goalsTable } = await import("@workspace/db");
+    const { goalsTable } = await import("@workspace/db");
 
-  const userId = req.user?.userId ?? null;
-  const mealUserFilter = userId ? eq(mealsTable.userId, userId) : isNull(mealsTable.userId);
-  const goalUserFilter = userId ? eq(goalsTable.userId, userId) : isNull(goalsTable.userId);
+    const mealUserFilter = eq(mealsTable.userId, req.user!.userId);
+    const goalUserFilter = eq(goalsTable.userId, req.user!.userId);
 
-  const meals = await db
-    .select()
-    .from(mealsTable)
-    .where(
-      and(
-        mealUserFilter,
-        sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`
+    const meals = await db
+      .select()
+      .from(mealsTable)
+      .where(
+        and(
+          mealUserFilter,
+          sql`${mealsTable.loggedAt} >= ${start.toISOString()} AND ${mealsTable.loggedAt} < ${end.toISOString()}`,
+        ),
       )
-    )
-    .orderBy(mealsTable.loggedAt);
+      .orderBy(mealsTable.loggedAt);
 
-  const allGoals = await db.select().from(goalsTable).where(goalUserFilter).limit(1);
-  const goals = allGoals[0] ?? {
-    dailyCalories: 2000,
-    dailyProtein: 150,
-    dailyCarbs: 200,
-    dailyFat: 65,
-  };
+    const allGoals = await db
+      .select()
+      .from(goalsTable)
+      .where(goalUserFilter)
+      .limit(1);
+    const goals = allGoals[0] ?? {
+      dailyCalories: 2000,
+      dailyProtein: 150,
+      dailyCarbs: 200,
+      dailyFat: 65,
+    };
 
-  const totalCalories = meals.reduce((s, m) => s + m.totalCalories, 0);
-  const totalProtein = meals.reduce((s, m) => s + m.totalProtein, 0);
-  const totalCarbs = meals.reduce((s, m) => s + m.totalCarbs, 0);
-  const totalFat = meals.reduce((s, m) => s + m.totalFat, 0);
+    const totalCalories = meals.reduce((s, m) => s + m.totalCalories, 0);
+    const totalProtein = meals.reduce((s, m) => s + m.totalProtein, 0);
+    const totalCarbs = meals.reduce((s, m) => s + m.totalCarbs, 0);
+    const totalFat = meals.reduce((s, m) => s + m.totalFat, 0);
 
-  res.json({
-    date: dateLabel,
-    totalCalories,
-    totalProtein,
-    totalCarbs,
-    totalFat,
-    goalCalories: goals.dailyCalories,
-    goalProtein: goals.dailyProtein,
-    goalCarbs: goals.dailyCarbs,
-    goalFat: goals.dailyFat,
-    meals: meals.map(formatMeal),
-  });
-});
+    res.json({
+      date: dateLabel,
+      totalCalories,
+      totalProtein,
+      totalCarbs,
+      totalFat,
+      goalCalories: goals.dailyCalories,
+      goalProtein: goals.dailyProtein,
+      goalCarbs: goals.dailyCarbs,
+      goalFat: goals.dailyFat,
+      meals: meals.map(formatMeal),
+    });
+  },
+);
 
 export default router;
