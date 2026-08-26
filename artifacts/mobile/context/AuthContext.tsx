@@ -6,6 +6,7 @@ import React, {
   useCallback,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 import { AuthApiError, authApiRequest } from "@/lib/api";
 import {
@@ -37,6 +38,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,11 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    setToken(null);
-    setUser(null);
-    setAuthTokenGetter(null);
-    await clearStoredSession();
-  }, []);
+    try {
+      if (token) {
+        await authApiRequest("/api/auth/logout", { method: "POST" }, token);
+      }
+    } catch {
+      // Local sign-out must still succeed while offline or after token expiry.
+    } finally {
+      setToken(null);
+      setUser(null);
+      setAuthTokenGetter(null);
+      queryClient.clear();
+      await clearStoredSession();
+    }
+  }, [queryClient, token]);
 
   return (
     <AuthContext.Provider value={{ user, token, isLoading, signIn, signOut }}>

@@ -31,6 +31,7 @@ const PASSWORD_MIN_LENGTH = 12;
 
 class DuplicateAccountError extends Error {}
 class AmbiguousLegacyAccountError extends Error {}
+class EmailVerificationRequiredError extends Error {}
 
 const registrationSchema = z
   .object({
@@ -544,12 +545,19 @@ router.post(
         : null;
       const user = await db.transaction(async (tx) => {
         const [canonicalEmail] = await tx
-          .select({ userId: accountEmailAddressesTable.userId })
+          .select({
+            userId: accountEmailAddressesTable.userId,
+            verifiedAt: accountEmailAddressesTable.verifiedAt,
+          })
           .from(accountEmailAddressesTable)
           .where(
             eq(accountEmailAddressesTable.emailNormalized, emailNormalized),
           )
           .limit(1);
+
+        if (canonicalEmail && !canonicalEmail.verifiedAt) {
+          throw new EmailVerificationRequiredError();
+        }
 
         let userId = canonicalEmail?.userId;
         if (!userId) {
@@ -558,34 +566,25 @@ router.post(
             .from(usersTable)
             .where(eq(usersTable.emailNormalized, emailNormalized))
             .limit(2);
-          if (legacyMatches.length > 1) throw new AmbiguousLegacyAccountError();
+          if (legacyMatches.length > 0) throw new AmbiguousLegacyAccountError();
 
-          if (legacyMatches.length === 1) {
-            userId = legacyMatches[0].id;
-            await tx.insert(accountEmailAddressesTable).values({
+          const [created] = await tx
+            .insert(usersTable)
+            .values({
+              email: emailNormalized,
               emailNormalized,
-              userId,
-              verifiedAt: new Date(),
-            });
-          } else {
-            const [created] = await tx
-              .insert(usersTable)
-              .values({
-                email: emailNormalized,
-                emailNormalized,
-                emailVerifiedAt: new Date(),
-                name: fullName,
-                provider: "apple",
-                providerId: identity.subject,
-              })
-              .returning();
-            userId = created.id;
-            await tx.insert(accountEmailAddressesTable).values({
-              emailNormalized,
-              userId,
-              verifiedAt: new Date(),
-            });
-          }
+              emailVerifiedAt: new Date(),
+              name: fullName,
+              provider: "apple",
+              providerId: identity.subject,
+            })
+            .returning();
+          userId = created.id;
+          await tx.insert(accountEmailAddressesTable).values({
+            emailNormalized,
+            userId,
+            verifiedAt: new Date(),
+          });
         } else {
           await tx
             .update(accountEmailAddressesTable)
@@ -616,6 +615,13 @@ router.post(
 
       res.json(await sessionResponse(user));
     } catch (error) {
+      if (error instanceof EmailVerificationRequiredError) {
+        res.status(409).json({
+          error:
+            "Verify this email with Forgot password before linking Sign in with Apple.",
+        });
+        return;
+      }
       if (
         error instanceof AmbiguousLegacyAccountError ||
         isUniqueViolation(error)
@@ -629,6 +635,21 @@ router.post(
       req.log.warn({ err: error }, "Apple identity token rejected");
       res.status(401).json({ error: "Apple authentication failed" });
     }
+  },
+);
+
+router.post(
+  "/auth/logout",
+  requireAuth,
+  async (req: AuthRequest, res: Response) => {
+    await db
+      .update(usersTable)
+      .set({
+        sessionVersion: sql`${usersTable.sessionVersion} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, req.user!.userId));
+    res.status(204).send();
   },
 );
 

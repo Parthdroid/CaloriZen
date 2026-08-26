@@ -248,7 +248,7 @@ describe("email authentication", () => {
   });
 
   it("uses single-use hashed reset tokens and invalidates the old password", async () => {
-    await register();
+    const registration = await register();
     const forgot = await request(app)
       .post("/api/auth/password/forgot")
       .send({ email: "person@example.com" });
@@ -268,6 +268,11 @@ describe("email authentication", () => {
     });
     expect(reset.status).toBe(200);
 
+    const staleSession = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", `Bearer ${registration.body.token}`);
+    expect(staleSession.status).toBe(401);
+
     const replay = await request(app).post("/api/auth/password/reset").send({
       token: emailMock.token,
       password: "AnotherPassword42",
@@ -285,6 +290,26 @@ describe("email authentication", () => {
     });
     expect(oldLogin.status).toBe(401);
     expect(newLogin.status).toBe(200);
+  });
+
+  it("rejects an expired password reset token", async () => {
+    await register();
+    await request(app)
+      .post("/api/auth/password/forgot")
+      .send({ email: "person@example.com" });
+    expect(emailMock.token).toEqual(expect.any(String));
+
+    await pool.query("UPDATE password_reset_tokens SET expires_at = $1", [
+      new Date(Date.now() - 60_000),
+    ]);
+
+    const reset = await request(app).post("/api/auth/password/reset").send({
+      token: emailMock.token,
+      password: "EvenBetterPassword42",
+      confirmPassword: "EvenBetterPassword42",
+    });
+    expect(reset.status).toBe(400);
+    expect(reset.body.error).toContain("invalid or has expired");
   });
 
   it("does not reveal whether an account exists during recovery", async () => {
@@ -382,6 +407,21 @@ describe("email authentication", () => {
         .status,
     ).toBe(401);
   });
+
+  it("invalidates the current session on logout", async () => {
+    const registration = await register();
+    const authorization = `Bearer ${registration.body.token}`;
+
+    const loggedOut = await request(app)
+      .post("/api/auth/logout")
+      .set("Authorization", authorization);
+    expect(loggedOut.status).toBe(204);
+
+    const staleSession = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", authorization);
+    expect(staleSession.status).toBe(401);
+  });
 });
 
 describe("Apple authentication", () => {
@@ -437,6 +477,72 @@ describe("Apple authentication", () => {
         )
       ).rows[0].subject,
     ).toBe("verified-apple-subject");
+  });
+
+  it("requires mailbox verification before linking Apple to a password account", async () => {
+    const registration = await register();
+    const verifiedPasswordIdentity = {
+      subject: "verified-apple-subject",
+      audience: "com.parth.calorizen",
+      email: "person@example.com",
+      emailVerified: true,
+      issuedAt: Math.floor(Date.now() / 1000),
+    };
+    appleMock.verify
+      .mockResolvedValueOnce(verifiedPasswordIdentity)
+      .mockResolvedValueOnce(verifiedPasswordIdentity);
+
+    const blocked = await request(app).post("/api/auth/apple").send({
+      identityToken: "verified-password-account-token",
+    });
+    expect(blocked.status).toBe(409);
+    expect(
+      (await pool.query("SELECT subject FROM apple_identities")).rowCount,
+    ).toBe(0);
+
+    await request(app)
+      .post("/api/auth/password/forgot")
+      .send({ email: "person@example.com" });
+    const reset = await request(app).post("/api/auth/password/reset").send({
+      token: emailMock.token,
+      password: "VerifiedMailboxPassword42",
+      confirmPassword: "VerifiedMailboxPassword42",
+    });
+    expect(reset.status).toBe(200);
+
+    const linked = await request(app).post("/api/auth/apple").send({
+      identityToken: "verified-password-account-token",
+    });
+    expect(linked.status).toBe(200);
+    expect(linked.body.user.id).toBe(registration.body.user.id);
+    expect(linked.body.user.authMethods).toEqual({
+      password: true,
+      apple: true,
+    });
+  });
+
+  it("does not link Apple to an email-only legacy row without a canonical alias", async () => {
+    await pool.query(`
+      INSERT INTO users (
+        email, email_normalized, name, provider, provider_id
+      ) VALUES (
+        'apple-owner@example.com',
+        'apple-owner@example.com',
+        'Legacy Email Row',
+        'google',
+        'legacy-email-only-subject'
+      )
+    `);
+
+    const response = await request(app).post("/api/auth/apple").send({
+      identityToken: "verified-legacy-token",
+    });
+
+    expect(response.status).toBe(409);
+    expect(
+      (await pool.query("SELECT subject FROM apple_identities")).rowCount,
+    ).toBe(0);
+    expect((await pool.query("SELECT id FROM users")).rowCount).toBe(1);
   });
 });
 

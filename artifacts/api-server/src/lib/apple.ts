@@ -19,7 +19,7 @@ export type VerifiedAppleIdentity = {
   audience: string;
   email: string | null;
   emailVerified: boolean;
-  issuedAt: number | null;
+  issuedAt: number;
 };
 
 function getAppleClientIds(): string[] {
@@ -65,6 +65,13 @@ export async function verifyAppleIdentityToken(
     throw new Error("Apple identity token is missing an audience");
   }
 
+  if (typeof payload.exp !== "number") {
+    throw new Error("Apple identity token is missing an expiry");
+  }
+  if (typeof payload.iat !== "number") {
+    throw new Error("Apple identity token is missing an issued-at time");
+  }
+
   const email = typeof payload.email === "string" ? payload.email : null;
 
   return {
@@ -72,7 +79,7 @@ export async function verifyAppleIdentityToken(
     audience,
     email,
     emailVerified: email !== null && claimIsTrue(payload.email_verified),
-    issuedAt: typeof payload.iat === "number" ? payload.iat : null,
+    issuedAt: payload.iat,
   };
 }
 

@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/context/AuthContext";
 import { authApiRequest } from "@/lib/api";
 
 function PasswordField(props: {
@@ -52,6 +53,7 @@ function PasswordField(props: {
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { signOut } = useAuth();
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const token = Array.isArray(params.token) ? params.token[0] : params.token;
   const [password, setPassword] = useState("");
@@ -83,6 +85,7 @@ export default function ResetPasswordScreen() {
         method: "POST",
         body: JSON.stringify({ token, password, confirmPassword }),
       });
+      await signOut();
       setComplete(true);
     } catch (caught) {
       setError(
